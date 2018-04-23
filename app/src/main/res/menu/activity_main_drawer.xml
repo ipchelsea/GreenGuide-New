@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/home"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="Home" />
+        <item
+            android:id="@+id/my_reviews"
+            android:icon="@drawable/ic_reviews_black_24dp"
+            android:title="My Reviews" />
+        <item
+            android:id="@+id/guidelines"
+            android:icon="@drawable/ic_guidelines_24dp"
+            android:title="Guidelines" />
+        <item
+            android:id="@+id/about"
+            android:icon="@drawable/ic_about_24dp"
+            android:title="About" />
+        <item
+            android:id="@+id/user_guide"
+            android:icon="@drawable/ic_guide"
+            android:title="User Guide" />
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/sign_up"
+                android:icon="@drawable/ic_signup_24dp"
+                android:title="Sign Up" />
+            <item
+                android:id="@+id/log_in_out"
+                android:icon="@drawable/ic_login_24dp"
+                android:title="Log In/Out" />
+        </menu>
+    </item>
+
+</menu>

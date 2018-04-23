@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Green Guide</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="about_us_1">
+        Green Guide Inc. was founded in 2015 in Seattle, USA. With the help of Microsoft and Guiyang Municipal Government of China,
+        Green Guide Inc. established the Guizhou Love Green Evaluation Service Co., Ltd. in Guiyang, China in 2016.
+    </string>
+
+    <string name="about_us_2">
+        www.lovegreenguide.com was officially launched in China for public use in January 2017.
+    </string>
+
+    <string name="about_us_3">
+        Guizhou Love Green Evaluation Internet Service Co., Ltd. is committed to the application of information
+        technology to practice the green supply chain. Promoting participation, sharing and integration of environmental
+        messages by all citizens has become an aid to the improvement of the environment.
+    </string>
+</resources>
