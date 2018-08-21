@@ -27,7 +27,7 @@ public class ResultDetail extends Activity {
         reviews =  findViewById(R.id. Reviews);
         if (!extras.isEmpty()) {
             String value = extras.getString("id");
-            reviews.setText("Reviews");
+            reviews.setText("Reviews"); 
         }
     }
 }
