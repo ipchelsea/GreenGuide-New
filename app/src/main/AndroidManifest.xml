@@ -45,7 +45,7 @@
         </activity>
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="go8X4MKG31nKKIN1Thb7V4j5NyPeeLQB" />
+            android:value="q2vm31m0SXgdtXvsyFoNfvesPf3R4KjN" />
     </application>
 
 </manifest>

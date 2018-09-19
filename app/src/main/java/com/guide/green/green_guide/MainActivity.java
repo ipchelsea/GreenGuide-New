@@ -3,17 +3,23 @@ package com.guide.green.green_guide;
 import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.JsonWriter;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -36,6 +42,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
@@ -77,11 +90,18 @@ import com.guide.green.green_guide.Fragments.MyReviewsFragment;
 import com.guide.green.green_guide.Fragments.SignUpFragment;
 import com.guide.green.green_guide.Fragments.UserGuideFragment;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.Result;
 
@@ -93,11 +113,11 @@ public class MainActivity extends AppCompatActivity
     private BaiduMap mBaiduMap;
     private PoiSearch mPoiSearch;
     SuggestionSearch mSuggestionSearch;
-    private List<String> suggest;
+    private List<BaiduSuggestion> suggest;
 
     private EditText editCity = null;
     private AutoCompleteTextView keyWorldsView = null;
-    private ArrayAdapter<String> sugAdapter = null;
+    private ArrayAdapter<BaiduSuggestion> sugAdapter = null;
     private int loadIndex = 0;
 
     LatLng center = new LatLng(39.92235, 116.380338);
@@ -120,11 +140,34 @@ public class MainActivity extends AppCompatActivity
 
     SearchView searchView;
 
+    // Stan additions
+    private TextView previewCityName, previewCompanyName;
+    private BottomSheetBehavior btmSheet;
+    private RequestQueue requestsQueue;
+    public static class BaiduSuggestion {
+        public final String name;
+        public final double lat, lng;
+        public  BaiduSuggestion(String name, double lat, double lng) {
+            this.name = name;
+            this.lat = lat;
+            this.lng = lng;
+        }
+        @Override
+        public String toString() { return name; }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_main);
+
+        // Stan Additions
+        requestsQueue = Volley.newRequestQueue(this);
+        android.support.v4.widget.NestedScrollView sheetView = (android.support.v4.widget.NestedScrollView) findViewById(R.id.btmSheet);
+        btmSheet = BottomSheetBehavior.from(sheetView);
+        btmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+
 
         mPoiSearch = PoiSearch.newInstance();
         mPoiSearch.setOnGetPoiSearchResultListener(this);
@@ -135,7 +178,7 @@ public class MainActivity extends AppCompatActivity
 
         editCity = (EditText) findViewById(R.id.city);
         keyWorldsView = (AutoCompleteTextView) findViewById(R.id.searchkey);
-        sugAdapter = new ArrayAdapter<String>(this,
+        sugAdapter = new ArrayAdapter<BaiduSuggestion>(this,
                 android.R.layout.simple_dropdown_item_1line);
         keyWorldsView.setAdapter(sugAdapter);
         keyWorldsView.setThreshold(1);
@@ -181,11 +224,66 @@ public class MainActivity extends AppCompatActivity
         keyWorldsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, ResultDetail.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("id", String.valueOf(position));
-                intent.putExtras(bundle);
-                startActivity(intent);
+                /*
+                    Stan:
+                     - Get Selection (Latitude/Longitude)
+                     - Search GreenGuide DB for location
+                     - Display it
+
+                Old Code for starting a new intent:
+                    Intent intent = new Intent(MainActivity.this, ResultDetail.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("id", String.valueOf(position));
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                */
+
+                BaiduSuggestion bSuggestion = (BaiduSuggestion) parent.getItemAtPosition(position);
+                String url = "http://www.lovegreenguide.com/map_point_co_app.php?lng=" +
+                                bSuggestion.lng + "&lat=" + bSuggestion.lat;
+                url = "http://www.lovegreenguide.com/map_point_co_app.php?lng=121.461988&lat=31.028635";
+
+                JsonArrayRequest greenGuideDBRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                    new Response.Listener<JSONArray>() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            Toast.makeText(MainActivity.this, "Success Querying Green Guid DB", Toast.LENGTH_SHORT).show();
+                            btmSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                            TextView tvJson = (TextView) findViewById(R.id.previewJSON);
+                            StringBuilder result = new StringBuilder();
+                            try {
+                                for (int i = 0; i < response.length(); i++) {
+                                    JSONObject jObj = response.getJSONObject(i);
+                                    result.append("[\n");
+                                    for (Iterator<String> jIter = jObj.keys(); jIter.hasNext();) {
+                                        String key = jIter.next();
+                                        result.append("  \"" + key + "\" {\n");
+
+                                        JSONObject jSubObj = jObj.getJSONObject(key);
+                                        for (Iterator<String> jSubIter = jSubObj.keys(); jSubIter.hasNext();) {
+                                            String subKey = jSubIter.next();
+                                            result.append("    \"" + subKey + "\":" + jSubObj.getString(subKey) + ",\n");
+                                        }
+                                        result.append("  },\n");
+                                    }
+                                    result.append("],\n");
+                                }
+
+                                btmSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                            } catch (JSONException e) {
+                                Log.e("JSON_PARSE", e.getMessage());
+                            }
+                            tvJson.setText(result.toString());
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(MainActivity.this, "Item not found in Green Guide DB", Toast.LENGTH_SHORT).show();
+                            Log.e("JsonRSP", error.toString());
+                            btmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+                        }
+                    });
+                requestsQueue.add(greenGuideDBRequest);
             }
         });
     }
@@ -342,7 +440,7 @@ public class MainActivity extends AppCompatActivity
 
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
-
+            ft.add(R.id.drawer_layout, fragment);
             ft.commit();
         }
 
@@ -463,13 +561,13 @@ public class MainActivity extends AppCompatActivity
         if (res == null || res.getAllSuggestions() == null) {
             return;
         }
-        suggest = new ArrayList<String>();
+        suggest = new ArrayList<BaiduSuggestion>();
         for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
-            if (info.key != null) {
-                suggest.add(info.key);
+            if (info.key != null & info.pt != null) {
+                suggest.add(new BaiduSuggestion(info.key, info.pt.latitude, info.pt.longitude));
             }
         }
-        sugAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_dropdown_item_1line, suggest);
+        sugAdapter = new ArrayAdapter<BaiduSuggestion>(MainActivity.this, android.R.layout.simple_dropdown_item_1line, suggest);
         keyWorldsView.setAdapter(sugAdapter);
         sugAdapter.notifyDataSetChanged();
     }
