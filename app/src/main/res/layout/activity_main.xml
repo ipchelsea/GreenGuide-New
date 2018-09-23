@@ -31,66 +31,115 @@
     </android.support.v4.widget.DrawerLayout>
 
     <android.support.v4.widget.NestedScrollView
+        android:id="@+id/btmSheet"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_orange_light"
-        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+        android:layout_height="match_parent"
+        android:background="@color/bottom_sheet_blue"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="45dp"
-        android:id="@+id/btmSheet">
+        app:behavior_peekHeight="@dimen/reviews_bottom_sheet_peek_height"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
         <android.support.v7.widget.LinearLayoutCompat
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <GridLayout
-                android:rowCount="2"
-                android:columnCount="2"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:background="@android:color/holo_orange_light">
-
-                <TextView
-                    android:layout_row="0"
-                    android:layout_column="0"
-                    android:layout_columnWeight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="#ff0000"
-                    android:id="@+id/previewCityName"
-                    android:layout_margin="5px"
-                    android:text="City: ...."/>
-
-                <TextView
-                    android:layout_row="1"
-                    android:layout_column="0"
-                    android:layout_columnWeight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5px"
-                    android:background="#ff0000"
-                    android:text="Stars: ***"/>
-
-                <TextView
-                    android:layout_row="0"
-                    android:layout_column="1"
-                    android:layout_columnWeight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5px"
-                    android:background="#ff0000"
-                    android:id="@+id/previewCompanyName"
-                    android:text="Company Name: ...."/>
-            </GridLayout>
-
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/holo_orange_dark"
-                android:id="@+id/previewJSON"
-                android:text=""/>
+                android:minHeight="@dimen/reviews_bottom_sheet_peek_height"
+                android:background="@android:color/white"
+                android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/previewCompanyName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/reviews_bottom_sheet_peek_height_halved"
+                    android:textSize="15sp"
+                    android:textColor="#000000"
+                    android:text="宝鸡有一群怀揣着梦想的少年相信在牛大叔的带领下会创造生命的奇迹网络科技有限公司"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:overScrollMode="ifContentScrolls" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/reviews_bottom_sheet_peek_height_halved"
+                    android:orientation="horizontal"
+                    android:minHeight="@dimen/reviews_bottom_sheet_peek_height_halved">
+
+                    <TextView
+                        android:id="@+id/btmSheetRatingValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:textSize="13sp"
+                        android:layout_weight="1"
+                        android:text="123"
+                        android:paddingLeft="5dp" />
+
+                    <ImageView
+                        android:id="@+id/btmSheetRatingStars"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="7"
+                        android:layout_gravity="top"
+                        android:paddingBottom="5dp"
+                        android:scaleType="center"/>
+
+                    <TextView
+                        android:id="@+id/btmSheetRatingsCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="5dp"
+                        android:textSize="13sp"
+                        android:layout_weight="2"
+                        android:text="54 Reviews" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/btmSheetAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:textColor="@color/bottom_sheet_text"/>
+
+            <TextView
+                android:id="@+id/btmSheetCityName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/bottom_sheet_text"/>
+
+            <TextView
+                android:id="@+id/btmSheetIndustry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/bottom_sheet_text"/>
+
+            <TextView
+                android:id="@+id/btmSheetProduct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:textColor="@color/bottom_sheet_text"/>
+
+            <ImageView
+                android:id="@+id/btmSheetHistogram"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="center"/>
+
+            <LinearLayout
+                android:id="@+id/userReviewList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp">
+
+            </LinearLayout>
         </android.support.v7.widget.LinearLayoutCompat>
     </android.support.v4.widget.NestedScrollView>
+
 </android.support.design.widget.CoordinatorLayout>

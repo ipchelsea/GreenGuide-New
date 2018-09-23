@@ -8,4 +8,7 @@
     <color name="black">#000000</color>
     <color name="green">#4caf50</color>
     <color name="grey">#9e9e9e</color>
+    <color name="bottom_sheet_blue">#4285f4</color>
+    <color name="bottom_sheet_gold">#ffa500</color>
+    <color name="bottom_sheet_text">@color/colorWhite</color>
 </resources>

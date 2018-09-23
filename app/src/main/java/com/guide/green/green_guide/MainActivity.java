@@ -1,26 +1,24 @@
 package com.guide.green.green_guide;
 
-import android.content.Intent;
-import android.nfc.Tag;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.media.Image;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.NestedScrollView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.JsonWriter;
 import android.util.Log;
-import android.util.Pair;
-import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -30,25 +28,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.inputmethod.EditorInfo;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
@@ -58,7 +47,6 @@ import com.baidu.mapapi.map.GroundOverlayOptions;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.map.SupportMapFragment;
 import com.baidu.mapapi.model.LatLng;
@@ -82,28 +70,20 @@ import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+import com.guide.green.green_guide.Dialogs.LoadingDialog;
 import com.guide.green.green_guide.Fragments.AboutFragment;
 import com.guide.green.green_guide.Fragments.GuidelinesFragment;
-import com.guide.green.green_guide.Fragments.HomeFragment;
 import com.guide.green.green_guide.Fragments.LogInOutFragment;
 import com.guide.green.green_guide.Fragments.MyReviewsFragment;
 import com.guide.green.green_guide.Fragments.SignUpFragment;
 import com.guide.green.green_guide.Fragments.UserGuideFragment;
+import com.guide.green.green_guide.Utilities.AsyncJSONArray;
+import com.guide.green.green_guide.Utilities.Drawing;
+import com.guide.green.green_guide.Utilities.Review;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.sql.SQLOutput;
+import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.transform.Result;
 
 
 public class MainActivity extends AppCompatActivity
@@ -141,16 +121,21 @@ public class MainActivity extends AppCompatActivity
     SearchView searchView;
 
     // Stan additions
-    private TextView previewCityName, previewCompanyName;
+    private TextView previewCityName, previewCompanyName, btmSheetCoName;
+    android.support.v4.widget.NestedScrollView btmSheetView;
+    private ImageView btmSheetRatingStars;
     private BottomSheetBehavior btmSheet;
-    private RequestQueue requestsQueue;
+
+    public void doStuff(View view) {
+    }
+
     public static class BaiduSuggestion {
         public final String name;
         public final double lat, lng;
-        public  BaiduSuggestion(String name, double lat, double lng) {
-            this.name = name;
-            this.lat = lat;
-            this.lng = lng;
+        public  BaiduSuggestion(SuggestionResult.SuggestionInfo info) {
+            this.name = info.key;
+            this.lat = info.pt.latitude;
+            this.lng = info.pt.longitude;
         }
         @Override
         public String toString() { return name; }
@@ -163,10 +148,35 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         // Stan Additions
-        requestsQueue = Volley.newRequestQueue(this);
-        android.support.v4.widget.NestedScrollView sheetView = (android.support.v4.widget.NestedScrollView) findViewById(R.id.btmSheet);
-        btmSheet = BottomSheetBehavior.from(sheetView);
-        btmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+        btmSheetRatingStars = (ImageView) findViewById(R.id.btmSheetRatingStars);
+        btmSheetCoName = (TextView) findViewById(R.id.previewCompanyName);
+
+        btmSheetView = (android.support.v4.widget.NestedScrollView) findViewById(R.id.btmSheet);
+        btmSheet = BottomSheetBehavior.from(btmSheetView);
+//        btmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+        btmSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                ViewGroup.LayoutParams layoutParams = btmSheetCoName.getLayoutParams();
+                LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams (layoutParams);
+
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    btmSheetCoName.setSingleLine(true);
+                    btmSheetCoName.setPadding(0, 0, 0, 0);
+                } else {
+                    btmSheetCoName.setSingleLine(false);
+                    ll.setMargins (0,0,0,
+                            (int) Drawing.convertDpToPx(MainActivity.this, 10));
+                }
+
+                btmSheetCoName.setLayoutParams(ll);
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                /* Do Nothing */
+            }
+        });
 
 
         mPoiSearch = PoiSearch.newInstance();
@@ -220,70 +230,25 @@ public class MainActivity extends AppCompatActivity
                 handleFabActions(view);
             }
         });
-//
+
         keyWorldsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                /*
-                    Stan:
-                     - Get Selection (Latitude/Longitude)
-                     - Search GreenGuide DB for location
-                     - Display it
-
-                Old Code for starting a new intent:
-                    Intent intent = new Intent(MainActivity.this, ResultDetail.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("id", String.valueOf(position));
-                    intent.putExtras(bundle);
-                    startActivity(intent);
-                */
+                Drawing.hideKeyboard(keyWorldsView, getApplicationContext());
 
                 BaiduSuggestion bSuggestion = (BaiduSuggestion) parent.getItemAtPosition(position);
-                String url = "http://www.lovegreenguide.com/map_point_co_app.php?lng=" +
-                                bSuggestion.lng + "&lat=" + bSuggestion.lat;
-                url = "http://www.lovegreenguide.com/map_point_co_app.php?lng=121.461988&lat=31.028635";
+                final LoadingDialog ld = new LoadingDialog();
+                ld.show(getFragmentManager(), "Working?");
 
-                JsonArrayRequest greenGuideDBRequest = new JsonArrayRequest(Request.Method.GET, url, null,
-                    new Response.Listener<JSONArray>() {
-                        @Override
-                        public void onResponse(JSONArray response) {
-                            Toast.makeText(MainActivity.this, "Success Querying Green Guid DB", Toast.LENGTH_SHORT).show();
-                            btmSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                            TextView tvJson = (TextView) findViewById(R.id.previewJSON);
-                            StringBuilder result = new StringBuilder();
-                            try {
-                                for (int i = 0; i < response.length(); i++) {
-                                    JSONObject jObj = response.getJSONObject(i);
-                                    result.append("[\n");
-                                    for (Iterator<String> jIter = jObj.keys(); jIter.hasNext();) {
-                                        String key = jIter.next();
-                                        result.append("  \"" + key + "\" {\n");
+                final AsyncJSONArray reviewTask = Review.getReviewsForPlace(104.075155d,
+                        37.198839d, new FetchedReviewsHandler(ld, bSuggestion));
 
-                                        JSONObject jSubObj = jObj.getJSONObject(key);
-                                        for (Iterator<String> jSubIter = jSubObj.keys(); jSubIter.hasNext();) {
-                                            String subKey = jSubIter.next();
-                                            result.append("    \"" + subKey + "\":" + jSubObj.getString(subKey) + ",\n");
-                                        }
-                                        result.append("  },\n");
-                                    }
-                                    result.append("],\n");
-                                }
-
-                                btmSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                            } catch (JSONException e) {
-                                Log.e("JSON_PARSE", e.getMessage());
-                            }
-                            tvJson.setText(result.toString());
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(MainActivity.this, "Item not found in Green Guide DB", Toast.LENGTH_SHORT).show();
-                            Log.e("JsonRSP", error.toString());
-                            btmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-                        }
-                    });
-                requestsQueue.add(greenGuideDBRequest);
+                ld.setCallback(new LoadingDialog.Canceled() {
+                    @Override
+                    public void onCancel() {
+                        reviewTask.cancel(true);
+                    }
+                });
             }
         });
     }
@@ -407,7 +372,6 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         Fragment fragment = null;
-        System.out.println(item.getItemId());
         switch (id) {
             case R.id.my_reviews:
                 fragment = new MyReviewsFragment();
@@ -564,7 +528,7 @@ public class MainActivity extends AppCompatActivity
         suggest = new ArrayList<BaiduSuggestion>();
         for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
             if (info.key != null & info.pt != null) {
-                suggest.add(new BaiduSuggestion(info.key, info.pt.latitude, info.pt.longitude));
+                suggest.add(new BaiduSuggestion(info));
             }
         }
         sugAdapter = new ArrayAdapter<BaiduSuggestion>(MainActivity.this, android.R.layout.simple_dropdown_item_1line, suggest);
@@ -620,5 +584,143 @@ public class MainActivity extends AppCompatActivity
         mBaiduMap.setMapStatus(u);
 
         bdGround.recycle();
+    }
+
+    class FetchedReviewsHandler implements Review.GetReviewsResult {
+        private LoadingDialog ld;
+        private BaiduSuggestion suggestion;
+
+        public FetchedReviewsHandler(LoadingDialog ld, BaiduSuggestion suggestion) {
+            this.ld = ld;
+            this.suggestion = suggestion;
+        }
+        @Override
+        public void onSuccess(ArrayList<Review> reviews) {
+            // Hide dialog
+            ld.dismiss();
+            btmSheetView.requestFocus();
+
+            // Calculate histogram values and average rating
+            String address = "", city = "", industry = "", product = "";
+
+
+            LinearLayout root = (LinearLayout) findViewById(R.id.userReviewList);
+            root.removeAllViews();
+
+
+            int total = 0;
+            String[] histogramX = new String[] {"+3", "+2", "+1", "0", "-1", "-2", "-3"};
+            int[] histogramY = new int[histogramX.length];
+            for (int i = reviews.size() - 1; i >= 0; i--) {
+                Review review = reviews.get(i);
+                int rating = Integer.parseInt(review.location.get(Review.Location.Key.RATING));
+                histogramY[3 - rating] += 1; // '-3' = 6, '-2' = 5, ..., '+3' = 0
+                total += rating;
+
+                if (address.equals("")) {
+                    address = review.location.get(Review.Location.Key.ADDRESS);
+                }
+                if (city.equals("")) {
+                    city = review.location.get(Review.Location.Key.CITY);
+                }
+                if (industry.equals("")) {
+                    industry = review.location.get(Review.Location.Key.INDUSTRY);
+                }
+                if (product.equals("")) {
+                    product = review.location.get(Review.Location.Key.PRODUCT);
+                }
+
+                // Add review
+                LayoutInflater lf = LayoutInflater.from(MainActivity.this);
+                LinearLayout child = (LinearLayout) lf.inflate(R.layout.review_single_comment, null, false);
+                TextView ratingValue = (TextView) child.findViewById(R.id.ratingValue);
+                ImageView ratingImage = (ImageView) child.findViewById(R.id.ratingImage);
+                TextView reviewText = (TextView) child.findViewById(R.id.reviewText);
+                TextView reviewTime = (TextView) child.findViewById(R.id.reviewTime);
+                Button rawDataBtn = (Button) child.findViewById(R.id.rawDataBtn);
+                Button helpfulBtn = (Button) child.findViewById(R.id.helpfulBtn);
+                Button inappropriateBtn = (Button) child.findViewById(R.id.inappropriateBtn);
+
+                ratingValue.setText("Rating: " + (rating > 0 ? "+" : "") + rating);
+
+                String resourseName = "rate" + (rating < 0 ? "_" : "") + Math.abs(rating);
+                int resoureseId = getResources().getIdentifier(resourseName, "drawable", MainActivity.this.getPackageName());
+                Bitmap bmp = BitmapFactory.decodeResource(getResources(), resoureseId);
+                ratingImage.setImageBitmap(bmp);
+
+                reviewText.setText(review.location.get(Review.Location.Key.REVIEW));
+
+                reviewTime.setText("Time: " + review.location.get(Review.Location.Key.TIME));
+
+                root.addView(child);
+
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams (child.getLayoutParams());
+                child.setPadding(0, (int) Drawing.convertDpToPx(MainActivity.this,
+                        10), 0, 0);
+                child.setLayoutParams(lp);
+            }
+
+            // Remove empty X values from histogram.
+            int histLeft = 0, histRight = histogramY.length - 1;
+
+            float ratio = (float) total / reviews.size();
+            float halfBtmSheetHeight = getResources().getDimension(R.dimen.reviews_bottom_sheet_peek_height_halved);
+            int w = btmSheetRatingStars.getWidth();
+            int h = (int) Drawing.convertDpToPx(MainActivity.this, (int) halfBtmSheetHeight);
+
+            int filledStarsColor, backgroundColor;
+            if (Build.VERSION.SDK_INT >= 23) {
+                filledStarsColor = getResources().getColor(R.color.bottom_sheet_gold, null);
+                backgroundColor = getResources().getColor(R.color.bottom_sheet_blue, null);
+            } else {
+                filledStarsColor = getResources().getColor(R.color.bottom_sheet_gold);
+                backgroundColor = getResources().getColor(R.color.bottom_sheet_blue);
+            }
+
+            // Create the rating stars
+            Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Drawing.drawStars(0, 0, w, h, 5, ratio,
+                                filledStarsColor, Color.GRAY, new Canvas(bmp));
+            btmSheetRatingStars.setImageBitmap(bmp);
+
+            if (histLeft != -1 && histRight != -1) {
+                // Create the histogram
+                float textSize = Drawing.convertSpToPx(MainActivity.this, 13);
+                w = getResources().getDisplayMetrics().widthPixels;
+                bmp = Drawing.createBarGraph(histogramX, histogramY, histLeft, histRight, w,
+                        textSize, filledStarsColor, Color.WHITE, backgroundColor, 7, 7, 7);
+            }
+
+            ((ImageView) findViewById(R.id.btmSheetHistogram)).setImageBitmap(bmp);
+
+            String sTemp;
+            sTemp = (ratio > 0 ? "+" : "") + ratio;
+            ((TextView) findViewById(R.id.btmSheetRatingValue)).setText(sTemp);
+            sTemp = reviews.size() + " Review" + (reviews.size() > 1 ? "s" : "");
+            ((TextView) findViewById(R.id.btmSheetRatingsCount)).setText(sTemp);
+
+            ((TextView) findViewById(R.id.btmSheetAddress)).setText("Address: " + address);
+            ((TextView) findViewById(R.id.btmSheetCityName)).setText("City: " + city);
+            ((TextView) findViewById(R.id.btmSheetIndustry)).setText("Industry: " + industry);
+            ((TextView) findViewById(R.id.btmSheetProduct)).setText("Product: " + product);
+        }
+
+        @Override
+        public void onError(Exception e) {
+            Log.e("Getting Review", e.toString());
+            e.printStackTrace();
+        }
+
+        @Override
+        public void onUpdate(long current, long total) {
+            if (total != -1) {
+                ld.setProgress((double) current / total);
+            }
+        }
+
+        @Override
+        public void onCanceled() {
+            Toast.makeText(MainActivity.this, "Get Review Canceled", Toast.LENGTH_SHORT);
+        }
     }
 }
