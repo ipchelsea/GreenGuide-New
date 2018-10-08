@@ -4,10 +4,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/search"
+        android:id="@+id/cityItem"
+        android:title="Search for Locations"
+        app:showAsAction="always"
+        app:actionLayout="@layout/city_menu_item"/>
+
+    <item
+        android:id="@+id/searchItem"
         android:icon="@drawable/ic_search_black_24dp"
         android:title="Search for Locations"
         app:showAsAction="ifRoom|collapseActionView"
-        app:actionViewClass="android.support.v7.widget.SearchView" />
+        app:actionLayout="@layout/search_autocomplete_menu_item"/>
 
 </menu>

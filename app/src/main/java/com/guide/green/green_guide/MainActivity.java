@@ -1,23 +1,32 @@
 package com.guide.green.green_guide;
 
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
+import android.Manifest;
+import android.app.Activity;
+import android.app.Dialog;
+import android.support.v4.app.DialogFragment;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.media.Image;
-import android.os.Build;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -33,8 +42,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,11 +51,13 @@ import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.CircleOptions;
 import com.baidu.mapapi.map.GroundOverlayOptions;
+import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.map.Stroke;
-import com.baidu.mapapi.map.SupportMapFragment;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
 import com.baidu.mapapi.search.core.CityInfo;
@@ -70,18 +79,15 @@ import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
-import com.guide.green.green_guide.Dialogs.LoadingDialog;
+import com.guide.green.green_guide.Dialogs.CityPickerDialog;
 import com.guide.green.green_guide.Fragments.AboutFragment;
 import com.guide.green.green_guide.Fragments.GuidelinesFragment;
 import com.guide.green.green_guide.Fragments.LogInOutFragment;
 import com.guide.green.green_guide.Fragments.MyReviewsFragment;
 import com.guide.green.green_guide.Fragments.SignUpFragment;
 import com.guide.green.green_guide.Fragments.UserGuideFragment;
-import com.guide.green.green_guide.Utilities.AsyncJSONArray;
 import com.guide.green.green_guide.Utilities.Drawing;
-import com.guide.green.green_guide.Utilities.Review;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,8 +100,9 @@ public class MainActivity extends AppCompatActivity
     private PoiSearch mPoiSearch;
     SuggestionSearch mSuggestionSearch;
     private List<BaiduSuggestion> suggest;
+    private PoiOverlay mOverlay;
 
-    private EditText editCity = null;
+    private Button citySelectionView = null;
     private AutoCompleteTextView keyWorldsView = null;
     private ArrayAdapter<BaiduSuggestion> sugAdapter = null;
     private int loadIndex = 0;
@@ -121,24 +128,29 @@ public class MainActivity extends AppCompatActivity
     SearchView searchView;
 
     // Stan additions
-    private TextView previewCityName, previewCompanyName, btmSheetCoName;
-    android.support.v4.widget.NestedScrollView btmSheetView;
-    private ImageView btmSheetRatingStars;
-    private BottomSheetBehavior btmSheet;
-
-    public void doStuff(View view) {
-    }
+    private TextView mBtmSheetCompanyName;
+    private BottomSheetBehavior mBtmSheet;
+    private android.support.v4.widget.NestedScrollView btmSheetView;
 
     public static class BaiduSuggestion {
         public final String name;
-        public final double lat, lng;
-        public  BaiduSuggestion(SuggestionResult.SuggestionInfo info) {
+        public final LatLng point;
+        public BaiduSuggestion(@NonNull SuggestionResult.SuggestionInfo info) {
             this.name = info.key;
-            this.lat = info.pt.latitude;
-            this.lng = info.pt.longitude;
+            this.point = info.pt;
+        }
+        public BaiduSuggestion(@NonNull PoiDetailResult info) {
+            this.name = info.name;
+            this.point = info.location;
         }
         @Override
-        public String toString() { return name; }
+        public String toString() {
+            if (point == null) {
+                return " " + name;
+            } else {
+                return "\uD83D\uDCCD" + name;
+            }
+        }
     }
 
     @Override
@@ -148,28 +160,28 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         // Stan Additions
-        btmSheetRatingStars = (ImageView) findViewById(R.id.btmSheetRatingStars);
-        btmSheetCoName = (TextView) findViewById(R.id.previewCompanyName);
-
+        mBtmSheetCompanyName = (TextView) findViewById(R.id.previewCompanyName);
         btmSheetView = (android.support.v4.widget.NestedScrollView) findViewById(R.id.btmSheet);
-        btmSheet = BottomSheetBehavior.from(btmSheetView);
-//        btmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-        btmSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+        mBtmSheet = BottomSheetBehavior.from(btmSheetView);
+        mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+        mBtmSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                ViewGroup.LayoutParams layoutParams = btmSheetCoName.getLayoutParams();
-                LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams (layoutParams);
-
+                ViewGroup.LayoutParams layoutParams = mBtmSheetCompanyName.getLayoutParams();
+                LinearLayout.LayoutParams linearL = new LinearLayout.LayoutParams (layoutParams);
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    btmSheetCoName.setSingleLine(true);
-                    btmSheetCoName.setPadding(0, 0, 0, 0);
+                    mBtmSheetCompanyName.setSingleLine(true);
+                    mBtmSheetCompanyName.setPadding(0, 0, 0, 0);
                 } else {
-                    btmSheetCoName.setSingleLine(false);
-                    ll.setMargins (0,0,0,
-                            (int) Drawing.convertDpToPx(MainActivity.this, 10));
+                    int px = (int) Drawing.convertDpToPx(MainActivity.this, 10);
+                    mBtmSheetCompanyName.setSingleLine(false);
+                    linearL.setMargins (0, px,0, px);
+                    if (newState == BottomSheetBehavior.STATE_HIDDEN && oldMarker != null) {
+                        oldMarker.remove();
+                        oldMarker = null;
+                    }
                 }
-
-                btmSheetCoName.setLayoutParams(ll);
+                mBtmSheetCompanyName.setLayoutParams(linearL);
             }
 
             @Override
@@ -186,39 +198,39 @@ public class MainActivity extends AppCompatActivity
         mSuggestionSearch = SuggestionSearch.newInstance();
         mSuggestionSearch.setOnGetSuggestionResultListener(this);
 
-        editCity = (EditText) findViewById(R.id.city);
-        keyWorldsView = (AutoCompleteTextView) findViewById(R.id.searchkey);
-        sugAdapter = new ArrayAdapter<BaiduSuggestion>(this,
-                android.R.layout.simple_dropdown_item_1line);
-        keyWorldsView.setAdapter(sugAdapter);
-        keyWorldsView.setThreshold(1);
-        mBaiduMap = ((SupportMapFragment) (getSupportFragmentManager()
-                .findFragmentById(R.id.map))).getBaiduMap();
-
-
-        keyWorldsView.addTextChangedListener(new TextWatcher() {
-
+        mMapView = (MapView) findViewById(R.id.map);
+        mBaiduMap = mMapView.getMap();
+        mBaiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
             @Override
-            public void afterTextChanged(Editable arg0) {
-
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2,
-                                      int arg3) {
-                if (cs.length() <= 0) {
-                    return;
+            public void onMapClick(LatLng latLng) {
+                if (mBtmSheet.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                    mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
                 }
+            }
 
-                mSuggestionSearch
-                        .requestSuggestion((new SuggestionSearchOption())
-                                .keyword(cs.toString()).city(editCity.getText().toString()));
+            @Override
+            public boolean onMapPoiClick(MapPoi mapPoi) {
+                if (mBtmSheet.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                    mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
+                return false;
+            }
+        });
+
+        mBaiduMap.setOnMapLongClickListener(new BaiduMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                if (mBtmSheet.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                    mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
+            }
+        });
+
+        mBaiduMap.setOnMyLocationClickListener(new BaiduMap.OnMyLocationClickListener() {
+            @Override
+            public boolean onMyLocationClick() {
+                Log.i("MyLocation", "Not too sure what to dow now?");
+                return false;
             }
         });
 
@@ -231,26 +243,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        keyWorldsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Drawing.hideKeyboard(keyWorldsView, getApplicationContext());
-
-                BaiduSuggestion bSuggestion = (BaiduSuggestion) parent.getItemAtPosition(position);
-                final LoadingDialog ld = new LoadingDialog();
-                ld.show(getFragmentManager(), "Working?");
-
-                final AsyncJSONArray reviewTask = Review.getReviewsForPlace(104.075155d,
-                        37.198839d, new FetchedReviewsHandler(ld, bSuggestion));
-
-                ld.setCallback(new LoadingDialog.Canceled() {
-                    @Override
-                    public void onCancel() {
-                        reviewTask.cancel(true);
-                    }
-                });
-            }
-        });
+        FloatingActionButton btnMyLocation = (FloatingActionButton) findViewById(R.id.myLocation);
+        btnMyLocation.setOnClickListener(new TrackLocationHandler(this, btnMyLocation, mBaiduMap));
     }
 
     private void initToolsAndWidgets() {
@@ -273,13 +267,17 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    private void handleFabActions(View view) {
+    private void hideFabItems() {
+        normalMapView.hide();
+        satelliteMapView.hide();
+        normalMapView.setClickable(false);
+        satelliteMapView.setClickable(false);
+        fabIsOpen = false;
+    }
+
+    private void handleFabActions(final View view) {
         if (fabIsOpen) {
-            normalMapView.hide();
-            satelliteMapView.hide();
-            normalMapView.setClickable(false);
-            satelliteMapView.setClickable(false);
-            fabIsOpen = false;
+            hideFabItems();
         }
         else {
             normalMapView.show();
@@ -292,25 +290,20 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v) {
                     setMapType(1);
+                    hideFabItems();
                 }
             });
             satelliteMapView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     setMapType(2);
+                    hideFabItems();
                 }
             });
         }
     }
 
     private void setMapType(int id) {
-        mBaiduMap = ((SupportMapFragment) (getSupportFragmentManager()
-                .findFragmentById(R.id.bmapView))).getBaiduMap();
-        mMapView = (MapView) findViewById(R.id.bmapView);
-        if (mMapView != null) {
-            mMapView = (MapView) findViewById(R.id.bmapView);
-            mBaiduMap = mMapView.getMap();
-        }
         if (mBaiduMap != null) {
             if (id == 1)
                 mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
@@ -333,23 +326,145 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        MenuItem item = menu.findItem(R.id.search);
-        searchView = (SearchView)item.getActionView();
+        MenuItem item;
 
-        // Old top searchbar
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        item = menu.findItem(R.id.cityItem);
+        citySelectionView = (Button) item.getActionView().findViewById(R.id.city);
+        citySelectionView.setOnClickListener(new Button.OnClickListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public void onClick(View view) {
+                final CityPickerDialog cpd = new CityPickerDialog();
+                cpd.setSelectedCityButton(citySelectionView);
+                cpd.show(getSupportFragmentManager(), "");
+            }
+        });
+
+        item = menu.findItem(R.id.searchItem);
+        keyWorldsView = (AutoCompleteTextView) item.getActionView().findViewById(R.id.search);
+        sugAdapter = new ArrayAdapter<BaiduSuggestion>(this,
+                android.R.layout.simple_dropdown_item_1line);
+        keyWorldsView.setAdapter(sugAdapter);
+        keyWorldsView.setThreshold(1);
+        keyWorldsView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean gaineFocus) {
+                AutoCompleteTextView tv = (AutoCompleteTextView) view;
+                if (!gaineFocus) {
+                    if (mOverlay != null) {
+                        // Should be a function
+                        mOverlay.removeFromMap();
+                        mOverlay = null;
+                    }
+                    tv.setText("");
+                }
+            }
+        });
+        keyWorldsView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN &&
+                        keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+
+                    mPoiSearch.searchInCity(new PoiCitySearchOption()
+                            .city(citySelectionView.getText().toString())
+                            .keyword(keyWorldsView.getText().toString()));
+
+                    Drawing.hideKeyboard(keyWorldsView, getApplicationContext());
+                }
                 return false;
             }
+        });
+        keyWorldsView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable arg0) { /* Do Nothign */ }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                return true;
+            public void beforeTextChanged(CharSequence arg0, int arg1,
+                                          int arg2, int arg3) {  /* Do Nothign */ }
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2,
+                                      int arg3) {
+                if (cs.length() <= 0) {
+                    return;
+                }
+
+//                BitmapDescriptor bitmap =
+//                        BitmapDescriptorFactory.fromResource(R.drawable.icon_markg_aqua);
+//                OverlayOptions option;
+//                option = new MarkerOptions().position(southWest).icon(bitmap); mBaiduMap.addOverlay(option);
+//                option = new MarkerOptions().position(northEast).icon(bitmap); mBaiduMap.addOverlay(option);
+
+//                mSuggestionSearch .requestSuggestion((new SuggestionSearchOption())
+//                        .city("\t合肥").keyword(cs.toString()));
+
+//*
+
+                mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
+                        .city(citySelectionView.getText().toString()).keyword(cs.toString()));
+/*/
+                Point btmLeft = new Point(mMapView.getWidth(), 0);
+                LatLng southWest = mBaiduMap.getProjection().fromScreenLocation(btmLeft);
+                Point topRight = new Point(0, mMapView.getHeight());
+                LatLng northEast = mBaiduMap.getProjection().fromScreenLocation(topRight);
+
+                LatLngBounds searchBound = new LatLngBounds.Builder()
+                        .include(southwest).include(northeast)
+                        .build();
+
+                PoiBoundSearchOption option = new PoiBoundSearchOption();
+                option.keyword(cs.toString());
+                option.bound(searchBound);
+                mPoiSearch.searchInBound(option);
+//*/
+
+
+            }
+        });
+
+        keyWorldsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the suggested place that was clicked
+                MainActivity.BaiduSuggestion bSuggestion =
+                        (MainActivity.BaiduSuggestion) parent.getItemAtPosition(position);
+
+                keyWorldsView.setText(bSuggestion.name);
+                keyWorldsView.setSelection(bSuggestion.name.length());
+
+                // Start the asynchronous retrieval of the GreenGuide DB data about this place
+                if (bSuggestion.point != null) {
+                    if (mOverlay != null) {
+                        // Should be a function
+                        mOverlay.removeFromMap();
+                        mOverlay = null;
+                    }
+
+                    FetchedReviewsHandler.fetch(MainActivity.this, bSuggestion);
+                    Drawing.hideKeyboard(keyWorldsView, getApplicationContext());
+
+                    // Remove all markers then put a marker on the map at this places location
+                    if (oldMarker != null) {
+                        oldMarker.remove();
+                        oldMarker = null;
+                    }
+                    BitmapDescriptor bitmap =
+                            BitmapDescriptorFactory.fromResource(R.drawable.icon_markg_red);
+                    OverlayOptions option = new MarkerOptions().position(bSuggestion.point).icon(bitmap);
+                    oldMarker = mBaiduMap.addOverlay(option);
+
+                    // Move the map to the selected point
+                    moveMapViewTo(bSuggestion.point);
+                }
             }
         });
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    Overlay oldMarker = null;
+    private void moveMapViewTo(LatLng location) {
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newLatLngZoom(location, 18));
     }
 
     @Override
@@ -401,7 +516,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (fragment != null) {
-
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             ft.add(R.id.drawer_layout, fragment);
@@ -414,23 +528,30 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onPause() { super.onPause(); }
+    protected void onPause() {
+        super.onPause();
+        mMapView.onPause();
+    }
 
     @Override
-    protected void onResume() { super.onResume(); }
+    protected void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
 
     @Override
     public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) { }
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         if (mPoiSearch != null)
             mPoiSearch.destroy();
         if (mSuggestionSearch != null)
             mSuggestionSearch.destroy();
         mPoiSearch.destroy();
         mSuggestionSearch.destroy();
-        super.onDestroy();
+        mMapView.onDestroy();
     }
 
     @Override
@@ -443,10 +564,14 @@ public class MainActivity extends AppCompatActivity
 
     public void searchButtonProcess(View v) {
         searchType = 1;
-        String citystr = editCity.getText().toString();
         String keystr = keyWorldsView.getText().toString();
-        mPoiSearch.searchInCity((new PoiCitySearchOption())
-                .city(citystr).keyword(keystr).pageNum(loadIndex));
+
+
+        mPoiSearch.searchInBound(new PoiBoundSearchOption().bound(mBaiduMap.getMapStatusLimit())
+                .keyword(keystr).pageNum(loadIndex));
+
+//        mPoiSearch.searchInCity((new PoiCitySearchOption())
+//                .keyword(keystr).pageNum(loadIndex));
     }
 
     public void  searchNearbyProcess(View v) {
@@ -476,12 +601,21 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         if (result.error == SearchResult.ERRORNO.NO_ERROR) {
-            mBaiduMap.clear();
-            PoiOverlay overlay = new MyPoiOverlay(mBaiduMap);
-            mBaiduMap.setOnMarkerClickListener(overlay);
-            overlay.setData(result);
-            overlay.addToMap();
-            overlay.zoomToSpan();
+            if (oldMarker != null) {
+                // Should be a function
+                oldMarker.remove();
+                oldMarker = null;
+            }
+            if (mOverlay != null) {
+                // Should be a function
+                mOverlay.removeFromMap();
+                mOverlay = null;
+            }
+            mOverlay = new MyPoiOverlay(mBaiduMap);
+            mBaiduMap.setOnMarkerClickListener(mOverlay);
+            mOverlay.setData(result);
+            mOverlay.addToMap();
+            mOverlay.zoomToSpan();
 
             switch( searchType ) {
                 case 2:
@@ -515,6 +649,22 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(MainActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT)
                     .show();
         } else {
+            BaiduSuggestion bSuggestion = new BaiduSuggestion(result);
+            // Start the asynchronous retrieval of the GreenGuide DB data about this place
+            FetchedReviewsHandler.fetch(MainActivity.this, bSuggestion);
+            Drawing.hideKeyboard(keyWorldsView, getApplicationContext());
+
+            // Remove all markers then put a marker on the map at this places location
+            mBaiduMap.clear();
+
+            BitmapDescriptor bitmap =
+                    BitmapDescriptorFactory.fromResource(R.drawable.icon_markg_red);
+            OverlayOptions option = new MarkerOptions().position(bSuggestion.point).icon(bitmap);
+            oldMarker = mBaiduMap.addOverlay(option);
+
+            // Move the map to the selected point
+            moveMapViewTo(bSuggestion.point);
+
             Toast.makeText(MainActivity.this, result.getName() + ": " + result.getAddress(), Toast.LENGTH_SHORT)
                     .show();
         }
@@ -527,9 +677,7 @@ public class MainActivity extends AppCompatActivity
         }
         suggest = new ArrayList<BaiduSuggestion>();
         for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
-            if (info.key != null & info.pt != null) {
-                suggest.add(new BaiduSuggestion(info));
-            }
+            suggest.add(new BaiduSuggestion(info));
         }
         sugAdapter = new ArrayAdapter<BaiduSuggestion>(MainActivity.this, android.R.layout.simple_dropdown_item_1line, suggest);
         keyWorldsView.setAdapter(sugAdapter);
@@ -542,7 +690,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private class MyPoiOverlay extends PoiOverlay {
-
         public MyPoiOverlay(BaiduMap baiduMap) {
             super(baiduMap);
         }
@@ -586,141 +733,6 @@ public class MainActivity extends AppCompatActivity
         bdGround.recycle();
     }
 
-    class FetchedReviewsHandler implements Review.GetReviewsResult {
-        private LoadingDialog ld;
-        private BaiduSuggestion suggestion;
-
-        public FetchedReviewsHandler(LoadingDialog ld, BaiduSuggestion suggestion) {
-            this.ld = ld;
-            this.suggestion = suggestion;
-        }
-        @Override
-        public void onSuccess(ArrayList<Review> reviews) {
-            // Hide dialog
-            ld.dismiss();
-            btmSheetView.requestFocus();
-
-            // Calculate histogram values and average rating
-            String address = "", city = "", industry = "", product = "";
-
-
-            LinearLayout root = (LinearLayout) findViewById(R.id.userReviewList);
-            root.removeAllViews();
-
-
-            int total = 0;
-            String[] histogramX = new String[] {"+3", "+2", "+1", "0", "-1", "-2", "-3"};
-            int[] histogramY = new int[histogramX.length];
-            for (int i = reviews.size() - 1; i >= 0; i--) {
-                Review review = reviews.get(i);
-                int rating = Integer.parseInt(review.location.get(Review.Location.Key.RATING));
-                histogramY[3 - rating] += 1; // '-3' = 6, '-2' = 5, ..., '+3' = 0
-                total += rating;
-
-                if (address.equals("")) {
-                    address = review.location.get(Review.Location.Key.ADDRESS);
-                }
-                if (city.equals("")) {
-                    city = review.location.get(Review.Location.Key.CITY);
-                }
-                if (industry.equals("")) {
-                    industry = review.location.get(Review.Location.Key.INDUSTRY);
-                }
-                if (product.equals("")) {
-                    product = review.location.get(Review.Location.Key.PRODUCT);
-                }
-
-                // Add review
-                LayoutInflater lf = LayoutInflater.from(MainActivity.this);
-                LinearLayout child = (LinearLayout) lf.inflate(R.layout.review_single_comment, null, false);
-                TextView ratingValue = (TextView) child.findViewById(R.id.ratingValue);
-                ImageView ratingImage = (ImageView) child.findViewById(R.id.ratingImage);
-                TextView reviewText = (TextView) child.findViewById(R.id.reviewText);
-                TextView reviewTime = (TextView) child.findViewById(R.id.reviewTime);
-                Button rawDataBtn = (Button) child.findViewById(R.id.rawDataBtn);
-                Button helpfulBtn = (Button) child.findViewById(R.id.helpfulBtn);
-                Button inappropriateBtn = (Button) child.findViewById(R.id.inappropriateBtn);
-
-                ratingValue.setText("Rating: " + (rating > 0 ? "+" : "") + rating);
-
-                String resourseName = "rate" + (rating < 0 ? "_" : "") + Math.abs(rating);
-                int resoureseId = getResources().getIdentifier(resourseName, "drawable", MainActivity.this.getPackageName());
-                Bitmap bmp = BitmapFactory.decodeResource(getResources(), resoureseId);
-                ratingImage.setImageBitmap(bmp);
-
-                reviewText.setText(review.location.get(Review.Location.Key.REVIEW));
-
-                reviewTime.setText("Time: " + review.location.get(Review.Location.Key.TIME));
-
-                root.addView(child);
-
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams (child.getLayoutParams());
-                child.setPadding(0, (int) Drawing.convertDpToPx(MainActivity.this,
-                        10), 0, 0);
-                child.setLayoutParams(lp);
-            }
-
-            // Remove empty X values from histogram.
-            int histLeft = 0, histRight = histogramY.length - 1;
-
-            float ratio = (float) total / reviews.size();
-            float halfBtmSheetHeight = getResources().getDimension(R.dimen.reviews_bottom_sheet_peek_height_halved);
-            int w = btmSheetRatingStars.getWidth();
-            int h = (int) Drawing.convertDpToPx(MainActivity.this, (int) halfBtmSheetHeight);
-
-            int filledStarsColor, backgroundColor;
-            if (Build.VERSION.SDK_INT >= 23) {
-                filledStarsColor = getResources().getColor(R.color.bottom_sheet_gold, null);
-                backgroundColor = getResources().getColor(R.color.bottom_sheet_blue, null);
-            } else {
-                filledStarsColor = getResources().getColor(R.color.bottom_sheet_gold);
-                backgroundColor = getResources().getColor(R.color.bottom_sheet_blue);
-            }
-
-            // Create the rating stars
-            Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            Drawing.drawStars(0, 0, w, h, 5, ratio,
-                                filledStarsColor, Color.GRAY, new Canvas(bmp));
-            btmSheetRatingStars.setImageBitmap(bmp);
-
-            if (histLeft != -1 && histRight != -1) {
-                // Create the histogram
-                float textSize = Drawing.convertSpToPx(MainActivity.this, 13);
-                w = getResources().getDisplayMetrics().widthPixels;
-                bmp = Drawing.createBarGraph(histogramX, histogramY, histLeft, histRight, w,
-                        textSize, filledStarsColor, Color.WHITE, backgroundColor, 7, 7, 7);
-            }
-
-            ((ImageView) findViewById(R.id.btmSheetHistogram)).setImageBitmap(bmp);
-
-            String sTemp;
-            sTemp = (ratio > 0 ? "+" : "") + ratio;
-            ((TextView) findViewById(R.id.btmSheetRatingValue)).setText(sTemp);
-            sTemp = reviews.size() + " Review" + (reviews.size() > 1 ? "s" : "");
-            ((TextView) findViewById(R.id.btmSheetRatingsCount)).setText(sTemp);
-
-            ((TextView) findViewById(R.id.btmSheetAddress)).setText("Address: " + address);
-            ((TextView) findViewById(R.id.btmSheetCityName)).setText("City: " + city);
-            ((TextView) findViewById(R.id.btmSheetIndustry)).setText("Industry: " + industry);
-            ((TextView) findViewById(R.id.btmSheetProduct)).setText("Product: " + product);
-        }
-
-        @Override
-        public void onError(Exception e) {
-            Log.e("Getting Review", e.toString());
-            e.printStackTrace();
-        }
-
-        @Override
-        public void onUpdate(long current, long total) {
-            if (total != -1) {
-                ld.setProgress((double) current / total);
-            }
-        }
-
-        @Override
-        public void onCanceled() {
-            Toast.makeText(MainActivity.this, "Get Review Canceled", Toast.LENGTH_SHORT);
-        }
+    public void doStuff(View view) {
     }
 }

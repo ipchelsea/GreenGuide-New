@@ -9,26 +9,16 @@
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?android:attr/actionBarSize"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <FrameLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?android:attr/actionBarSize"
-                android:background="?android:attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Click Me!"
-                android:onClick="doStuff" />
-
-        </FrameLayout>
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+        <!--android:background="?android:attr/colorPrimary"-->
 
     </android.support.design.widget.AppBarLayout>
 
@@ -42,7 +32,7 @@
         android:layout_marginRight="10dp"
         app:srcCompat="@drawable/view_satellite"
         android:layout_gravity="bottom|end"
-        android:backgroundTint="@color/colorWhite"
+        android:backgroundTint="@color/white"
         app:backgroundTint="@color/colorPrimary"
         android:visibility="invisible"/>
 
@@ -54,7 +44,7 @@
         android:layout_marginRight="10dp"
         android:layout_gravity="bottom|end"
         app:srcCompat="@drawable/view_normal"
-        android:backgroundTint="@color/colorWhite"
+        android:backgroundTint="@color/white"
         app:backgroundTint="@color/colorPrimary"
         android:visibility="invisible"/>
 
@@ -66,7 +56,18 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="300dp"
         app:srcCompat="@drawable/ic_filter_24dp"
-        android:backgroundTint="@color/colorWhite"
+        android:backgroundTint="@color/white"
+        app:backgroundTint="@color/colorPrimary"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/myLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="233dp"
+        app:srcCompat="@drawable/ic_my_location_24px"
+        android:backgroundTint="@color/white"
         app:backgroundTint="@color/colorPrimary"/>
 
 </android.support.design.widget.CoordinatorLayout>

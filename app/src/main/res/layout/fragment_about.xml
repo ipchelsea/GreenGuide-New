@@ -33,7 +33,7 @@
             android:paddingTop="10sp"
             android:text="@string/about_us_1"
             android:textSize="14sp"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/black"
             android:textStyle="italic"/>
 
         <TextView
@@ -45,7 +45,7 @@
             android:paddingTop="10sp"
             android:text="@string/about_us_2"
             android:textSize="14sp"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/black"
             android:textStyle="italic"/>
 
         <TextView
@@ -57,7 +57,7 @@
             android:paddingTop="10sp"
             android:text="@string/about_us_3"
             android:textSize="14sp"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/black"
             android:textStyle="italic"/>
     </LinearLayout>
 

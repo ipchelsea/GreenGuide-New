@@ -1,65 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@drawable/layout_background"
-    android:padding="10dp"
-    android:layout_marginTop="30dp">
-
-    <TextView
-        android:id="@+id/ratingValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"/>
-
-    <ImageView
-        android:id="@+id/ratingImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Review: "/>
-
-    <TextView
-        android:id="@+id/reviewText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/reviewTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/rawDataBtn"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Raw Data"
-        android:textAlignment="viewStart"
-        android:textStyle="bold"/>
+    android:paddingTop="32dp"
+    android:paddingBottom="32dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/helpfulBtn"
+        android:orientation="vertical"
+        android:background="@drawable/layout_background">
+
+        <TextView
+            android:id="@+id/ratingValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="True"
-            android:layout_weight="1"
-            android:textStyle="italic"/>
-        <Button
-            android:id="@+id/inappropriateBtn"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:id="@+id/ratingImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Inappropriate"
-            android:layout_weight="1"
-            android:textStyle="italic"/>
+            android:text="Review: "/>
+
+        <TextView
+            android:id="@+id/reviewText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/reviewTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/rawDataBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:text="View Raw Data"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/helpfulBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="True"
+                android:textStyle="italic"
+                android:textSize="13sp"
+                android:minHeight="0dp"/>
+
+            <Button
+                android:id="@+id/inappropriateBtn"
+                style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Inappropriate"
+                android:textStyle="italic"
+                android:textSize="13sp"
+                android:minHeight="0dp"/>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</FrameLayout>

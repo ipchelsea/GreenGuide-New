@@ -21,4 +21,11 @@
         technology to practice the green supply chain. Promoting participation, sharing and integration of environmental
         messages by all citizens has become an aid to the improvement of the environment.
     </string>
+    <string name="histogram_description">Sideways Histogram</string>
+    <string name="Rating_Stars_Description">Displays similar content to a RatingBar</string>
+    <string name="explore_button_text">Explore Reviews</string>
+    <string name="write_review_button_text">Write a Review</string>
+    <string name="btmsheet_company_name_default">Company Name</string>
+    <string name="btmsheet_rating_value_default">+3.0</string>
+    <string name="btmsheet_ratings_count_default">(134)</string>
 </resources>

@@ -1,76 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_marginTop="50dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginTop="?android:attr/actionBarSize"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="60dip"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="在"></TextView>
-
-        <EditText
-            android:id="@+id/city"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="北京" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="市内找"></TextView>
-
-        <AutoCompleteTextView
-            android:id="@+id/searchkey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.88"
-            android:text="餐厅" />
-    </LinearLayout>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="50dip"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="12"
-            android:onClick="searchButtonProcess"
-            android:padding="10dip"
-            android:text="城市内搜索" />
-
-        <Button
-            android:id="@+id/searchNearby"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="12"
-            android:onClick="searchNearbyProcess"
-            android:padding="10dip"
-            android:text="周边搜索" />
-
-        <Button
-            android:id="@+id/searchBound"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="12"
-            android:onClick="searchBoundProcess"
-            android:padding="10dip"
-            android:text="区域搜索" />
-    </LinearLayout>
-
-    <fragment
+    <com.baidu.mapapi.map.MapView
         android:id="@+id/map"
-        class="com.baidu.mapapi.map.SupportMapFragment"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/reviews_bottom_sheet_peek_height"
+        android:layout_weight="0"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <Button
+            android:onClick="doStuff"
+            android:id="@+id/explore"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:background="@color/bottom_buttons"
+            android:drawableTint="@android:color/holo_blue_dark"
+            android:drawableTop="@drawable/ic_search_review"
+            android:fontFamily="sans-serif"
+            android:text="@string/explore_button_text"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:gravity="bottom|center_horizontal"
+            android:typeface="normal"
+            android:theme="?android:attr/buttonBarButtonStyle"/>
+
+        <Button
+            android:id="@+id/writeReview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:background="@color/bottom_buttons"
+            android:drawableTint="#101010"
+            android:drawableTop="@drawable/ic_write_review"
+            android:fontFamily="sans-serif"
+            android:text="@string/write_review_button_text"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:gravity="bottom|center_horizontal"
+            android:typeface="normal"
+            android:theme="?android:attr/buttonBarButtonStyle"/>
+    </LinearLayout>
 </LinearLayout>
