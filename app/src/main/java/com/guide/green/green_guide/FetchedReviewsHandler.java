@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -48,23 +49,20 @@ class FetchedReviewsHandler implements Review.GetReviewsResult {
 
     @Override
     public void onSuccess(ArrayList<Review> reviews) {
-        ImageView btmSheetRatingStars = (ImageView) act.findViewById(R.id.btmSheetRatingStars);
-
         // Hide dialog
         if (ld != null) {
             ld.dismiss();
         }
         btmSheetView.requestFocus();
 
-        // Calculate histogram values and average rating
-        String address = "", city = "", industry = "", product = "";
-
-
         btmSheetCompanyName.setText(suggestion.name);
 
         LinearLayout root = (LinearLayout) act.findViewById(R.id.userReviewList);
         root.removeAllViews();
 
+
+        // Calculate histogram values and average rating
+        String address = "", city = "", industry = "", product = "";
 
         int total = 0;
         String[] histogramX = new String[] {"+3", "+2", "+1", "0", "-1", "-2", "-3"};
@@ -133,6 +131,8 @@ class FetchedReviewsHandler implements Review.GetReviewsResult {
             backgroundColor = act.getResources().getColor(R.color.bottom_sheet_blue);
         }
 
+        ImageView btmSheetRatingStars = (ImageView) act.findViewById(R.id.btmSheetRatingStars);
+
         // Create the rating stars & add the bitmap to a view
         int h = act.getResources().getDimensionPixelSize(
                 R.dimen.reviews_bottom_sheet_peek_height_halved);
@@ -153,13 +153,25 @@ class FetchedReviewsHandler implements Review.GetReviewsResult {
         String sTemp;
         sTemp = (average > 0 ? "+" : "") + average;
         ((TextView) act.findViewById(R.id.btmSheetRatingValue)).setText(sTemp);
-        sTemp = reviews.size() + " Review" + (reviews.size() > 1 ? "s" : "");
+        sTemp = reviews.size() + " Review" + (reviews.size() != 1 ? "s" : "");
         ((TextView) act.findViewById(R.id.btmSheetRatingsCount)).setText(sTemp);
 
         ((TextView) act.findViewById(R.id.btmSheetAddress)).setText("Address: " + address);
         ((TextView) act.findViewById(R.id.btmSheetCityName)).setText("City: " + city);
         ((TextView) act.findViewById(R.id.btmSheetIndustry)).setText("Industry: " + industry);
         ((TextView) act.findViewById(R.id.btmSheetProduct)).setText("Product: " + product);
+
+        if (reviews.size() == 0) {
+            ((TextView) act.findViewById(R.id.btmSheetRatingValue)).setVisibility(View.INVISIBLE);
+            btmSheetRatingStars.setVisibility(View.INVISIBLE);
+            ((LinearLayout) act.findViewById(R.id.btmSheetReviewBody)).setVisibility(View.INVISIBLE);
+            ((Button) act.findViewById(R.id.btmSheetWriteReview)).setText(R.string.write_first_review_button_text);
+        } else {
+            ((TextView) act.findViewById(R.id.btmSheetRatingValue)).setVisibility(View.VISIBLE);
+            btmSheetRatingStars.setVisibility(View.VISIBLE);
+            ((LinearLayout) act.findViewById(R.id.btmSheetReviewBody)).setVisibility(View.VISIBLE);
+            ((Button) act.findViewById(R.id.btmSheetWriteReview)).setText(R.string.write_review_button_text);
+        }
 
         btmSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }

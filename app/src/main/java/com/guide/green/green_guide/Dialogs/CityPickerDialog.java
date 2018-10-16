@@ -7,168 +7,182 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.Pair;
-import android.view.KeyEvent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.guide.green.green_guide.R;
 import com.guide.green.green_guide.Utilities.RomanizedLocation;
 
-import com.guide.green.green_guide.R;
-
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import static com.guide.green.green_guide.Utilities.Drawing.hideKeyboard;
 
 public class CityPickerDialog extends DialogFragment {
     private AutoCompleteTextView mAutoComplete;
-
-    public static class GroupIndex implements Comparable<GroupIndex> {
-        public final Character name;
-        public final int startIndex;
-        public GroupIndex(Character name, int startIndex) {
-            this.name = name;
-            this.startIndex = startIndex;
-        }
-        @Override
-        public int compareTo(@NonNull GroupIndex groupIndex) {
-            return name - groupIndex.name;
-        }
-    }
-
-    public static class RomanizedAdapter extends RecyclerView.Adapter<RomanizedAdapter.MyViewHolder> {
-        private LayoutInflater inflater;
-        private Context context;
-        private List<RomanizedLocation> items;
-        private List<GroupIndex> headers;
-        private View.OnClickListener clickListener;
-
-        public RomanizedAdapter(@NonNull Context context, @NonNull List<RomanizedLocation> items,
-            @NonNull List<GroupIndex> headers, @NonNull View.OnClickListener clickListener) {
-            inflater = LayoutInflater.from(context);
-            this.context = context;
-            this.items = items;
-            this.headers = headers;
-            this.clickListener = clickListener;
-        }
-
-        @Override
-        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = inflater.inflate(R.layout.dialog_city_picker_list_item, parent, false);
-            MyViewHolder holder = new MyViewHolder(v);
-            v.setOnClickListener(clickListener);
-            return holder;
-        }
-
-        @Override
-        public void onBindViewHolder(MyViewHolder holder, int position) {
-            holder.name.setText(items.get(position).name);
-        }
-
-        @Override
-        public int getItemCount() {
-            return items.size() + 1;
-        }
-
-        class MyViewHolder extends RecyclerView.ViewHolder {
-            public Button name;
-            public MyViewHolder(View itemView) {
-                super(itemView);
-                name = (Button) itemView;
-            }
-        }
-    }
 
     private Button btnSelectedCity;
     public void setSelectedCityButton(Button btnSelectedCity) {
         this.btnSelectedCity = btnSelectedCity;
     }
 
-    /***
-     * List must be sorted.
-     *
-     * @param list sorted collection of cities
-     * @return a pair containing the group id
-     */
-    private static List<GroupIndex> getGroupStartIndexes(List<RomanizedLocation> list) {
-        HashMap<Character, Integer> firstIndexOfGroup = new LinkedHashMap<>();
-        for (int i = 0; i < list.size(); i++) {
-            char key = Character.toUpperCase(list.get(i).pinyin.charAt(0));
-            if (!firstIndexOfGroup.containsKey(key)) {
-                firstIndexOfGroup.put(key, i);
-            }
-        }
-
-        ArrayList<GroupIndex> results = new ArrayList<>(firstIndexOfGroup.size());
-        for (Map.Entry<Character, Integer> item : firstIndexOfGroup.entrySet()) {
-            results.add(new GroupIndex(item.getKey(), item.getValue()));
-        }
-
-        Collections.sort(results);
-
-        return results;
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+//        this.setCancelable(false);
     }
+//
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        Dialog dialog = getDialog();
+//        if (dialog != null) {
+//            Window window = dialog.getWindow();
+//            WindowManager.LayoutParams wlp = window.getAttributes();
+//            wlp.copyFrom(window.getAttributes());
+//            wlp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+//            window.setAttributes(wlp);
+//        }
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.dialog_city_picker, container);
 
-        List<RomanizedLocation> cities = RomanizedLocation.getCities();
-        List<GroupIndex> groupStartIndexs = getGroupStartIndexes(cities);
-
-//        mAutoComplete = (AutoCompleteTextView) layout.findViewById(R.id.searchCity);
-//        mAutoComplete.setOnKeyListener(new View.OnKeyListener() {
-//            @Override
-//            public boolean onKey(View view, int i, KeyEvent keyEvent) {
-//                return false;
-//            }
-//        });
-
-
-        RecyclerView rv = (RecyclerView) layout.findViewById(R.id.cityList2);
-        rv.setHasFixedSize(true);
-        rv.setLayoutManager(new LinearLayoutManager(getContext()));
-        RomanizedAdapter adapter = new RomanizedAdapter(getContext(), cities, groupStartIndexs,
-                new View.OnClickListener() {
+        mAutoComplete = (AutoCompleteTextView) layout.findViewById(R.id.searchCity);
+        mAutoComplete.setThreshold(1);
+        RomanizedAdapter adapter = new RomanizedAdapter(getContext(), RomanizedLocation.getCities(),
+                new RomanizedAdapter.OnItemClicked() {
                     @Override
-                    public void onClick(View view) {
-                        Button btn = (Button) view;
-                        btnSelectedCity.setText(((Button) view).getText());
-                        CityPickerDialog.this.dismiss();
+                    public void onClicked(int i, RomanizedAdapter adapter, View v) {
+                        RomanizedLocation city = (RomanizedLocation) adapter.getItem(i);
+                        btnSelectedCity.setText(city.name);
+                        hideKeyboard(mAutoComplete, getContext());
+                        dismiss();
                     }
                 });
-        rv.setAdapter(adapter);
+        mAutoComplete.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-
         return layout;
     }
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Dialog d = super.onCreateDialog(savedInstanceState);
-        d.requestWindowFeature(DialogInterface.BUTTON_POSITIVE | DialogInterface.BUTTON_NEGATIVE);
-        return d;
-    }
+    public static class RomanizedAdapter extends BaseAdapter implements Filterable {
+        public interface OnItemClicked {
+            void onClicked(int i, RomanizedAdapter adapter, View v);
+        }
 
-//        public void show(FragmentManager fragManager) {
-//            FragmentTransaction transaction = fragManager.beginTransaction();
-//            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//            transaction.add(0,this, null)
-//                    .addToBackStack(null).commit();
-//        }
+        private List<RomanizedLocation> citiesOriginal;
+        private List<RomanizedLocation> cities;
+        private Context context;
+        public OnItemClicked mCallback;
+
+        public RomanizedAdapter(@NonNull Context context, @NonNull List<RomanizedLocation> cities,
+                                @NonNull OnItemClicked callback) {
+            this.context = context;
+            this.cities = cities;
+            this.citiesOriginal = cities;
+            this.mCallback = callback;
+        }
+
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence charSequence) {
+                    FilterResults results = new FilterResults();
+                    if (charSequence != null && charSequence.length() > 0) {
+                        String query = charSequence.toString().toUpperCase();
+                        ArrayList<RomanizedLocation> filteredList = new ArrayList<>();
+                        for (RomanizedLocation city : citiesOriginal) {
+                            if ((city.pinyin != null && city.pinyin.toUpperCase().startsWith(query))
+                                    || (city.name != null && city.name.toUpperCase().startsWith(query))
+                                    || (city.fullName != null && city.fullName.toUpperCase().startsWith(query))) {
+                                filteredList.add(city);
+                            }
+                        }
+                        results.values = filteredList;
+                        results.count = filteredList.size();
+                    } else {
+                        results.values = citiesOriginal;
+                        results.count = citiesOriginal.size();
+                    }
+                    return results;
+                }
+
+                @Override
+                protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                    cities = (ArrayList<RomanizedLocation>) filterResults.values;
+                    notifyDataSetChanged();
+                }
+            };
+        }
+
+        @Override
+        public int getCount() {
+            return cities.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return cities.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            if (view == null) {
+                view = View.inflate(context, R.layout.dialog_city_autocomplete_item, null);
+                view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                    @Override
+                    public void onFocusChange(View view, boolean b) {
+                        if (b) {
+                            mCallback.onClicked(((ViewHolder) view.getTag()).i,
+                                    RomanizedAdapter.this, view);
+                        }
+                    }
+                });
+                ViewHolder temp = new ViewHolder((TextView) view.findViewById(R.id.cityName),
+                        (TextView) view.findViewById(R.id.cityPinyin));
+                temp.mCityPinyin.setClickable(false);
+                temp.mCityPinyin.setFocusable(false);
+                temp.mCityName.setClickable(false);
+                temp.mCityName.setFocusable(false);
+                view.setTag(temp);
+            }
+
+            ViewHolder v = (ViewHolder) view.getTag();
+            v.i = i;
+            v.mCityName.setText(cities.get(i).name.toString());
+            v.mCityPinyin.setText(cities.get(i).pinyin.toString());
+
+            return view;
+        }
+
+        public static class ViewHolder {
+            int i;
+            TextView mCityName;
+            TextView mCityPinyin;
+            ViewHolder(TextView cityName, TextView cityPinyin) {
+                this.mCityName = cityName;
+                this.mCityPinyin = cityPinyin;
+            }
+        }
+    }
 }
