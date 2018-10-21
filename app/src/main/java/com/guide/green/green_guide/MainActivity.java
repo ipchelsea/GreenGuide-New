@@ -2,21 +2,13 @@ package com.guide.green.green_guide;
 
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.widget.NestedScrollView;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.SearchView;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,128 +19,41 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.baidu.mapapi.SDKInitializer;
-import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.CircleOptions;
-import com.baidu.mapapi.map.GroundOverlayOptions;
-import com.baidu.mapapi.map.MapPoi;
-import com.baidu.mapapi.map.MapStatusUpdate;
-import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.Overlay;
-import com.baidu.mapapi.map.Stroke;
-import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.model.LatLngBounds;
-import com.baidu.mapapi.search.core.CityInfo;
-import com.baidu.mapapi.search.core.PoiInfo;
-import com.baidu.mapapi.search.core.SearchResult;
-import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
-import com.baidu.mapapi.search.poi.PoiBoundSearchOption;
-import com.baidu.mapapi.search.poi.PoiCitySearchOption;
-import com.baidu.mapapi.search.poi.PoiDetailResult;
-import com.baidu.mapapi.search.poi.PoiDetailSearchOption;
-import com.baidu.mapapi.search.poi.PoiIndoorResult;
-import com.baidu.mapapi.map.MarkerOptions;
-import com.baidu.mapapi.map.OverlayOptions;
-import com.baidu.mapapi.search.poi.PoiNearbySearchOption;
-import com.baidu.mapapi.search.poi.PoiResult;
-import com.baidu.mapapi.search.poi.PoiSearch;
-import com.baidu.mapapi.search.poi.PoiSortType;
-import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
-import com.baidu.mapapi.search.sug.SuggestionResult;
-import com.baidu.mapapi.search.sug.SuggestionSearch;
-import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
+import com.guide.green.green_guide.Dialogs.CityPickerDialog2;
 import com.guide.green.green_guide.Fragments.AboutFragment;
-import com.guide.green.green_guide.Fragments.BtmSheetPoiResultPage;
 import com.guide.green.green_guide.Fragments.GuidelinesFragment;
 import com.guide.green.green_guide.Fragments.LogInOutFragment;
 import com.guide.green.green_guide.Fragments.MyReviewsFragment;
 import com.guide.green.green_guide.Fragments.SignUpFragment;
 import com.guide.green.green_guide.Fragments.UserGuideFragment;
-import com.guide.green.green_guide.Utilities.Drawing;
-import com.guide.green.green_guide.Utilities.FragPager;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.guide.green.green_guide.Utilities.BaiduMapManager;
+import com.guide.green.green_guide.Utilities.BottomSheetManager;
+import com.guide.green.green_guide.Utilities.SuggestionSearchManager;
 
 
-public class MainActivity extends AppCompatActivity
-        implements OnGetPoiSearchResultListener, OnGetSuggestionResultListener, NavigationView.OnNavigationItemSelectedListener {
-
-    private MapView mMapView;
-    private BaiduMap mBaiduMap;
-    private PoiSearch mPoiSearch;
-    SuggestionSearch mSuggestionSearch;
-    private List<BaiduSuggestion> suggest;
-    private PoiOverlay mOverlay;
-
+public class MainActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener {
+    // High level managers
+    private BaiduMapManager mMapManager;
+    private BottomSheetManager mBtmSheetManager;
     private Button citySelectionView = null;
-    private AutoCompleteTextView keyWorldsView = null;
-    private ArrayAdapter<BaiduSuggestion> sugAdapter = null;
-    private int loadIndex = 0;
 
-    LatLng center = new LatLng(39.92235, 116.380338);
-    int radius = 100;
-    LatLng southwest = new LatLng( 39.92235, 116.380338 );
-    LatLng northeast = new LatLng( 39.947246, 116.414977);
-    LatLngBounds searchbound = new LatLngBounds.Builder().include(southwest).include(northeast).build();
-
-    int searchType = 0;  // 搜索的类型，在显示时区分
-
-    FloatingActionButton fab;
+    // Terrain selection
     FloatingActionButton normalMapView;
     FloatingActionButton satelliteMapView;
     boolean fabIsOpen = false;
 
-    private Toolbar toolbar;
-    private DrawerLayout drawer;
-    private ActionBarDrawerToggle toggle;
+    private DrawerLayout mDrawer;
     private NavigationView navigationView;
-
-    SearchView searchView;
-
-    // Stan additions
-    private PageChangeListener mPageChangeListener;
-    private TextView mBtmSheetCompanyName;
-    private BottomSheetBehavior mBtmSheet;
-    private android.support.v4.widget.NestedScrollView btmSheetView;
-
-    public static class BaiduSuggestion {
-        public final String name;
-        public final LatLng point;
-        public BaiduSuggestion(@NonNull SuggestionResult.SuggestionInfo info) {
-            this.name = info.key;
-            this.point = info.pt;
-        }
-        public BaiduSuggestion(@NonNull PoiDetailResult info) {
-            this.name = info.name;
-            this.point = info.location;
-        }
-        public BaiduSuggestion(@NonNull PoiInfo info) {
-            this.name = info.name;
-            this.point = info.location;
-        }
-        @Override
-        public String toString() {
-            if (point == null) {
-                return " " + name;
-            } else {
-                return "\uD83D\uDCCD" + name;
-            }
-        }
-    }
+    private SuggestionSearchManager mSuggestionSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,88 +61,81 @@ public class MainActivity extends AppCompatActivity
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
-        // Stan Additions
-        mBtmSheetCompanyName = (TextView) findViewById(R.id.previewCompanyName);
-        btmSheetView = (android.support.v4.widget.NestedScrollView) findViewById(R.id.btmSheet);
-        mBtmSheet = BottomSheetBehavior.from(btmSheetView);
-        mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-        mBtmSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                ViewGroup.LayoutParams layoutParams = mBtmSheetCompanyName.getLayoutParams();
-                LinearLayout.LayoutParams linearL = new LinearLayout.LayoutParams (layoutParams);
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    mBtmSheetCompanyName.setSingleLine(true);
-                    mBtmSheetCompanyName.setPadding(0, 0, 0, 0);
-                } else {
-                    int px = (int) Drawing.convertDpToPx(MainActivity.this, 10);
-                    mBtmSheetCompanyName.setSingleLine(false);
-                    linearL.setMargins (0, px,0, px);
-                    if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                        if (oldMarker != null) {
-                            oldMarker.remove();
-                            oldMarker = null;
-                            /* Should be a function */
-                        }
-                        if (mPageChangeListener != null) {
-                            mPageChangeListener.removeCurrent();
-                        }
-                    }
-
-                }
-                mBtmSheetCompanyName.setLayoutParams(linearL);
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                /* Do Nothing */
-            }
-        });
-
-        mPoiSearch = PoiSearch.newInstance();
-        mPoiSearch.setOnGetPoiSearchResultListener(this);
-
-        // 初始化建议搜索模块，注册建议搜索事件监听
-        mSuggestionSearch = SuggestionSearch.newInstance();
-        mSuggestionSearch.setOnGetSuggestionResultListener(this);
-
-        mMapView = (MapView) findViewById(R.id.map);
-        mBaiduMap = mMapView.getMap();
-        mBaiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                if (mBtmSheet.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-                    mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
-            }
-
-            @Override
-            public boolean onMapPoiClick(MapPoi mapPoi) {
-                if (mBtmSheet.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-                    mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
-                return false;
-            }
-        });
-
-        mBaiduMap.setOnMapLongClickListener(new BaiduMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                if (mBtmSheet.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-                    mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
-            }
-        });
-
-        mBaiduMap.setOnMyLocationClickListener(new BaiduMap.OnMyLocationClickListener() {
-            @Override
-            public boolean onMyLocationClick() {
-                Log.i("MyLocation", "Not too sure what to dow now?");
-                return false;
-            }
-        });
-
+        initMapManager();
+        initBottomSheet();
         initToolsAndWidgets();
+        initLocationTracker();
+    }
+
+    public void initMapManager() {
+        mMapManager = new BaiduMapManager((MapView) findViewById(R.id.map));
+    }
+
+    /**
+     * {@code mMapManager} must be initialized before calling this.
+     */
+    public void initLocationTracker() {
+        FloatingActionButton btnMyLocation = (FloatingActionButton) findViewById(R.id.myLocation);
+
+        TrackLocationHandler locationHandler =
+                new TrackLocationHandler(this, btnMyLocation, mMapManager.BAIDU_MAP);
+
+        btnMyLocation.setOnClickListener(locationHandler);
+    }
+
+    /**
+     * {@code mMapManager} must be initialized before calling this.
+     */
+    private void initBottomSheet() {
+        // Get Relevant Bottom Sheet Views
+        BottomSheetManager.Reviews reviews = new BottomSheetManager.Reviews();
+
+        reviews.container = (ViewGroup) findViewById(R.id.btmSheetReviewsContainer);
+        reviews.firstReviewButton = (Button) findViewById(R.id.btmSheetWriteReview);
+
+        reviews.peekBar.companyName = (TextView) findViewById(R.id.previewCompanyName);
+        reviews.peekBar.ratingValue = (TextView) findViewById(R.id.btmSheetRatingValue);
+        reviews.peekBar.ratingStars = (ImageView) findViewById(R.id.btmSheetRatingStars);
+        reviews.peekBar.ratingCount = (TextView) findViewById(R.id.btmSheetRatingsCount);
+
+        reviews.body.container = (ViewGroup) findViewById(R.id.btmSheetReviewBody);
+        reviews.body.address = (TextView) findViewById(R.id.btmSheetAddress);
+        reviews.body.city = (TextView) findViewById(R.id.btmSheetCityName);
+        reviews.body.industry = (TextView) findViewById(R.id.btmSheetIndustry);
+        reviews.body.product = (TextView) findViewById(R.id.btmSheetProduct);
+        reviews.body.histogram = (ImageView) findViewById(R.id.btmSheetHistogram);
+        reviews.body.reviews = (ViewGroup) findViewById(R.id.userReviewList);
+
+        BottomSheetManager.PoiSearchResults poiResults = new BottomSheetManager.PoiSearchResults();
+        poiResults.container = (ViewGroup) findViewById(R.id.poiResultsSwipeView);
+        poiResults.swipeView = (ViewPager) findViewById(R.id.poiResultsSwipeView);
+
+        // Initialize Bottom Sheet Manager
+        NestedScrollView btmSheet = (NestedScrollView) findViewById(R.id.btmSheet);
+        mBtmSheetManager = new BottomSheetManager(this, btmSheet, reviews, poiResults,
+                mMapManager);
+        mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+    /**
+     * Initializes the tool bar and the floating buttons.
+     */
+    private void initToolsAndWidgets() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        normalMapView = findViewById(R.id.normalfab);
+        satelliteMapView = findViewById(R.id.satellitefab);
+        FloatingActionButton fab = findViewById(R.id.fab);
+
+        mDrawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -245,32 +143,6 @@ public class MainActivity extends AppCompatActivity
                 handleFabActions(view);
             }
         });
-
-        FloatingActionButton btnMyLocation = (FloatingActionButton) findViewById(R.id.myLocation);
-        btnMyLocation.setOnClickListener(new TrackLocationHandler(this, btnMyLocation, mBaiduMap));
-
-
-        doStuff(null);
-    }
-
-    private void initToolsAndWidgets() {
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        normalMapView = findViewById(R.id.normalfab);
-        satelliteMapView = findViewById(R.id.satellitefab);
-        fab = findViewById(R.id.fab);
-
-        drawer = findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-//        clearImage = (ImageView) findViewById(R.id.clearImage);mPoiSearch = PoiSearch.newInstance();
-
-        navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
     private void hideFabItems() {
@@ -295,26 +167,17 @@ public class MainActivity extends AppCompatActivity
             normalMapView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setMapType(1);
+                    mMapManager.setMapType(BaiduMapManager.MapType.NORMAL);
                     hideFabItems();
                 }
             });
             satelliteMapView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setMapType(2);
+                    mMapManager.setMapType(BaiduMapManager.MapType.SATELLITE);
                     hideFabItems();
                 }
             });
-        }
-    }
-
-    private void setMapType(int id) {
-        if (mBaiduMap != null) {
-            if (id == 1)
-                mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
-            else
-                mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
         }
     }
 
@@ -332,154 +195,27 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        MenuItem item;
 
-        item = menu.findItem(R.id.cityItem);
+        MenuItem item = menu.findItem(R.id.cityItem);
         citySelectionView = (Button) item.getActionView().findViewById(R.id.city);
         citySelectionView.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final CityPickerDialog cpd = new CityPickerDialog();
+//                final CityPickerDialog cpd = new CityPickerDialog();
+                final CityPickerDialog2 cpd = new CityPickerDialog2();
                 cpd.setSelectedCityButton(citySelectionView);
                 cpd.show(getSupportFragmentManager(), "Pick a City");
             }
         });
 
         item = menu.findItem(R.id.searchItem);
-        keyWorldsView = (AutoCompleteTextView) item.getActionView().findViewById(R.id.search);
-        sugAdapter = new ArrayAdapter<BaiduSuggestion>(this,
-                android.R.layout.simple_dropdown_item_1line);
-        keyWorldsView.setAdapter(sugAdapter);
-        keyWorldsView.setThreshold(1);
-        keyWorldsView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean gaineFocus) {
-                AutoCompleteTextView tv = (AutoCompleteTextView) view;
-                if (gaineFocus) {
-                    if (!tv.getText().toString().equals("")) {
-                        tv.showDropDown();
-                    }
-                } else {
-                    if (mOverlay != null) {
-                        // Should be a function
-                        mOverlay.removeFromMap();
-                        mOverlay = null;
-                    }
-                    tv.setText("");
-                    com.guide.green.green_guide.Utilities.Drawing.hideKeyboard(view, MainActivity.this.getApplicationContext());
-                }
-            }
-        });
-        keyWorldsView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN &&
-                        keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+        AutoCompleteTextView searchView =
+                (AutoCompleteTextView) item.getActionView().findViewById(R.id.search);
 
-                    PoiCitySearchOption searchOption = new PoiCitySearchOption()
-                            .city(citySelectionView.getText().toString())
-                            .keyword(keyWorldsView.getText().toString());
-
-                    ViewPager mBtmSheetPager = (ViewPager) findViewById(R.id.poiResultsSwipeView);
-                    /* Should be a function */
-                    if (mPageChangeListener != null) {
-                        mPageChangeListener.removeCurrent();
-                    }
-                    FragPager pagerAdapter = new FragPager(getSupportFragmentManager(), mBaiduMap,
-                            mPoiSearch, searchOption, getLayoutInflater());
-                    pagerAdapter.setPoiClickHandler(new FragPager.PoiSelected() {
-                        @Override
-                        public void onPoiSelected(PoiInfo poi) {
-                            BaiduSuggestion bSuggestion = new BaiduSuggestion(poi);
-                            FetchedReviewsHandler.fetch(MainActivity.this, bSuggestion);
-                            mBaiduMap.clear();
-                            showPoiResults(false);
-                            BitmapDescriptor bitmap =
-                                    BitmapDescriptorFactory.fromResource(R.drawable.icon_markg_red);
-                            OverlayOptions option = new MarkerOptions().position(bSuggestion.point).icon(bitmap);
-                            oldMarker = mBaiduMap.addOverlay(option);
-                        }
-                    });
-                    mPageChangeListener = new PageChangeListener(pagerAdapter);
-                    mBtmSheetPager.addOnPageChangeListener(mPageChangeListener);
-                    pagerAdapter.setPoiResultLoaded(mPageChangeListener);
-                    mBtmSheetPager.setAdapter(pagerAdapter);
-                    mBaiduMap.clear();
-                    pagerAdapter.notifyDataSetChanged();
-                    showPoiResults(true);
-                    mBtmSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-                    keyWorldsView.dismissDropDown();
-                    Drawing.hideKeyboard(keyWorldsView, getApplicationContext());
-                }
-                return false;
-            }
-        });
-        keyWorldsView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable arg0) { /* Do Nothign */ }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {  /* Do Nothign */ }
-
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2,
-                                      int arg3) {
-                if (cs.length() <= 0) {
-                    return;
-                }
-
-                mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
-                        .city(citySelectionView.getText().toString()).keyword(cs.toString()));
-            }
-        });
-
-        keyWorldsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Get the suggested place that was clicked
-                MainActivity.BaiduSuggestion bSuggestion =
-                        (MainActivity.BaiduSuggestion) parent.getItemAtPosition(position);
-
-                keyWorldsView.setText(bSuggestion.name);
-                keyWorldsView.setSelection(bSuggestion.name.length());
-
-                // Start the asynchronous retrieval of the GreenGuide DB data about this place
-                if (bSuggestion.point != null) {
-                    if (mOverlay != null) {
-                        // Should be a function
-                        mOverlay.removeFromMap();
-                        mOverlay = null;
-                    }
-
-                    FetchedReviewsHandler.fetch(MainActivity.this, bSuggestion);
-                    mBaiduMap.clear();
-                    showPoiResults(false);
-                    Drawing.hideKeyboard(keyWorldsView, getApplicationContext());
-
-                    // Remove all markers then put a marker on the map at this places location
-                    if (oldMarker != null) {
-                        oldMarker.remove();
-                        oldMarker = null;
-                    }
-                    BitmapDescriptor bitmap =
-                            BitmapDescriptorFactory.fromResource(R.drawable.icon_markg_red);
-                    OverlayOptions option = new MarkerOptions().position(bSuggestion.point).icon(bitmap);
-                    oldMarker = mBaiduMap.addOverlay(option);
-
-                    // Move the map to the selected point
-                    moveMapViewTo(bSuggestion.point);
-                }
-            }
-        });
+        mSuggestionSearch = new SuggestionSearchManager(this, searchView, citySelectionView,
+                mMapManager, mBtmSheetManager);
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    Overlay oldMarker = null;
-    private void moveMapViewTo(LatLng location) {
-        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newLatLngZoom(location, 18));
     }
 
     @Override
@@ -521,13 +257,6 @@ public class MainActivity extends AppCompatActivity
             case R.id.log_in_out:
                 fragment = new LogInOutFragment();
                 break;
-            default:
-                keyWorldsView.setVisibility(View.VISIBLE);
-                keyWorldsView.setText("");
-        }
-
-        if (id != R.id.home) {
-            keyWorldsView.setVisibility(View.GONE);
         }
 
         if (fragment != null) {
@@ -545,270 +274,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        mMapView.onPause();
+        mMapManager.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mMapView.onResume();
+        mMapManager.onResume();
     }
-
-    @Override
-    public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) { }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mPoiSearch != null)
-            mPoiSearch.destroy();
-        if (mSuggestionSearch != null)
-            mSuggestionSearch.destroy();
-        mPoiSearch.destroy();
-        mSuggestionSearch.destroy();
-        mMapView.onDestroy();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) { super.onSaveInstanceState(outState); }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
-    public void searchButtonProcess(View v) {
-        searchType = 1;
-        String keystr = keyWorldsView.getText().toString();
-
-
-        mPoiSearch.searchInBound(new PoiBoundSearchOption().bound(mBaiduMap.getMapStatusLimit())
-                .keyword(keystr).pageNum(loadIndex));
-
-//        mPoiSearch.searchInCity((new PoiCitySearchOption())
-//                .keyword(keystr).pageNum(loadIndex));
-    }
-
-    public void  searchNearbyProcess(View v) {
-        searchType = 2;
-        PoiNearbySearchOption nearbySearchOption = new PoiNearbySearchOption().keyword(keyWorldsView.getText()
-                .toString()).sortType(PoiSortType.distance_from_near_to_far).location(center)
-                .radius(radius).pageNum(loadIndex);
-        mPoiSearch.searchNearby(nearbySearchOption);
-    }
-
-    public void goToNextPage(View v) {
-        loadIndex++;
-        searchButtonProcess(null);
-    }
-
-    public void searchBoundProcess(View v) {
-        searchType = 3;
-        mPoiSearch.searchInBound(new PoiBoundSearchOption().bound(searchbound)
-                .keyword(keyWorldsView.getText().toString()));
-
-    }
-
-    public void onGetPoiResult(PoiResult result) {
-        Log.i("TotalPageNumbers", "" + result.getTotalPageNum());
-        if (result == null || result.error == SearchResult.ERRORNO.RESULT_NOT_FOUND) {
-            Toast.makeText(MainActivity.this, "未找到结果", Toast.LENGTH_LONG)
-                    .show();
-            return;
-        }
-        if (result.error == SearchResult.ERRORNO.NO_ERROR) {
-            if (oldMarker != null) {
-                // Should be a function
-                oldMarker.remove();
-                oldMarker = null;
-            }
-            if (mOverlay != null) {
-                // Should be a function
-                mOverlay.removeFromMap();
-                mOverlay = null;
-            }
-            mOverlay = new MyPoiOverlay(mBaiduMap);
-            mBaiduMap.setOnMarkerClickListener(mOverlay);
-            mOverlay.setData(result);
-            mOverlay.addToMap();
-            mOverlay.zoomToSpan();
-
-            switch( searchType ) {
-                case 2:
-                    showNearbyArea(center, radius);
-                    break;
-                case 3:
-                    showBound(searchbound);
-                    break;
-                default:
-                    break;
-            }
-
-            return;
-        }
-        if (result.error == SearchResult.ERRORNO.AMBIGUOUS_KEYWORD) {
-            // 当输入关键字在本市没有找到，但在其他城市找到时，返回包含该关键字信息的城市列表
-            String strInfo = "在";
-            for (CityInfo cityInfo : result.getSuggestCityList()) {
-                strInfo += cityInfo.city;
-                strInfo += ",";
-            }
-            strInfo += "找到结果";
-            Toast.makeText(MainActivity.this, strInfo, Toast.LENGTH_LONG)
-                    .show();
-        }
-    }
-
-    public void onGetPoiDetailResult(PoiDetailResult result) {
-        if (result.error != SearchResult.ERRORNO.NO_ERROR) {
-            Toast.makeText(MainActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT)
-                    .show();
-        } else {
-            BaiduSuggestion bSuggestion = new BaiduSuggestion(result);
-            // Start the asynchronous retrieval of the GreenGuide DB data about this place
-            FetchedReviewsHandler.fetch(MainActivity.this, bSuggestion);
-            Drawing.hideKeyboard(keyWorldsView, getApplicationContext());
-
-            // Remove all markers then put a marker on the map at this places location
-            mBaiduMap.clear();
-
-            BitmapDescriptor bitmap =
-                    BitmapDescriptorFactory.fromResource(R.drawable.icon_markg_red);
-            OverlayOptions option = new MarkerOptions().position(bSuggestion.point).icon(bitmap);
-            oldMarker = mBaiduMap.addOverlay(option);
-
-            // Move the map to the selected point
-            moveMapViewTo(bSuggestion.point);
-
-            Toast.makeText(MainActivity.this, result.getName() + ": " + result.getAddress(), Toast.LENGTH_SHORT)
-                    .show();
-        }
-    }
-
-    @Override
-    public void onGetSuggestionResult(SuggestionResult res) {
-        if (res == null || res.getAllSuggestions() == null) {
-            return;
-        }
-        suggest = new ArrayList<BaiduSuggestion>();
-        for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
-            suggest.add(new BaiduSuggestion(info));
-        }
-        sugAdapter = new ArrayAdapter<BaiduSuggestion>(MainActivity.this, android.R.layout.simple_dropdown_item_1line, suggest);
-        keyWorldsView.setAdapter(sugAdapter);
-        sugAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-
-    }
-
-    private class MyPoiOverlay extends PoiOverlay {
-        public MyPoiOverlay(BaiduMap baiduMap) {
-            super(baiduMap);
-        }
-
-        @Override
-        public boolean onPoiClick(int index) {
-            super.onPoiClick(index);
-            PoiInfo poi = getPoiResult().getAllPoi().get(index);
-            // if (poi.hasCaterDetails) {
-            mPoiSearch.searchPoiDetail((new PoiDetailSearchOption())
-                    .poiUid(poi.uid));
-            // }
-            return true;
-        }
-    }
-
-    public void showNearbyArea( LatLng center, int radius) {
-        BitmapDescriptor centerBitmap = BitmapDescriptorFactory
-                .fromResource(R.drawable.icon_geo);
-        MarkerOptions ooMarker = new MarkerOptions().position(center).icon(centerBitmap);
-        mBaiduMap.addOverlay(ooMarker);
-
-        OverlayOptions ooCircle = new CircleOptions().fillColor( 0xCCCCCC00 )
-                .center(center).stroke(new Stroke(5, 0xFFFF00FF ))
-                .radius(radius);
-        mBaiduMap.addOverlay(ooCircle);
-    }
-
-    public void showBound( LatLngBounds bounds) {
-        BitmapDescriptor bdGround = BitmapDescriptorFactory
-                .fromResource(R.drawable.ground_overlay);
-
-        OverlayOptions ooGround = new GroundOverlayOptions()
-                .positionFromBounds(bounds).image(bdGround).transparency(0.8f);
-        mBaiduMap.addOverlay(ooGround);
-
-        MapStatusUpdate u = MapStatusUpdateFactory
-                .newLatLng(bounds.getCenter());
-        mBaiduMap.setMapStatus(u);
-
-        bdGround.recycle();
-    }
-
-    public void showPoiResults(boolean falseForReviews) {
-        View la = findViewById(R.id.btmSheetReviewsContainer);
-        View lb = findViewById(R.id.poiResultsSwipeView);
-        if (falseForReviews) {
-            la.setVisibility(View.GONE);
-            lb.setVisibility(View.VISIBLE);
-        } else {
-            la.setVisibility(View.VISIBLE);
-            lb.setVisibility(View.GONE);
-        }
-    }
-    public static class PageChangeListener implements ViewPager.OnPageChangeListener, FragPager.PoiResultLoaded {
-        private int mLastPage;
-        private int mCurrentPage;
-        private FragPager mFragPager;
-
-        public void removeCurrent() {
-            PoiOverlay overlay = mFragPager.getPoiOverlay(mCurrentPage);
-            if (overlay != null) {
-                overlay.removeFromMap();
-            }
-        }
-
-        public PageChangeListener(@NonNull FragPager fragPager) {
-            this.mFragPager = fragPager;
-        }
-
-        @Override
-        public void onResult(PoiOverlay overlay, int pageNumber) {
-            if (pageNumber == mCurrentPage) {
-                overlay.addToMap();
-                overlay.zoomToSpan();
-            }
-        }
-
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            /* Do nothing */
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            mCurrentPage = position;
-            if (mLastPage != mCurrentPage) {
-                PoiOverlay lastOverlay = mFragPager.getPoiOverlay(mLastPage);
-                if (lastOverlay != null) {
-                    lastOverlay.removeFromMap();
-                }
-            }
-            PoiOverlay overlay = mFragPager.getPoiOverlay(mCurrentPage);
-            if (overlay != null) {
-                overlay.addToMap();
-                overlay.zoomToSpan();
-            }
-            mLastPage = mCurrentPage;
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-            /* Do nothing */
-        }
+        mMapManager.onDestroy();
     }
 
     public void doStuff(View view) {

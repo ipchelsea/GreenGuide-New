@@ -23,7 +23,8 @@
                 android:singleLine="true"
                 android:textColor="#000000"
                 android:textSize="15sp"
-                android:text="@string/btmsheet_company_name_default"/>
+                android:text="@string/btmsheet_company_name_default"
+                android:textIsSelectable="true" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -40,7 +41,8 @@
                     android:paddingEnd="4dp"
                     android:textSize="14sp"
                     android:gravity="center"
-                    android:text="@string/btmsheet_rating_value_default"/>
+                    android:text="@string/btmsheet_rating_value_default"
+                    android:textIsSelectable="true" />
 
                 <ImageView
                     android:id="@+id/btmSheetRatingStars"
@@ -59,7 +61,8 @@
                     android:paddingEnd="4dp"
                     android:textSize="14sp"
                     android:gravity="center"
-                    android:text="@string/btmsheet_ratings_count_default"/>
+                    android:text="@string/btmsheet_ratings_count_default"
+                    android:textIsSelectable="true" />
             </LinearLayout>
         </LinearLayout>
 
@@ -73,26 +76,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:textColor="@color/bottom_sheet_text" />
+                android:textColor="@color/bottom_sheet_text"
+                android:textIsSelectable="true" />
 
             <TextView
                 android:id="@+id/btmSheetCityName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/bottom_sheet_text" />
+                android:textColor="@color/bottom_sheet_text"
+                android:textIsSelectable="true" />
 
             <TextView
                 android:id="@+id/btmSheetIndustry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/bottom_sheet_text" />
+                android:textColor="@color/bottom_sheet_text"
+                android:textIsSelectable="true" />
 
             <TextView
                 android:id="@+id/btmSheetProduct"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:textColor="@color/bottom_sheet_text" />
+                android:textColor="@color/bottom_sheet_text"
+                android:textIsSelectable="true" />
 
             <ImageView
                 android:id="@+id/btmSheetHistogram"
@@ -106,7 +113,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:orientation="vertical"/>
+                android:orientation="vertical" />
         </LinearLayout>
 
         <Button

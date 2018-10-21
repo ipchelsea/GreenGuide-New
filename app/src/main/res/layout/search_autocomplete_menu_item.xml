@@ -5,6 +5,12 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
+    <!--<ImageButton-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:contentDescription="Search"-->
+        <!--android:src="@drawable/ic_search_review"/>-->
+
     <AutoCompleteTextView
         android:id="@+id/search"
         android:minWidth="300dp"
@@ -12,6 +18,6 @@
         android:layout_height="wrap_content"
         android:theme="@style/Autocomplete"
         android:inputType="textNoSuggestions"
-        android:hint="Search location ..."/>
-
+        android:hint="Search location ..."
+        android:imeOptions="actionSearch"/>
 </LinearLayout>

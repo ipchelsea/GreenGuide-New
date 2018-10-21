@@ -1,8 +1,10 @@
 package com.guide.green.green_guide.Utilities;
 
+import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 
@@ -63,13 +65,13 @@ public class FragPager extends FragmentStatePagerAdapter implements OnGetPoiSear
         }
     }
 
-    public FragPager(FragmentManager fragManager, BaiduMap baiduMap, PoiSearch poiSearch, PoiCitySearchOption query, LayoutInflater inflater) {
-        super(fragManager);
-        mBaiduMap = baiduMap;
-        mPoiSearch = poiSearch;
+    public FragPager(AppCompatActivity act, BaiduMapManager mapManager, PoiCitySearchOption query) {
+        super(act.getSupportFragmentManager());
         this.query = query;
+        mBaiduMap = mapManager.BAIDU_MAP;
+        mPoiSearch = mapManager.POI_SEARCH;
+        mInflater = act.getLayoutInflater();
         mPoiSearch.setOnGetPoiSearchResultListener(this);
-        mInflater = inflater;
     }
 
     public PoiOverlay getPoiOverlay(int pageNumber) {

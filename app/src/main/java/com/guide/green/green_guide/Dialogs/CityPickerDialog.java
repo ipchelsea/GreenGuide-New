@@ -1,6 +1,7 @@
 package com.guide.green.green_guide.Dialogs;
 
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,6 +22,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.guide.green.green_guide.R;
@@ -31,7 +33,7 @@ import java.util.List;
 
 import static com.guide.green.green_guide.Utilities.Drawing.hideKeyboard;
 
-public class CityPickerDialog extends DialogFragment {
+public class CityPickerDialog extends DialogFragment implements DialogInterface.OnClickListener {
     private AutoCompleteTextView mAutoComplete;
 
     private Button btnSelectedCity;
@@ -58,9 +60,14 @@ public class CityPickerDialog extends DialogFragment {
 //        }
 //    }
 
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.dialog_city_picker, container);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_city_picker, null);
+
+        builder.setView(layout);//.setNegativeButton("Cancel", this);
 
         mAutoComplete = (AutoCompleteTextView) layout.findViewById(R.id.searchCity);
         mAutoComplete.setThreshold(1);
@@ -76,7 +83,36 @@ public class CityPickerDialog extends DialogFragment {
                 });
         mAutoComplete.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-        return layout;
+
+        Dialog result = builder.create();
+        result.setCanceledOnTouchOutside(true);
+        return result;
+    }
+
+//    @Override
+//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+//        View layout = inflater.inflate(R.layout.dialog_city_picker, container);
+//
+//        mAutoComplete = (AutoCompleteTextView) layout.findViewById(R.id.searchCity);
+//        mAutoComplete.setThreshold(1);
+//        RomanizedAdapter adapter = new RomanizedAdapter(getContext(), RomanizedLocation.getCities(),
+//                new RomanizedAdapter.OnItemClicked() {
+//                    @Override
+//                    public void onClicked(int i, RomanizedAdapter adapter, View v) {
+//                        RomanizedLocation city = (RomanizedLocation) adapter.getItem(i);
+//                        btnSelectedCity.setText(city.name);
+//                        hideKeyboard(mAutoComplete, getContext());
+//                        dismiss();
+//                    }
+//                });
+//        mAutoComplete.setAdapter(adapter);
+//        adapter.notifyDataSetChanged();
+//        return layout;
+//    }
+
+    @Override
+    public void onClick(DialogInterface dialogInterface, int i) {
+
     }
 
     public static class RomanizedAdapter extends BaseAdapter implements Filterable {
@@ -97,37 +133,43 @@ public class CityPickerDialog extends DialogFragment {
             this.mCallback = callback;
         }
 
+        public Filter mFilter;
+
         @Override
         public Filter getFilter() {
-            return new Filter() {
-                @Override
-                protected FilterResults performFiltering(CharSequence charSequence) {
-                    FilterResults results = new FilterResults();
-                    if (charSequence != null && charSequence.length() > 0) {
-                        String query = charSequence.toString().toUpperCase();
-                        ArrayList<RomanizedLocation> filteredList = new ArrayList<>();
-                        for (RomanizedLocation city : citiesOriginal) {
-                            if ((city.pinyin != null && city.pinyin.toUpperCase().startsWith(query))
-                                    || (city.name != null && city.name.toUpperCase().startsWith(query))
-                                    || (city.fullName != null && city.fullName.toUpperCase().startsWith(query))) {
-                                filteredList.add(city);
+            if (mFilter == null) {
+                mFilter = new Filter() {
+                    @Override
+                    protected FilterResults performFiltering(CharSequence charSequence) {
+                        FilterResults results = new FilterResults();
+                        if (charSequence != null && charSequence.length() > 0) {
+                            String query = charSequence.toString().toUpperCase();
+                            ArrayList<RomanizedLocation> filteredList = new ArrayList<>();
+                            for (RomanizedLocation city : citiesOriginal) {
+                                if ((city.pinyin != null && city.pinyin.toUpperCase().startsWith(query))
+                                        || (city.name != null && city.name.toUpperCase().startsWith(query))
+                                        || (city.fullName != null && city.fullName.toUpperCase().startsWith(query))) {
+                                    filteredList.add(city);
+                                }
                             }
+                            results.values = filteredList;
+                            results.count = filteredList.size();
+                        } else {
+                            results.values = citiesOriginal;
+                            results.count = citiesOriginal.size();
                         }
-                        results.values = filteredList;
-                        results.count = filteredList.size();
-                    } else {
-                        results.values = citiesOriginal;
-                        results.count = citiesOriginal.size();
+                        return results;
                     }
-                    return results;
-                }
 
-                @Override
-                protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                    cities = (ArrayList<RomanizedLocation>) filterResults.values;
-                    notifyDataSetChanged();
-                }
-            };
+                    @Override
+                    protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                        cities = (ArrayList<RomanizedLocation>) filterResults.values;
+                        notifyDataSetChanged();
+                    }
+                };
+            }
+
+            return mFilter;
         }
 
         @Override

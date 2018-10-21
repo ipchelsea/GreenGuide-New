@@ -1,8 +1,8 @@
 package com.guide.green.green_guide.Utilities;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.text.Html;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -171,7 +171,8 @@ public class Review {
             public static final Key WATER_TYPE = new Key("WaterType");
             public static final Key[] keys = new Key[] {Key.WATER_TYPE, Key.WATER_COLOR, Key.ODOR,
                     Key.TURB_SCORE, Key.CHECK_FLOAT, Key.FLOATS, Key.DO, Key.PH, Key.TURB_PARAMS,
-                    Key.BOD, Key.COD, Key.TOC, Key.TS, Key.NH4, Key.TP, Key.HG, Key.PB, Key.CD, Key.ARSENIC};
+                    Key.BOD, Key.COD, Key.TOC, Key.TS, Key.NH4, Key.TP, Key.HG, Key.PB, Key.CD,
+                    Key.ARSENIC};
 
             /**
              * Private default constructor to insure that no keys can be created outside of this
@@ -246,7 +247,7 @@ public class Review {
         }
 
         /**
-         * Key class containing keys that only work for the  object.
+         * Key class containing keys that only work for the object.
          */
         public static class Key extends Review.Key {
             public static final Key MEASUREMENTS = new Key("Measurements");
@@ -274,8 +275,7 @@ public class Review {
         }
     }
 
-
-    public interface GetReviewsResult {
+    public interface Results {
         /**
          * Provided the returns of the query.
          *
@@ -305,83 +305,90 @@ public class Review {
         public void onCanceled();
     }
 
-    private static String decodeHTML(String htmlString) {
-        if (Build.VERSION.SDK_INT >= 24) {
-           return Html.fromHtml(htmlString , Html.FROM_HTML_MODE_LEGACY).toString();
-        } else {
-            return Html.fromHtml(htmlString).toString();
-        }
-    }
-
     /**
-     * Gets the reviews stored for a specific point on the Green Guide databse.
+     * Gets the reviews stored for a specific point on the Green Guide database.
      *
-     * @param lng   longitude
-     * @param lat   latitude
-     * @param callback  non-null value where the results will be returned to.
+     * @param lng longitude
+     * @param lat latitude
+     * @param callback non-null value where the results will be returned to.
      * @return  the object managing the background request.
      */
-    public static AsyncJSONArray getReviewsForPlace(double lng, double lat, final GetReviewsResult callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("Callback can't be null.");
-        }
+    public static AsyncJSONArray getReviewsForPlace(double lng, double lat,
+                                                    @NonNull final Results callback) {
 
-        AsyncJSONArray aj = new AsyncJSONArray(new AsyncJSONArray.AsyncJSONArrayResult() {
-            @Override
-            public void onCanceled(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
-                callback.onCanceled();
-            }
+        final ReviewAsyncJSONArrayResult jsonCallback = new ReviewAsyncJSONArrayResult(callback);
 
-            @Override
-            public void onFinish(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
-                if (!exceptions.isEmpty() || jArray.isEmpty() || jArray.get(0) == null) {
-                    callback.onError(exceptions.get(0));
-                    return;
-                }
-
-                ArrayList<Review> results = new ArrayList<>();
-                JSONArray jArr = jArray.get(0);
-                for (int i = jArr.length() - 1; i >= 0; i--) {
-                    Review review = new Review();
-                    try {
-                        JSONObject jObj = jArr.getJSONObject(i);
-                        review.imageCount = jObj.getInt("img_count");
-                        JSONObject subJObj = null;
-                        subJObj = jObj.getJSONObject("review");
-
-                        for (Location.Key key : Location.Key.keys) {
-                            review.location.set(key, decodeHTML(subJObj.getString(key.value)));
-                        }
-                        subJObj = jObj.getJSONObject("water");
-                        for (WaterIssue.Key key : WaterIssue.Key.keys) {
-                            review.waterIssue.set(key, decodeHTML(subJObj.getString(key.value)));
-                        }
-                        subJObj = jObj.getJSONObject("solid");
-                        for (SolidWaste.Key key : SolidWaste.Key.keys) {
-                            review.solidWaste.set(key, decodeHTML(subJObj.getString(key.value)));
-                        }
-                        subJObj = jObj.getJSONObject("air");
-                        for (AirWaste.Key key : AirWaste.Key.keys) {
-                            review.airWaste.set(key, decodeHTML(subJObj.getString(key.value)));
-                        }
-                        results.add(review);
-                    } catch (JSONException e) {
-                        callback.onError(e);
-                        return;
-                    }
-                }
-                callback.onSuccess(results);
-            }
-        }) {
+        AsyncJSONArray aj = new AsyncJSONArray(jsonCallback) {
             @Override
             protected void onProgressUpdate(Long... values) {
-                callback.onUpdate(values[0], values[1]);
+                jsonCallback.REVIEWS_CALLBACK.onUpdate(values[0], values[1]);
             }
         };
 
         String url = "http://www.lovegreenguide.com/map_point_co_app.php?lng=" + lng + "&lat=" +lat;
-//        url = "http://10.21.2.15:2000/C:/users/stanm/Desktop/test/map_point_co_app.html";
         aj.execute(url);
         return  aj;
+    }
+
+    private static class ReviewAsyncJSONArrayResult implements AsyncJSONArray.AsyncJSONArrayResult {
+        public final Results REVIEWS_CALLBACK;
+
+        private static String decodeHTML(String htmlString) {
+            if (Build.VERSION.SDK_INT >= 24) {
+                return Html.fromHtml(htmlString , Html.FROM_HTML_MODE_LEGACY).toString();
+            } else {
+                return Html.fromHtml(htmlString).toString();
+            }
+        }
+
+        ReviewAsyncJSONArrayResult(Results callback) {
+            REVIEWS_CALLBACK = callback;
+        }
+
+        @Override
+        public void onCanceled(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
+            REVIEWS_CALLBACK.onCanceled();
+        }
+
+        @Override
+        public void onFinish(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
+            if (!exceptions.isEmpty() || jArray.isEmpty() || jArray.get(0) == null) {
+                REVIEWS_CALLBACK.onError(exceptions.get(0));
+                return;
+            }
+
+            ArrayList<Review> results = new ArrayList<>();
+            JSONArray jArr = jArray.get(0);
+            for (int i = jArr.length() - 1; i >= 0; i--) {
+                Review review = new Review();
+                try {
+                    JSONObject jObj = jArr.getJSONObject(i);
+                    review.imageCount = jObj.getInt("img_count");
+                    JSONObject subJObj = null;
+                    subJObj = jObj.getJSONObject("review");
+
+                    for (Location.Key key : Location.Key.keys) {
+                        review.location.set(key, decodeHTML(subJObj.getString(key.value)));
+                    }
+                    subJObj = jObj.getJSONObject("water");
+                    for (WaterIssue.Key key : WaterIssue.Key.keys) {
+                        review.waterIssue.set(key, decodeHTML(subJObj.getString(key.value)));
+                    }
+                    subJObj = jObj.getJSONObject("solid");
+                    for (SolidWaste.Key key : SolidWaste.Key.keys) {
+                        review.solidWaste.set(key, decodeHTML(subJObj.getString(key.value)));
+                    }
+                    subJObj = jObj.getJSONObject("air");
+                    for (AirWaste.Key key : AirWaste.Key.keys) {
+                        review.airWaste.set(key, decodeHTML(subJObj.getString(key.value)));
+                    }
+                    results.add(review);
+                } catch (JSONException e) {
+                    REVIEWS_CALLBACK.onError(e);
+                    return;
+                }
+            }
+            REVIEWS_CALLBACK.onSuccess(results);
+        }
     }
 }

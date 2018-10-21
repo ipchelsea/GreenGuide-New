@@ -9,10 +9,12 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.ImageViewCompat;
 import android.view.View;
 
 import com.baidu.mapapi.map.BaiduMap;
@@ -20,69 +22,71 @@ import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 
+import static android.support.v7.content.res.AppCompatResources.getColorStateList;
+
 public class TrackLocationHandler implements View.OnClickListener, LocationListener {
-    private android.support.design.widget.FloatingActionButton btnToggleLocation;
-    private LocationManager locationManager;
-    private boolean isTraking = false;
-    private Location bestGuess;
+    private FloatingActionButton btnToggleLocation;
+    private LocationManager mLocationManager;
+    private boolean mIsTracking = false;
+    private Location mBestGuess;
     private BaiduMap mBaiduMap;
-    private Activity act;
+    private Activity mAct;
 
     // True if the first time a location has be obtained after the button was pressed.
     private boolean moveToMyLocation = true;
 
-    public TrackLocationHandler(Activity act, FloatingActionButton location, BaiduMap bMap) {
+    public TrackLocationHandler(Activity activity, FloatingActionButton location, BaiduMap bMap) {
         btnToggleLocation = location;
-        this.act = act;
+        mAct = activity;
         mBaiduMap = bMap;
     }
 
     @Override
     public void onClick(View view) {
         // Register the listener with the Location Manager to receive location updates
-        if (ContextCompat.checkSelfPermission(act,
+        if (ContextCompat.checkSelfPermission(mAct,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(act,
+            ActivityCompat.requestPermissions(mAct,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     0);
 
             return;
         }
 
-        if (locationManager == null) {
+        if (mLocationManager == null) {
             // Acquire a reference to the system Location Manager
-            locationManager = (LocationManager) act.getSystemService(Context.LOCATION_SERVICE);
+            mLocationManager = (LocationManager) mAct.getSystemService(Context.LOCATION_SERVICE);
         }
 
         // Define a listener that responds to location updates
-        if (isTraking) {
+        if (mIsTracking) {
             moveToMyLocation = true;
-            locationManager.removeUpdates(this);
+            mLocationManager.removeUpdates(this);
             setTracking(false);
         } else {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                     0, 0, this);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     0, 0, this);
             setTracking(true);
         }
     }
 
     private boolean betterThanBestGuess(Location newer) {
-        if (bestGuess == null) return true;
+        if (mBestGuess == null) return true;
 
         final int maxMilliSeconds = 10000;
-        long timeDelta = newer.getTime() - bestGuess.getTime();
+        long timeDelta = newer.getTime() - mBestGuess.getTime();
 
         if (timeDelta > maxMilliSeconds) return true;
         else if (timeDelta < maxMilliSeconds / 2) return false;
 
         boolean isNewer = timeDelta > 0;
-        int accuracyDelta = (int) (newer.getAccuracy() - bestGuess.getAccuracy());
+        int accuracyDelta = (int) (newer.getAccuracy() - mBestGuess.getAccuracy());
         boolean haveSameProviders = newer.getProvider() != null &&
-                newer.getProvider().equals(bestGuess.getProvider());
+                newer.getProvider().equals(mBestGuess.getProvider());
 
         if (isNewer && haveSameProviders) {
             return true;
@@ -96,18 +100,27 @@ public class TrackLocationHandler implements View.OnClickListener, LocationListe
         if (mode) {
             int[][] states = new int[][] { new int[] { android.R.attr.state_enabled} };
             int[] colors = new int[] {Color.RED};
-            btnToggleLocation.setImageTintList(new ColorStateList(states, colors));
+            ColorStateList csl = new ColorStateList(states, colors);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btnToggleLocation.setImageTintList(csl);
+            } else {
+                ImageViewCompat.setImageTintList(btnToggleLocation, csl);
+            }
             mBaiduMap.setMyLocationEnabled(true);
         } else {
-            btnToggleLocation.setImageTintList(null);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btnToggleLocation.setImageTintList(null);
+            } else {
+                ImageViewCompat.setImageTintList(btnToggleLocation, null);
+            }
             mBaiduMap.setMyLocationEnabled(false);
         }
-        isTraking = mode;
+        mIsTracking = mode;
     }
 
     public void onLocationChanged(Location location) {
         if (betterThanBestGuess(location)) {
-            bestGuess = location;
+            mBestGuess = location;
             MyLocationData locData = new MyLocationData.Builder()
                     .accuracy(location.getAccuracy())
                     .direction(100)

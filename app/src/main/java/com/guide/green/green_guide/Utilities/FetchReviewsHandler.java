@@ -1,4 +1,4 @@
-package com.guide.green.green_guide;
+package com.guide.green.green_guide.Utilities;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -19,32 +19,33 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.guide.green.green_guide.Dialogs.LoadingDialog;
-import com.guide.green.green_guide.Utilities.AsyncJSONArray;
-import com.guide.green.green_guide.Utilities.Drawing;
-import com.guide.green.green_guide.Utilities.Review;
+import com.guide.green.green_guide.R;
+import android.support.v4.widget.NestedScrollView;
+
 import java.util.ArrayList;
+import com.guide.green.green_guide.Utilities.BaiduMapManager.BaiduSuggestion;
 
 /**
  * Manages requesting the reviews for a specific point, displaying a dialog box to show that data
  * is being retrieved, and filling up the bottom sheet with the resulting reviews.
  */
-class FetchedReviewsHandler implements Review.GetReviewsResult {
-    private MainActivity.BaiduSuggestion suggestion;
+public class FetchReviewsHandler implements Review.Results {
+    private BaiduSuggestion suggestion;
     private LoadingDialog ld;
     private Activity act;
 
     private TextView btmSheetCompanyName;
     private BottomSheetBehavior btmSheet;
-    private android.support.v4.widget.NestedScrollView btmSheetView;
+    private NestedScrollView btmSheetView;
 
-    public FetchedReviewsHandler(@Nullable LoadingDialog ld, @NonNull Activity act,
-                                  @NonNull MainActivity.BaiduSuggestion suggestion) {
+    public FetchReviewsHandler(@Nullable LoadingDialog ld, @NonNull Activity act,
+                               @NonNull BaiduSuggestion suggestion) {
         this.ld = ld;
-        this.suggestion = suggestion;
         this.act = act;
-        btmSheetView = (android.support.v4.widget.NestedScrollView) act.findViewById(R.id.btmSheet);
+        this.suggestion = suggestion;
+        btmSheetView = act.findViewById(R.id.btmSheet);
         btmSheet = BottomSheetBehavior.from(btmSheetView);
-        btmSheetCompanyName = (TextView) act.findViewById(R.id.previewCompanyName);
+        btmSheetCompanyName = act.findViewById(R.id.previewCompanyName);
     }
 
     @Override
@@ -57,7 +58,7 @@ class FetchedReviewsHandler implements Review.GetReviewsResult {
 
         btmSheetCompanyName.setText(suggestion.name);
 
-        LinearLayout root = (LinearLayout) act.findViewById(R.id.userReviewList);
+        LinearLayout root = act.findViewById(R.id.userReviewList);
         root.removeAllViews();
 
 
@@ -90,10 +91,10 @@ class FetchedReviewsHandler implements Review.GetReviewsResult {
             LayoutInflater lf = LayoutInflater.from(act);
             ViewGroup child = (ViewGroup) lf.inflate(R.layout.review_single_comment,
                     null, false);
-            TextView ratingValue = (TextView) child.findViewById(R.id.ratingValue);
-            ImageView ratingImage = (ImageView) child.findViewById(R.id.ratingImage);
-            TextView reviewText = (TextView) child.findViewById(R.id.reviewText);
-            TextView reviewTime = (TextView) child.findViewById(R.id.reviewTime);
+            TextView ratingValue = child.findViewById(R.id.ratingValue);
+            ImageView ratingImage = child.findViewById(R.id.ratingImage);
+            TextView reviewText = child.findViewById(R.id.reviewText);
+            TextView reviewTime = child.findViewById(R.id.reviewTime);
 //            Button rawDataBtn = (Button) child.findViewById(R.id.rawDataBtn);
 //            Button helpfulBtn = (Button) child.findViewById(R.id.helpfulBtn);
 //            Button inappropriateBtn = (Button) child.findViewById(R.id.inappropriateBtn);
@@ -196,11 +197,11 @@ class FetchedReviewsHandler implements Review.GetReviewsResult {
     }
 
     public static void fetch(@NonNull Activity act,
-                             @NonNull MainActivity.BaiduSuggestion suggestion) {
+                             @NonNull BaiduSuggestion suggestion) {
         final LoadingDialog ld = new LoadingDialog();
         ld.show(act.getFragmentManager(), "Retrieving Reviews");
 
-        FetchedReviewsHandler fetchHandler = new FetchedReviewsHandler(ld, act, suggestion);
+        FetchReviewsHandler fetchHandler = new FetchReviewsHandler(ld, act, suggestion);
         final AsyncJSONArray reviewTask = Review.getReviewsForPlace(suggestion.point.longitude,
                 suggestion.point.latitude, fetchHandler);
 
