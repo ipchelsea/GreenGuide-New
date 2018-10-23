@@ -1,5 +1,6 @@
 package com.guide.green.green_guide.Utilities;
 
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.view.ViewPager;
@@ -22,6 +23,7 @@ import com.baidu.mapapi.search.core.SearchResult;
 import com.baidu.mapapi.search.poi.PoiCitySearchOption;
 import com.baidu.mapapi.search.poi.PoiResult;
 import com.guide.green.green_guide.PoiOverlay;
+import com.guide.green.green_guide.R;
 import com.guide.green.green_guide.Utilities.BaiduMapManager.BaiduSuggestion;
 
 
@@ -64,19 +66,20 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
 
     private Overlay mSelectedMarker;
     private AppCompatActivity mAct;
-    private Reviews mReviews;
-    private PoiSearchResults mPoiResults;
+    public final Reviews REVIEWS;
+    public final PoiSearchResults POI_RESULTS;
     private BottomSheetBehavior mBtmSheet;
     private NestedScrollView mBtmSheetView;
     private BaiduMapManager mMapManager;
     private PageChangeListener mPageChangeListener;
+    private FetchReviewsHandler mFetchReviewsHandler;
 
     public BottomSheetManager(@NonNull AppCompatActivity act, @NonNull NestedScrollView bottomSheet,
                               @NonNull Reviews reviews, @NonNull PoiSearchResults poiResults,
                               @NonNull BaiduMapManager mapManager) {
         mAct = act;
-        mReviews = reviews;
-        mPoiResults = poiResults;
+        REVIEWS = reviews;
+        POI_RESULTS = poiResults;
         mMapManager = mapManager;
         mBtmSheetView = bottomSheet;
         mBtmSheet = BottomSheetBehavior.from(mBtmSheetView);
@@ -99,14 +102,14 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
 
     @Override
     public void onStateChanged(@NonNull View bottomSheet, int newState) {
-        ViewGroup.LayoutParams layoutParams = mReviews.peekBar.companyName.getLayoutParams();
+        ViewGroup.LayoutParams layoutParams = REVIEWS.peekBar.companyName.getLayoutParams();
         if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-            mReviews.peekBar.companyName.setSingleLine(true);
-            mReviews.peekBar.companyName.setPadding(0, 0, 0, 0);
+            REVIEWS.peekBar.companyName.setSingleLine(true);
+            REVIEWS.peekBar.companyName.setPadding(0, 0, 0, 0);
         } else {
             int px = (int) Drawing.convertDpToPx(mAct, 10);
-            mReviews.peekBar.companyName.setSingleLine(false);
-            mReviews.peekBar.companyName.setPadding(0, px,0, px);
+            REVIEWS.peekBar.companyName.setSingleLine(false);
+            REVIEWS.peekBar.companyName.setPadding(0, px,0, px);
             if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 clearMarkers();
             }
@@ -114,31 +117,35 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
     }
 
     public void showPoiResults() {
-        mPoiResults.container.setVisibility(View.VISIBLE);
-        mReviews.container.setVisibility(View.GONE);
+        POI_RESULTS.container.setVisibility(View.VISIBLE);
+        REVIEWS.container.setVisibility(View.GONE);
     }
 
     public void showReviews() {
-        mPoiResults.container.setVisibility(View.GONE);
-        mReviews.container.setVisibility(View.VISIBLE);
+        POI_RESULTS.container.setVisibility(View.GONE);
+        REVIEWS.container.setVisibility(View.VISIBLE);
     }
 
     public void getReviews(BaiduSuggestion suggestion) {
-        FetchReviewsHandler.fetch(mAct, suggestion);
         clearMarkers();
         showReviews();
+
+        if (mFetchReviewsHandler != null && !mFetchReviewsHandler.isCompleted()) {
+            mFetchReviewsHandler.cancel();
+        }
+
+        mFetchReviewsHandler = new FetchReviewsHandler(mAct, suggestion, this);
+
         mMapManager.moveTo(suggestion.point);
-
-        int resoureseId = mAct.getResources().getIdentifier("icon_markg_red",
-                "drawable", mAct.getPackageName());
-
         mSelectedMarker = mMapManager.addMarker(new MarkerOptions()
-                .position(suggestion.point), resoureseId);
+                .position(suggestion.point), R.drawable.icon_star_marker);
     }
 
     public void searchCity(PoiCitySearchOption searchOption) {
-        FragPager pagerAdapter = new FragPager(mAct, mMapManager, searchOption);
-        pagerAdapter.setPoiClickHandler(new FragPager.PoiSelected() {
+        PoiResultsPagerAdapter pagerAdapter =
+                new PoiResultsPagerAdapter(mAct, mMapManager, searchOption);
+
+        pagerAdapter.setPoiClickHandler(new PoiResultsPagerAdapter.PoiSelected() {
             @Override
             public void onPoiSelected(PoiInfo poi) {
                 getReviews(new BaiduSuggestion(poi));
@@ -147,28 +154,13 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
         });
 
         mPageChangeListener = new PageChangeListener(pagerAdapter);
-        mPoiResults.swipeView.addOnPageChangeListener(mPageChangeListener);
-        mPoiResults.swipeView.setAdapter(pagerAdapter);
+        POI_RESULTS.swipeView.addOnPageChangeListener(mPageChangeListener);
+        POI_RESULTS.swipeView.setAdapter(pagerAdapter);
 
         clearMarkers();
         showPoiResults();
         pagerAdapter.notifyDataSetChanged();
         mBtmSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
-    }
-
-    public void onGetPoiResult(PoiResult result) {
-        Log.i("TotalPageNumbers", "" + result.getTotalPageNum());
-        if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-            Log.w("PoiResult", "Code: " + result.error + ", " + result.error.toString());
-            return;
-        }
-
-        PoiOverlay mOverlay = new PoiOverlay(mMapManager.BAIDU_MAP);
-        mMapManager.BAIDU_MAP.setOnMarkerClickListener(mOverlay);
-        mOverlay.setData(result);
-        mOverlay.addToMap();
-        mOverlay.zoomToSpan();
-        return;
     }
     
     @Override

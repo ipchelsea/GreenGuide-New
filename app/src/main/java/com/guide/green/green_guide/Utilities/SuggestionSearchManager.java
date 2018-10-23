@@ -25,7 +25,6 @@ import java.util.Stack;
 public class SuggestionSearchManager implements View.OnKeyListener, AdapterView.OnItemClickListener,
         View.OnFocusChangeListener, TextWatcher, OnGetSuggestionResultListener {
 
-//    private Stack<>
     private boolean mShowDropDownOnSuggestion = false;
     private ArrayList<BaiduSuggestion> mSuggestions;
     private BottomSheetManager mBtmSheetManager;
@@ -61,9 +60,9 @@ public class SuggestionSearchManager implements View.OnKeyListener, AdapterView.
 
     private ArrayList<BaiduSuggestion> getAutoCompleteArray() {
         ArrayList<BaiduSuggestion> suggest = new ArrayList<>();
-//        if (!mAutoComplete.getText().equals("")) {
+        if (!mAutoComplete.getText().equals("")) {
             suggest.add(new BaiduSuggestion("\uD83D\uDD0D" + mAutoComplete.getText()));
-//        }
+        }
         return suggest;
     }
 

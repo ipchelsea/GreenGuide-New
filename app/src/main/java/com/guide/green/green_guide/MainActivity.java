@@ -2,6 +2,7 @@ package com.guide.green.green_guide;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.widget.NestedScrollView;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
@@ -18,15 +19,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.MapView;
-import com.guide.green.green_guide.Dialogs.CityPickerDialog;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog2;
 import com.guide.green.green_guide.Fragments.AboutFragment;
 import com.guide.green.green_guide.Fragments.GuidelinesFragment;
@@ -51,10 +47,6 @@ public class MainActivity extends AppCompatActivity implements
     FloatingActionButton satelliteMapView;
     boolean fabIsOpen = false;
 
-    private DrawerLayout mDrawer;
-    private NavigationView navigationView;
-    private SuggestionSearchManager mSuggestionSearch;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements
      * {@code mMapManager} must be initialized before calling this.
      */
     public void initLocationTracker() {
-        FloatingActionButton btnMyLocation = (FloatingActionButton) findViewById(R.id.myLocation);
+        FloatingActionButton btnMyLocation = findViewById(R.id.myLocation);
 
         TrackLocationHandler locationHandler =
                 new TrackLocationHandler(this, btnMyLocation, mMapManager.BAIDU_MAP);
@@ -90,28 +82,28 @@ public class MainActivity extends AppCompatActivity implements
         // Get Relevant Bottom Sheet Views
         BottomSheetManager.Reviews reviews = new BottomSheetManager.Reviews();
 
-        reviews.container = (ViewGroup) findViewById(R.id.btmSheetReviewsContainer);
-        reviews.firstReviewButton = (Button) findViewById(R.id.btmSheetWriteReview);
+        reviews.container = findViewById(R.id.btmSheetReviewsContainer);
+        reviews.firstReviewButton = findViewById(R.id.btmSheetWriteReview);
 
-        reviews.peekBar.companyName = (TextView) findViewById(R.id.previewCompanyName);
-        reviews.peekBar.ratingValue = (TextView) findViewById(R.id.btmSheetRatingValue);
-        reviews.peekBar.ratingStars = (ImageView) findViewById(R.id.btmSheetRatingStars);
-        reviews.peekBar.ratingCount = (TextView) findViewById(R.id.btmSheetRatingsCount);
+        reviews.peekBar.companyName = findViewById(R.id.previewCompanyName);
+        reviews.peekBar.ratingValue = findViewById(R.id.btmSheetRatingValue);
+        reviews.peekBar.ratingStars = findViewById(R.id.btmSheetRatingStars);
+        reviews.peekBar.ratingCount = findViewById(R.id.btmSheetRatingsCount);
 
-        reviews.body.container = (ViewGroup) findViewById(R.id.btmSheetReviewBody);
-        reviews.body.address = (TextView) findViewById(R.id.btmSheetAddress);
-        reviews.body.city = (TextView) findViewById(R.id.btmSheetCityName);
-        reviews.body.industry = (TextView) findViewById(R.id.btmSheetIndustry);
-        reviews.body.product = (TextView) findViewById(R.id.btmSheetProduct);
-        reviews.body.histogram = (ImageView) findViewById(R.id.btmSheetHistogram);
-        reviews.body.reviews = (ViewGroup) findViewById(R.id.userReviewList);
+        reviews.body.container = findViewById(R.id.btmSheetReviewBody);
+        reviews.body.address = findViewById(R.id.btmSheetAddress);
+        reviews.body.city = findViewById(R.id.btmSheetCityName);
+        reviews.body.industry = findViewById(R.id.btmSheetIndustry);
+        reviews.body.product = findViewById(R.id.btmSheetProduct);
+        reviews.body.histogram = findViewById(R.id.btmSheetHistogram);
+        reviews.body.reviews = findViewById(R.id.userReviewList);
 
         BottomSheetManager.PoiSearchResults poiResults = new BottomSheetManager.PoiSearchResults();
-        poiResults.container = (ViewGroup) findViewById(R.id.poiResultsSwipeView);
-        poiResults.swipeView = (ViewPager) findViewById(R.id.poiResultsSwipeView);
+        poiResults.container = findViewById(R.id.poiResultsSwipeView);
+        poiResults.swipeView = (ViewPager) poiResults.container;
 
         // Initialize Bottom Sheet Manager
-        NestedScrollView btmSheet = (NestedScrollView) findViewById(R.id.btmSheet);
+        NestedScrollView btmSheet = findViewById(R.id.btmSheet);
         mBtmSheetManager = new BottomSheetManager(this, btmSheet, reviews, poiResults,
                 mMapManager);
         mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
@@ -128,24 +120,24 @@ public class MainActivity extends AppCompatActivity implements
         satelliteMapView = findViewById(R.id.satellitefab);
         FloatingActionButton fab = findViewById(R.id.fab);
 
-        mDrawer = findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawer.addDrawerListener(toggle);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handleFabActions(view);
+                toggleMapTypeFab();
             }
         });
     }
 
-    private void hideFabItems() {
+    private void hideMapTypeFabItems() {
         normalMapView.hide();
         satelliteMapView.hide();
         normalMapView.setClickable(false);
@@ -153,29 +145,31 @@ public class MainActivity extends AppCompatActivity implements
         fabIsOpen = false;
     }
 
-    private void handleFabActions(final View view) {
-        if (fabIsOpen) {
-            hideFabItems();
-        }
-        else {
-            normalMapView.show();
-            satelliteMapView.show();
-            normalMapView.setClickable(true);
-            satelliteMapView.setClickable(true);
-            fabIsOpen = true;
+    private void showMapTypeFabItems() {
+        normalMapView.show();
+        satelliteMapView.show();
+        normalMapView.setClickable(true);
+        satelliteMapView.setClickable(true);
+        fabIsOpen = true;
+    }
 
+    private void toggleMapTypeFab() {
+        if (fabIsOpen) {
+            hideMapTypeFabItems();
+        } else {
+            showMapTypeFabItems();
             normalMapView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mMapManager.setMapType(BaiduMapManager.MapType.NORMAL);
-                    hideFabItems();
+                    hideMapTypeFabItems();
                 }
             });
             satelliteMapView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mMapManager.setMapType(BaiduMapManager.MapType.SATELLITE);
-                    hideFabItems();
+                    hideMapTypeFabItems();
                 }
             });
         }
@@ -183,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -197,11 +191,11 @@ public class MainActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.main, menu);
 
         MenuItem item = menu.findItem(R.id.cityItem);
-        citySelectionView = (Button) item.getActionView().findViewById(R.id.city);
+        citySelectionView = item.getActionView().findViewById(R.id.city);
         citySelectionView.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                final CityPickerDialog cpd = new CityPickerDialog();
+                /* final CityPickerDialog cpd = new CityPickerDialog(); */
                 final CityPickerDialog2 cpd = new CityPickerDialog2();
                 cpd.setSelectedCityButton(citySelectionView);
                 cpd.show(getSupportFragmentManager(), "Pick a City");
@@ -209,11 +203,11 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         item = menu.findItem(R.id.searchItem);
-        AutoCompleteTextView searchView =
-                (AutoCompleteTextView) item.getActionView().findViewById(R.id.search);
+        AutoCompleteTextView searchView = item.getActionView().findViewById(R.id.search);
 
-        mSuggestionSearch = new SuggestionSearchManager(this, searchView, citySelectionView,
-                mMapManager, mBtmSheetManager);
+        /* Not saved Intentionally */
+        new SuggestionSearchManager(this, searchView, citySelectionView, mMapManager,
+                mBtmSheetManager);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -233,8 +227,7 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         Fragment fragment = null;
@@ -266,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements
             ft.commit();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -289,7 +282,6 @@ public class MainActivity extends AppCompatActivity implements
         mMapManager.onDestroy();
     }
 
-    public void doStuff(View view) {
-    }
-
+    /* Temporary Method For Testing Things */
+    public void doStuff(View view) {}
 }

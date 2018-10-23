@@ -11,7 +11,6 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.core.PoiInfo;
-import com.baidu.mapapi.search.poi.PoiDetailResult;
 import com.baidu.mapapi.search.poi.PoiSearch;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
@@ -95,23 +94,20 @@ public class BaiduMapManager {
     }
 
     public static class BaiduSuggestion {
-        public final String name;
+        public final @NonNull String name;
         public final LatLng point;
-        public BaiduSuggestion(MapPoi mapPoi) {
-            name = mapPoi.getName();
-            point = mapPoi.getPosition();
-        }
-        public BaiduSuggestion(String name) {
+
+        public BaiduSuggestion(@NonNull String name) {
             this.name = name;
             this.point = null;
+        }
+        public BaiduSuggestion(@NonNull MapPoi mapPoi) {
+            name = mapPoi.getName();
+            point = mapPoi.getPosition();
         }
         public BaiduSuggestion(@NonNull SuggestionResult.SuggestionInfo info) {
             this.name = info.key;
             this.point = info.pt;
-        }
-        public BaiduSuggestion(@NonNull PoiDetailResult info) {
-            this.name = info.name;
-            this.point = info.location;
         }
         public BaiduSuggestion(@NonNull PoiInfo info) {
             this.name = info.name;

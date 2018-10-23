@@ -25,7 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FragPager extends FragmentStatePagerAdapter implements OnGetPoiSearchResultListener, BtmSheetPoiResultPage.Clicked {
+public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
+        OnGetPoiSearchResultListener, BtmSheetPoiResultPage.Clicked {
     private class PagerPoiOverlay extends PoiOverlay {
         public PagerPoiOverlay(BaiduMap baiduMap) {
             super(baiduMap);
@@ -65,7 +66,8 @@ public class FragPager extends FragmentStatePagerAdapter implements OnGetPoiSear
         }
     }
 
-    public FragPager(AppCompatActivity act, BaiduMapManager mapManager, PoiCitySearchOption query) {
+    public PoiResultsPagerAdapter(AppCompatActivity act, BaiduMapManager mapManager,
+                                  PoiCitySearchOption query) {
         super(act.getSupportFragmentManager());
         this.query = query;
         mBaiduMap = mapManager.BAIDU_MAP;

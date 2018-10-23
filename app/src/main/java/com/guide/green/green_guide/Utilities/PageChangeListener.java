@@ -5,21 +5,21 @@ import android.support.v4.view.ViewPager;
 import com.guide.green.green_guide.PoiOverlay;
 
 public class PageChangeListener implements ViewPager.OnPageChangeListener,
-        FragPager.PoiResultLoaded {
+        PoiResultsPagerAdapter.PoiResultLoaded {
     private int mLastPage;
     private int mCurrentPage;
-    private FragPager mFragPager;
+    private PoiResultsPagerAdapter mAdapter;
 
     public void remove() {
-        PoiOverlay overlay = mFragPager.getPoiOverlay(mCurrentPage);
+        PoiOverlay overlay = mAdapter.getPoiOverlay(mCurrentPage);
         if (overlay != null) {
             overlay.removeFromMap();
         }
     }
 
-    public PageChangeListener(@NonNull FragPager fragPager) {
-        this.mFragPager = fragPager;
-        fragPager.setPoiResultLoaded(this);
+    public PageChangeListener(@NonNull PoiResultsPagerAdapter adapter) {
+        this.mAdapter = adapter;
+        this.mAdapter.setPoiResultLoaded(this);
     }
 
     @Override
@@ -39,12 +39,12 @@ public class PageChangeListener implements ViewPager.OnPageChangeListener,
     public void onPageSelected(int position) {
         mCurrentPage = position;
         if (mLastPage != mCurrentPage) {
-            PoiOverlay lastOverlay = mFragPager.getPoiOverlay(mLastPage);
+            PoiOverlay lastOverlay = mAdapter.getPoiOverlay(mLastPage);
             if (lastOverlay != null) {
                 lastOverlay.removeFromMap();
             }
         }
-        PoiOverlay overlay = mFragPager.getPoiOverlay(mCurrentPage);
+        PoiOverlay overlay = mAdapter.getPoiOverlay(mCurrentPage);
         if (overlay != null) {
             overlay.addToMap();
             overlay.zoomToSpan();
