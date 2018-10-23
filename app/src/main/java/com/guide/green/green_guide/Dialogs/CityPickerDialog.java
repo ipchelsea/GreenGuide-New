@@ -25,7 +25,7 @@ import java.util.List;
 
 import static com.guide.green.green_guide.Utilities.Drawing.hideKeyboard;
 
-public class CityPickerDialog2 extends DialogFragment implements DialogInterface.OnClickListener {
+public class CityPickerDialog extends DialogFragment implements DialogInterface.OnClickListener {
     private EditText mText;
     private RecyclerView mDropDown;
 
@@ -59,7 +59,7 @@ public class CityPickerDialog2 extends DialogFragment implements DialogInterface
                     }
                 });
 
-        View layout = inflater.inflate(R.layout.dialog_city_picker2, container);
+        View layout = inflater.inflate(R.layout.dialog_city_picker, container);
         mText = layout.findViewById(R.id.searchCity);
         mDropDown = layout.findViewById(R.id.searchDropDown);
 
@@ -97,7 +97,7 @@ public class CityPickerDialog2 extends DialogFragment implements DialogInterface
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             ViewGroup view = (ViewGroup) View.inflate(context,
-                    R.layout.dialog_city_autocomplete_item2, null);
+                    R.layout.dialog_city_autocomplete_item, null);
 
             final RomanizedAdapter.ViewHolder vh = new RomanizedAdapter.ViewHolder(
                     (ViewGroup) view.getRootView(),

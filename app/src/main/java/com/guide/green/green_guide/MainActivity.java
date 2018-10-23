@@ -23,7 +23,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.MapView;
-import com.guide.green.green_guide.Dialogs.CityPickerDialog2;
+import com.guide.green.green_guide.Dialogs.CityPickerDialog;
 import com.guide.green.green_guide.Fragments.AboutFragment;
 import com.guide.green.green_guide.Fragments.GuidelinesFragment;
 import com.guide.green.green_guide.Fragments.LogInOutFragment;
@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements
         citySelectionView.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final CityPickerDialog2 cpd = new CityPickerDialog2();
+                final CityPickerDialog cpd = new CityPickerDialog();
                 cpd.setSelectedCityButton(citySelectionView);
                 cpd.show(getSupportFragmentManager(), "Pick a City");
             }

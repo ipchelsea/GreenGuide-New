@@ -2,6 +2,7 @@ package com.guide.green.green_guide.Utilities;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -67,10 +68,11 @@ public class SuggestionSearchManager implements View.OnKeyListener, AdapterView.
     }
 
     @Override
-    public void onFocusChange(View view, boolean gaineFocus) {
+    public void onFocusChange(View view, boolean gainedFocus) {
         AutoCompleteTextView tv = (AutoCompleteTextView) view;
-        if (!gaineFocus) {
+        if (!gainedFocus) {
             mBtmSheetManager.clearMarkers();
+            mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
             tv.setText("");
             com.guide.green.green_guide.Utilities.Drawing.hideKeyboard(view, mAct);
         }
