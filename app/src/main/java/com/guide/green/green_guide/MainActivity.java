@@ -195,7 +195,6 @@ public class MainActivity extends AppCompatActivity implements
         citySelectionView.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /* final CityPickerDialog cpd = new CityPickerDialog(); */
                 final CityPickerDialog2 cpd = new CityPickerDialog2();
                 cpd.setSelectedCityButton(citySelectionView);
                 cpd.show(getSupportFragmentManager(), "Pick a City");
