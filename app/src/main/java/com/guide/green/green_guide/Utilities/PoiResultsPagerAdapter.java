@@ -1,12 +1,9 @@
 package com.guide.green.green_guide.Utilities;
 
-import android.app.Activity;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.search.core.PoiInfo;
@@ -26,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
-        OnGetPoiSearchResultListener, BtmSheetPoiResultPage.Clicked {
+        OnGetPoiSearchResultListener, BtmSheetPoiResultPage.ItemClickedListener {
     private class PagerPoiOverlay extends PoiOverlay {
         public PagerPoiOverlay(BaiduMap baiduMap) {
             super(baiduMap);
@@ -55,7 +52,6 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
     private PoiCitySearchOption query;
     private Map<Integer, BtmSheetPoiResultPage> mLoadingPages = new LinkedHashMap<>();
     private List<PoiOverlay> mPoiOverlay = new ArrayList<>();
-    private LayoutInflater mInflater;
     private PoiResultLoaded mPoiResultLoaded;
     private PoiSelected mPoiClickHandler;
 
@@ -72,7 +68,6 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
         this.query = query;
         mBaiduMap = mapManager.BAIDU_MAP;
         mPoiSearch = mapManager.POI_SEARCH;
-        mInflater = act.getLayoutInflater();
         mPoiSearch.setOnGetPoiSearchResultListener(this);
     }
 
@@ -124,14 +119,23 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
 
         if (makePoiQuery(position)) {
             // Add to the queue of pages waiting for data to update their layouts with.
-            mLoadingPages.put(position, poiResultFrag);
+            synchronized (mLoadingPages) {
+                mLoadingPages.put(position, poiResultFrag);
+            }
         }
 
         if (position + 1 < getCount()) {
             makePoiQuery(position + 1);
         }
 
-        poiResultFrag.setViewCreatedHandler(new BtmSheetPoiResultPage.ViewCreated() {
+        poiResultFrag.setOnRetrySearchListener(new BtmSheetPoiResultPage.RetrySearchListener() {
+            @Override
+            public void onRetrySearch(int pageNumber) {
+                makePoiQuery(pageNumber);
+            }
+        });
+
+        poiResultFrag.setOnViewCreatedListener(new BtmSheetPoiResultPage.ViewCreatedListener() {
             @Override
             public void onCreateView(BtmSheetPoiResultPage frag, int pos) {
                 // Its data is ready, update its layout with it
@@ -139,7 +143,7 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
             }
         });
 
-        poiResultFrag.setViewClickedHandler(this);
+        poiResultFrag.setOnItemClickedListener(this);
         return poiResultFrag;
     }
 
@@ -153,21 +157,38 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
         return mTotalPages == 0 ? 1 : mTotalPages;
     }
 
+    private static final String NO_RESULTS_MSG = "No results found.";
+    private static final String NET_ERROR_MSG = "Error: Check your network connection.";
+    private static final String UNKOWN_ERROR_MSG = "Error: Unknown error encountered.";
+
     @Override
     public void onGetPoiResult(PoiResult result) {
         if (result == null) {
             Log.e("Poi Search Result Error", "UNKNOWN ERROR, poiResult == null");
             return;
+        }
+
+        int pageNumber = result.getCurrentPageNum();
+
+        BtmSheetPoiResultPage loadingPage = mLoadingPages.get(pageNumber);
+        if (result.error == SearchResult.ERRORNO.RESULT_NOT_FOUND) {
+            loadingPage.onErrorEncountered(NO_RESULTS_MSG, false);
+            return;
+        } else if (result.error == SearchResult.ERRORNO.NETWORK_ERROR) {
+            loadingPage.onErrorEncountered(NET_ERROR_MSG, true);
+            return;
         } else if (result.error != SearchResult.ERRORNO.NO_ERROR) {
+            mLoadingPages.get(pageNumber).onErrorEncountered(UNKOWN_ERROR_MSG, true);
             Log.e("Poi Search Result Error", result.error.toString());
-            makePoiQuery(result.getCurrentPageNum());
             return;
         }
+
         setTotalPages(result.getTotalPageNum());
         PagerPoiOverlay mOverlay = new PagerPoiOverlay(mBaiduMap);
         mBaiduMap.setOnMarkerClickListener(mOverlay);
         mOverlay.setData(result);
-        int pageNumber = result.getCurrentPageNum();
+
+        // Add the the results to the cache
         synchronized (mPoiOverlay) {
             while (mPoiOverlay.size() <= result.getCurrentPageNum()) {
                 mPoiOverlay.add(null);
@@ -175,6 +196,8 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
             mPoiOverlay.set(pageNumber, mOverlay);
         }
 
+        // Updates the corresponding page with its data, removes the page from the list of pages
+        // waiting for their data.
         BtmSheetPoiResultPage frag = null;
         synchronized (mLoadingPages) {
             frag = mLoadingPages.remove(new Integer(pageNumber));

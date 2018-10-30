@@ -171,11 +171,13 @@ public class FetchReviewsHandler implements Review.Results {
         if (reviews.size() == 0) {
             mBtmSheetManager.REVIEWS.peekBar.ratingStars.setVisibility(View.INVISIBLE);
             mBtmSheetManager.REVIEWS.peekBar.ratingValue.setVisibility(View.INVISIBLE);
+            mBtmSheetManager.REVIEWS.peekBar.ratingCount.setVisibility(View.INVISIBLE);
             mBtmSheetManager.REVIEWS.body.container.setVisibility(View.INVISIBLE);
             mBtmSheetManager.REVIEWS.firstReviewButton.setText(R.string.write_first_review_button_text);
         } else {
             mBtmSheetManager.REVIEWS.peekBar.ratingStars.setVisibility(View.VISIBLE);
             mBtmSheetManager.REVIEWS.peekBar.ratingValue.setVisibility(View.VISIBLE);
+            mBtmSheetManager.REVIEWS.peekBar.ratingCount.setVisibility(View.VISIBLE);
             mBtmSheetManager.REVIEWS.body.container.setVisibility(View.VISIBLE);
             mBtmSheetManager.REVIEWS.firstReviewButton.setText(R.string.write_review_button_text);
         }

@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,8 +20,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
+
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.MapView;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
@@ -33,6 +37,7 @@ import com.guide.green.green_guide.Fragments.UserGuideFragment;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
 import com.guide.green.green_guide.Utilities.BottomSheetManager;
 import com.guide.green.green_guide.Utilities.SuggestionSearchManager;
+import com.guide.green.green_guide.Utilities.SuggestionSearchManager2;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -207,6 +212,16 @@ public class MainActivity extends AppCompatActivity implements
         /* Not saved Intentionally */
         new SuggestionSearchManager(this, searchView, citySelectionView, mMapManager,
                 mBtmSheetManager);
+
+        item = menu.findItem(R.id.searchItem2);
+        EditText searchInput = item.getActionView().findViewById(R.id.searchInput);
+        RecyclerView searchDropDown = findViewById(R.id.searchDropDown);
+
+        ViewGroup vMain = (ViewGroup) findViewById(R.id.mapViewContainer);
+        ViewGroup vDropDown = (ViewGroup) findViewById(R.id.searchDropDownContainer);
+        /* Not saved Intentionally */
+        new SuggestionSearchManager2(this, searchInput, searchDropDown, citySelectionView,
+                mMapManager, mBtmSheetManager, item, vMain, vDropDown);
 
         return super.onCreateOptionsMenu(menu);
     }

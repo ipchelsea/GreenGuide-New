@@ -16,4 +16,10 @@
         app:showAsAction="ifRoom|collapseActionView"
         app:actionLayout="@layout/search_autocomplete_menu_item"/>
 
+    <item
+        android:id="@+id/searchItem2"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:title="Search for Locations2"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionLayout="@layout/search_autocomplete_menu_item2"/>
 </menu>

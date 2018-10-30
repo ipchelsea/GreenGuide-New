@@ -142,6 +142,9 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
     }
 
     public void searchCity(PoiCitySearchOption searchOption) {
+        clearMarkers();     // Must be called before the mPageChangeListener value is changed
+        showPoiResults();
+
         PoiResultsPagerAdapter pagerAdapter =
                 new PoiResultsPagerAdapter(mAct, mMapManager, searchOption);
 
@@ -157,8 +160,6 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
         POI_RESULTS.swipeView.addOnPageChangeListener(mPageChangeListener);
         POI_RESULTS.swipeView.setAdapter(pagerAdapter);
 
-        clearMarkers();
-        showPoiResults();
         pagerAdapter.notifyDataSetChanged();
         mBtmSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }

@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.TextView;
 import com.guide.green.green_guide.R;
-import com.guide.green.green_guide.Utilities.AutoComplete;
+import com.guide.green.green_guide.Utilities.FilteredAutoComplete;
 import com.guide.green.green_guide.Utilities.RomanizedLocation;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +63,7 @@ public class CityPickerDialog extends DialogFragment implements DialogInterface.
         mText = layout.findViewById(R.id.searchCity);
         mDropDown = layout.findViewById(R.id.searchDropDown);
 
-        AutoComplete autoComplete = new AutoComplete(getContext(), mText, mDropDown, adapter);
+        FilteredAutoComplete autoComplete = new FilteredAutoComplete(getContext(), mText, mDropDown, adapter);
 
         return layout;
     }
@@ -74,7 +74,7 @@ public class CityPickerDialog extends DialogFragment implements DialogInterface.
     }
 
     public static class RomanizedAdapter extends
-            AutoComplete.FilteredAdapter<RomanizedAdapter.ViewHolder> {
+            FilteredAutoComplete.FilteredAdapter<RomanizedAdapter.ViewHolder> {
         public interface OnItemClicked {
             void onClicked(RomanizedLocation city, View v);
         }

@@ -2,6 +2,8 @@ package com.guide.green.green_guide.Utilities;
 
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapPoi;
@@ -20,12 +22,14 @@ public class BaiduMapManager {
     public final BaiduMap BAIDU_MAP;
     public final PoiSearch POI_SEARCH;
     public final SuggestionSearch SUGGESTION_SEARCH;
+    public final SuggestionSearch SUGGESTION_SEARCH2;
 
     public BaiduMapManager(@NonNull MapView map) {
         MAP_VIEW = map;
         BAIDU_MAP = MAP_VIEW.getMap();
         POI_SEARCH = PoiSearch.newInstance();
         SUGGESTION_SEARCH = SuggestionSearch.newInstance();
+        SUGGESTION_SEARCH2 = SuggestionSearch.newInstance();
     }
 
     /**
@@ -91,35 +95,34 @@ public class BaiduMapManager {
         POI_SEARCH.destroy();
         SUGGESTION_SEARCH.destroy();
         MAP_VIEW.onDestroy();
+        SUGGESTION_SEARCH2.destroy();
     }
 
     public static class BaiduSuggestion {
         public final @NonNull String name;
-        public final LatLng point;
+        public final @Nullable String address;
+        public final @Nullable LatLng point;
 
-        public BaiduSuggestion(@NonNull String name) {
+        private BaiduSuggestion(String name, String address, LatLng point) {
             this.name = name;
-            this.point = null;
+            this.address = address;
+            this.point = point;
+        }
+        public BaiduSuggestion(@NonNull String name) {
+            this(name, null, null);
         }
         public BaiduSuggestion(@NonNull MapPoi mapPoi) {
-            name = mapPoi.getName();
-            point = mapPoi.getPosition();
+            this(mapPoi.getName(), "MAP POI NULL", mapPoi.getPosition());
         }
         public BaiduSuggestion(@NonNull SuggestionResult.SuggestionInfo info) {
-            this.name = info.key;
-            this.point = info.pt;
+            this(info.key, info.address, info.pt);
         }
         public BaiduSuggestion(@NonNull PoiInfo info) {
-            this.name = info.name;
-            this.point = info.location;
+            this(info.name, info.address, info.location);
         }
         @Override
         public String toString() {
-            if (point == null) {
-                return " " + name;
-            } else {
-                return "\uD83D\uDCCD" + name;
-            }
+            return name;
         }
     }
 }

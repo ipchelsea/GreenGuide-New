@@ -18,56 +18,75 @@
             android:layout_height="match_parent"
             android:background="@android:color/transparent"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
-        <!--android:background="?android:attr/colorPrimary"-->
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_main" />
+    <LinearLayout
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:id="@+id/mapViewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/satellitefab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="451dp"
-        android:layout_marginRight="10dp"
-        app:srcCompat="@drawable/view_satellite"
-        android:layout_gravity="bottom|end"
-        android:backgroundTint="@color/white"
-        app:backgroundTint="@color/colorPrimary"
-        android:visibility="invisible"/>
+        <include layout="@layout/content_main" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/normalfab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="374dp"
-        android:layout_marginRight="10dp"
-        android:layout_gravity="bottom|end"
-        app:srcCompat="@drawable/view_normal"
-        android:backgroundTint="@color/white"
-        app:backgroundTint="@color/colorPrimary"
-        android:visibility="invisible"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/satellitefab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="451dp"
+            android:layout_marginRight="10dp"
+            app:srcCompat="@drawable/view_satellite"
+            android:layout_gravity="bottom|end"
+            android:backgroundTint="@color/white"
+            app:backgroundTint="@color/colorPrimary"
+            android:visibility="invisible"/>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="300dp"
-        app:srcCompat="@drawable/ic_filter_24dp"
-        android:backgroundTint="@color/white"
-        app:backgroundTint="@color/colorPrimary"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/normalfab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="374dp"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="bottom|end"
+            app:srcCompat="@drawable/view_normal"
+            android:backgroundTint="@color/white"
+            app:backgroundTint="@color/colorPrimary"
+            android:visibility="invisible"/>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/myLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="233dp"
-        app:srcCompat="@drawable/ic_my_location_24px"
-        android:backgroundTint="@color/white"
-        app:backgroundTint="@color/colorPrimary"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="300dp"
+            app:srcCompat="@drawable/ic_filter_24dp"
+            android:backgroundTint="@color/white"
+            app:backgroundTint="@color/colorPrimary"/>
 
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/myLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="233dp"
+            app:srcCompat="@drawable/ic_my_location_24px"
+            android:backgroundTint="@color/white"
+            app:backgroundTint="@color/colorPrimary"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:id="@+id/searchDropDownContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/searchDropDown"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:theme="@style/Autocomplete"
+            android:visibility="gone"/>
+    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

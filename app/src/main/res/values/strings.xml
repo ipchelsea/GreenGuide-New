@@ -29,4 +29,5 @@
     <string name="btmsheet_company_name_default">Company Name</string>
     <string name="btmsheet_rating_value_default">+3.0</string>
     <string name="btmsheet_ratings_count_default">(134)</string>
+    <string name="poi_results_retry">Retry</string>
 </resources>

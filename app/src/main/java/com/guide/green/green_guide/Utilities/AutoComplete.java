@@ -1,72 +1,65 @@
 package com.guide.green.green_guide.Utilities;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Filter;
-import android.widget.Filterable;
 
-public class AutoComplete implements TextWatcher, View.OnFocusChangeListener, Filter.FilterListener {
+public abstract class AutoComplete implements TextWatcher,
+        View.OnFocusChangeListener {
+
     private EditText mText;
     private RecyclerView mDropdown;
-    private FilteredAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private Context mContext;
 
-    public static abstract class FilteredAdapter<VH extends RecyclerView.ViewHolder> extends
-            RecyclerView.Adapter<VH> implements Filterable {/* Empty */}
+    public AutoComplete(Context context, EditText textInput, RecyclerView dropdown) {
+        this(context, textInput, dropdown, null);
+    }
 
-    public AutoComplete(Context context, EditText textInput, RecyclerView dropdown,
-                        FilteredAdapter adapter) {
-        mContext = context;
+    public AutoComplete(@NonNull Context context, @NonNull EditText textInput,
+                        @NonNull RecyclerView dropdown, @Nullable RecyclerView.Adapter adapter) {
+
         mText = textInput;
         mDropdown = dropdown;
-        mAdapter = adapter;
 
         mDropdown.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(context);
         mDropdown.setLayoutManager(mLayoutManager);
-        mDropdown.setAdapter(mAdapter);
-        mAdapter.notifyDataSetChanged();
+
+        if (adapter != null) {
+            mDropdown.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+        }
 
         mText.setOnFocusChangeListener(this);
         mText.addTextChangedListener(this);
     }
 
-    @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        if (charSequence.length() == 0) {
-            hideDropDown();
-        } else {
-            mAdapter.getFilter().filter(charSequence, this);
-        }
+    public int getInputTextLength() {
+        return mText.getText().length();
     }
 
     @Override
     public void onFocusChange(View view, boolean hasFocus) {
-        if (hasFocus && mText.getText().length() != 0) {
+        if (hasFocus && getInputTextLength() != 0) {
             showDropDown();
         } else {
-            hideDropDown();
+            dismissDropDown();
         }
     }
 
-    @Override
-    public void onFilterComplete(int i) {
-        if (i == 0) {
-            hideDropDown();
-        } else {
-            showDropDown();
-        }
-    }
-
-    public void hideDropDown() { mDropdown.setVisibility(View.GONE); }
+    public void dismissDropDown() { mDropdown.setVisibility(View.GONE); }
 
     public void showDropDown() { mDropdown.setVisibility(View.VISIBLE); }
+
+    public boolean isPopupShowing() {
+        return mDropdown.getVisibility() == View.VISIBLE;
+    }
 
     @Override
     public void afterTextChanged(Editable e) { /* Do nothing */ }
