@@ -1,28 +1,20 @@
 package com.guide.green.green_guide.Utilities;
 
 import android.app.Activity;
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.BaseAdapter;
-import android.widget.Filter;
-import android.widget.Filterable;
-import android.widget.ImageView;
 import android.widget.TextView;
 import com.baidu.mapapi.search.poi.PoiCitySearchOption;
 import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
-import com.guide.green.green_guide.R;
 import com.guide.green.green_guide.Utilities.BaiduMapManager.BaiduSuggestion;
 
 import java.util.ArrayList;
@@ -84,7 +76,7 @@ public class SuggestionSearchManager implements View.OnKeyListener, AdapterView.
     public void onFocusChange(View view, boolean gainedFocus) {
         AutoCompleteTextView tv = (AutoCompleteTextView) view;
         if (!gainedFocus) {
-            mBtmSheetManager.clearMarkers();
+            mBtmSheetManager.removeMarkers();
             mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
             tv.setText("");
             com.guide.green.green_guide.Utilities.Drawing.hideKeyboard(view, mAct);

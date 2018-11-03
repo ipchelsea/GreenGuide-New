@@ -58,7 +58,7 @@ public class FetchReviewsHandler implements Review.Results {
             @Override
             public void onCancel() {
                 mReviewTask.cancel(true);
-                mBtmSheetManager.clearMarkers();
+                mBtmSheetManager.removeMarkers();
             }
         });
     }

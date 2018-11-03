@@ -4,42 +4,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="30dp"
-    android:minWidth="20dp"
-    android:minHeight="30dp">
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp">
 
     <ImageView
         android:id="@+id/dropdown_typeIcon"
-        android:layout_width="40dp"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:minWidth="20dp"
-        android:minHeight="20dp"/>
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginRight="10dp"/>
 
     <LinearLayout
         app:layout_constraintStart_toEndOf="@id/dropdown_typeIcon"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:minWidth="20dp"
-        android:minHeight="20dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/dropdown_topText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="A"
-            android:minWidth="20dp"
-            android:minHeight="20dp"/>
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/dropdown_bottomText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="B"
-            android:minWidth="20dp"
-            android:minHeight="20dp"/>
+            android:textColor="@android:color/darker_gray"/>
+
+        <TextView
+            android:id="@+id/dropdown_uid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

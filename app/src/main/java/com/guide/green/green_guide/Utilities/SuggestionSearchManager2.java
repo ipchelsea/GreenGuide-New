@@ -1,6 +1,7 @@
 package com.guide.green.green_guide.Utilities;
 
 import android.app.Activity;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.widget.RecyclerView;
@@ -15,15 +16,17 @@ import com.baidu.mapapi.search.poi.PoiCitySearchOption;
 import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+import com.guide.green.green_guide.R;
 import com.guide.green.green_guide.Utilities.BaiduMapManager.BaiduSuggestion;
 
 import java.util.ArrayList;
 
 public class SuggestionSearchManager2 extends AutoComplete implements View.OnKeyListener,
-        OnGetSuggestionResultListener {
+        SuggestionSearchAdapter.OnItemClickListener, OnGetSuggestionResultListener {
 
-    private String lastSearch = "";
-    private boolean mShowDropDownOnSuggestion = false;
+    private boolean mWasShowingBottomSheet;
+    private boolean mShowDropDownOnSuggestion = true;
+    private boolean mEnterJustPressed = false;
     private ArrayList<BaiduSuggestion> mSuggestions;
     private BottomSheetManager mBtmSheetManager;
     private BaiduMapManager mMapManager;
@@ -33,13 +36,10 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
     private ViewGroup mDropDownContainer;
     private ViewGroup mMapViewContainer;
 
-    private SuggestionSearchOption mSearchOption;
-    private int mTotalPages = Integer.MIN_VALUE;
-    private int nextPage = 0;
-
     private EditText mTextInput;
     private RecyclerView mDropdown;
-    private SuggestionSearchAdapter mSuggestionSearchAdapter = new SuggestionSearchAdapter();
+    private SuggestionSearchAdapter mSuggestionSearchAdapter;
+    private SuggestionSearchAdapter.ItemIcons mItemIcons;
 
     public SuggestionSearchManager2(@NonNull Activity act, @NonNull EditText textInput,
                                     @NonNull RecyclerView dropdown, @NonNull TextView cityView,
@@ -49,29 +49,48 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
                                     @NonNull ViewGroup mapViewContainer,
                                     @NonNull ViewGroup dropDownContainer) {
         super(act, textInput, dropdown);
+        mItemIcons = new SuggestionSearchAdapter.ItemIcons();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mItemIcons.FIRST_ITEM = act.getDrawable(R.drawable.ic_search_review);
+            mItemIcons.AUTO_COMPLETE_TEXT = null;
+            mItemIcons.LOCATION = act.getDrawable(R.drawable.icon_markg_red);
+        } else {
+            mItemIcons.FIRST_ITEM = act.getResources().getDrawable(R.drawable.ic_search_review);
+            mItemIcons.AUTO_COMPLETE_TEXT = null;
+            mItemIcons.LOCATION = act.getResources().getDrawable(R.drawable.icon_markg_red);
+        }
         mMapViewContainer = mapViewContainer;
         mDropDownContainer = dropDownContainer;
         mSearchBarContainer = searbarContainer;
         mSearchBarContainer.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem menuItem) {
-                showDropDownOverlay();
+                onClick();
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                if (mWasShowingBottomSheet && !isDropDownOverlayShowing()) {
+                    mWasShowingBottomSheet = false;
+                }
+
                 hideDropDownOverlay();
-                mBtmSheetManager.clearMarkers();
-                mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
-                mTextInput.setText("");
                 Drawing.hideKeyboard(mTextInput, mAct);
-                return true;
+                mTextInput.clearFocus();
+
+                if (mWasShowingBottomSheet) {
+                    mWasShowingBottomSheet = false;
+                    mBtmSheetManager.restore();
+                    return false;
+                } else {
+                    mBtmSheetManager.removeMarkers();
+                    mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+                    mTextInput.setText("");
+                    return true;
+                }
             }
         });
-
-        dropdown.setAdapter(mSuggestionSearchAdapter);
-        mSuggestionSearchAdapter.notifyDataSetChanged();
 
         mTextInput = textInput;
         mDropdown = dropdown;
@@ -81,25 +100,11 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
         mCitySelector = cityView;
         mBtmSheetManager = btmSheetManager;
         mMapManager.SUGGESTION_SEARCH2.setOnGetSuggestionResultListener(this);
-        mDropdown.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
-            @Override
-            public void onChildViewAttachedToWindow(View view) {
-                int index = mDropdown.indexOfChild(view);
-                if (index > mDropdown.getChildCount() / 2) {
-                    loadNextPage();
-                }
-            }
-
-            @Override
-            public void onChildViewDetachedFromWindow(View view) {}
-        });
         mTextInput.setOnKeyListener(this);
         mTextInput.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!isPopupShowing() && mTextInput.getText().length() != 0) {
-                    showDropDown();
-                }
+                SuggestionSearchManager2.this.onClick();
             }
         });
 
@@ -107,12 +112,26 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
         dropdown.bringToFront();
     }
 
-    private void loadNextPage() {
-        if (nextPage < mTotalPages) {
-            mSearchOption.mCityLimit = true;
-            mMapManager.SUGGESTION_SEARCH2.requestSuggestion(mSearchOption);
-            mShowDropDownOnSuggestion = true;
+    private void onClick() {
+        if (mEnterJustPressed) {
+            mEnterJustPressed = false;
+            return;
         }
+        if (mBtmSheetManager.getBottomSheetState() != BottomSheetBehavior.STATE_HIDDEN) {
+            mBtmSheetManager.saveAndHide();
+            mWasShowingBottomSheet = true;
+        }
+        if (!isDropDownOverlayShowing()) {
+            mShowDropDownOnSuggestion = true;
+            showDropDownOverlay();
+            if (mTextInput.getText().length() != 0) {
+                showDropDown();
+            }
+        }
+    }
+
+    public boolean isDropDownOverlayShowing() {
+        return mDropDownContainer.getVisibility() == View.VISIBLE;
     }
 
     public void hideDropDownOverlay() {
@@ -123,12 +142,6 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
     public void showDropDownOverlay() {
         mDropDownContainer.setVisibility(View.VISIBLE);
         mMapViewContainer.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void showDropDown() {
-        super.showDropDown();
-        showDropDownOverlay();
     }
 
     public static void setAllParentsClip(View v, boolean enabled) {
@@ -145,9 +158,9 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
                 .city(mCitySelector.getText().toString())
                 .keyword(mTextInput.getText().toString());
         mBtmSheetManager.searchCity(searchOption);
-        hideDropDownOverlay();
         dismissDropDown();
         Drawing.hideKeyboard(mTextInput, mAct);
+        hideDropDownOverlay();
     }
 
     private ArrayList<BaiduSuggestion> getAutoCompleteArray() {
@@ -161,7 +174,6 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
     @Override
     public void onFocusChange(View view, boolean gainedFocus) {
         super.onFocusChange(view, gainedFocus);
-        showDropDownOverlay();
     }
 
     /**
@@ -170,55 +182,19 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
     @Override
     public void onTextChanged(CharSequence cs, int start, int before, int count) {
         if (cs.length() > 0) {
-            mSuggestionSearchAdapter.replaceAllSuggestions(getAutoCompleteArray());
-            mSearchOption = new SuggestionSearchOption().city(mCitySelector.getText().toString())
-                    .keyword(cs.toString());
-
-            loadNextPage();
-        }
-        lastSearch = mCitySelector.toString();
-    }
-
-    /**
-     * Set the items in the autocomplete dropdown to those returned by baidu
-     * @param res
-     */
-    @Override
-    public void onGetSuggestionResult(SuggestionResult res) {
-        mSuggestions = getAutoCompleteArray();
-        if (res != null && res.getAllSuggestions() != null) {
-            for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
-                mSuggestions.add(new BaiduSuggestion(info));
-            }
-        }
-
-        if (lastSearch.equals(mTextInput.getText())) {
-            mSuggestionSearchAdapter.addSuggestions(mSuggestions);
+            replaceAllSuggestions(getAutoCompleteArray());
+            mMapManager.SUGGESTION_SEARCH2.requestSuggestion(new SuggestionSearchOption()
+                    .city(mCitySelector.getText().toString())
+                    .keyword(cs.toString()).citylimit(true));
         } else {
-            mSuggestionSearchAdapter.replaceAllSuggestions(mSuggestions);
+            dismissDropDown();
         }
-
-        if (mShowDropDownOnSuggestion) {
-            showDropDown();
-        }
-    }
-
-    @Override
-    public boolean onKey(View view, int i, KeyEvent keyEvent) {
-        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN &&
-                keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-            searchForEnteredTextInCity();
-        }
-        return false;
     }
 
     public void onItemClick(int position) {
         BaiduSuggestion suggestion = mSuggestions.get(position);
 
         if (position == 0) {
-            CharSequence autoCompleteText = mTextInput.getText();
-            mTextInput.setText(autoCompleteText.subSequence(3, autoCompleteText.length()));
-            mTextInput.setSelection(autoCompleteText.length() - 3);
             searchForEnteredTextInCity();
             mShowDropDownOnSuggestion = false;
             return;
@@ -228,12 +204,54 @@ public class SuggestionSearchManager2 extends AutoComplete implements View.OnKey
         if (suggestion.point != null) {
             mShowDropDownOnSuggestion = false;
             mBtmSheetManager.getReviews(suggestion);
+            mTextInput.clearFocus();
             Drawing.hideKeyboard(mTextInput, mAct);
+            hideDropDownOverlay();
         } else {
             mShowDropDownOnSuggestion = true;
         }
 
         mTextInput.setText(suggestion.name);
         mTextInput.setSelection(suggestion.name.length());
+    }
+
+    public void replaceAllSuggestions(ArrayList<BaiduSuggestion> suggestions) {
+        SuggestionSearchAdapter mSuggestionSearchAdapter =
+                new SuggestionSearchAdapter(suggestions, mItemIcons);
+        mSuggestionSearchAdapter.setOnItemClickListener(this);
+        mDropdown.setAdapter(mSuggestionSearchAdapter);
+        mSuggestionSearchAdapter.notifyDataSetChanged();
+        mSuggestions = suggestions;
+    }
+
+    /**
+     * Set the items in the autocomplete dropdown to those returned by baidu
+     * @param res
+     */
+    @Override
+    public void onGetSuggestionResult(SuggestionResult res) {
+        ArrayList<BaiduSuggestion> suggestions = getAutoCompleteArray();
+        if (res != null && res.getAllSuggestions() != null) {
+            for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
+                suggestions.add(new BaiduSuggestion(info));
+            }
+        }
+
+        replaceAllSuggestions(suggestions);
+
+        if (mTextInput.getText().length() != 0 && isDropDownOverlayShowing()
+                && mShowDropDownOnSuggestion) {
+            showDropDown();
+        }
+    }
+
+    @Override
+    public boolean onKey(View view, int i, KeyEvent keyEvent) {
+        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN &&
+                keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+            searchForEnteredTextInCity();
+            mEnterJustPressed = true;
+        }
+        return false;
     }
 }

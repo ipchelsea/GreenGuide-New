@@ -102,6 +102,8 @@ public class BaiduMapManager {
         public final @NonNull String name;
         public final @Nullable String address;
         public final @Nullable LatLng point;
+        // TODO: delete the line bellow when done testing
+        public String uid = "";
 
         private BaiduSuggestion(String name, String address, LatLng point) {
             this.name = name;
@@ -113,12 +115,18 @@ public class BaiduMapManager {
         }
         public BaiduSuggestion(@NonNull MapPoi mapPoi) {
             this(mapPoi.getName(), "MAP POI NULL", mapPoi.getPosition());
+            // TODO: delete the line bellow
+            uid = mapPoi.getUid();
         }
         public BaiduSuggestion(@NonNull SuggestionResult.SuggestionInfo info) {
-            this(info.key, info.address, info.pt);
+            this(info.key, info.pt == null ? null : info.pt.toString(), info.pt);
+            // TODO: delete the line bellow
+            uid = info.uid;
         }
         public BaiduSuggestion(@NonNull PoiInfo info) {
             this(info.name, info.address, info.location);
+            // TODO: delete the line bellow
+            uid = info.uid;
         }
         @Override
         public String toString() {

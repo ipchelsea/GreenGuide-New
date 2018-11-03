@@ -122,6 +122,10 @@ public class BtmSheetPoiResultPage extends Fragment {
                     .setText(String.format("City: %s", result.city));
             ((TextView) listItem.findViewById(R.id.poi_lanAndLat))
                     .setText(String.format("Coordinate: (%s, %s)", result.location.longitude, result.location.latitude));
+
+            // TODO: delete bottom line when done testing
+            ((TextView) listItem.findViewById(R.id.poi_uid)).setText(result.uid);
+
             listItem.findViewById(R.id.poi_select)
                     .setOnClickListener(new ListItemClickHandler(iconNumber - 1));
             container.addView(listItem);

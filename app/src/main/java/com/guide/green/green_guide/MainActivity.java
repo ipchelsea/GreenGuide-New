@@ -21,10 +21,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.MapView;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
@@ -36,7 +34,6 @@ import com.guide.green.green_guide.Fragments.SignUpFragment;
 import com.guide.green.green_guide.Fragments.UserGuideFragment;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
 import com.guide.green.green_guide.Utilities.BottomSheetManager;
-import com.guide.green.green_guide.Utilities.SuggestionSearchManager;
 import com.guide.green.green_guide.Utilities.SuggestionSearchManager2;
 
 
@@ -195,8 +192,8 @@ public class MainActivity extends AppCompatActivity implements
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
-        MenuItem item = menu.findItem(R.id.cityItem);
-        citySelectionView = item.getActionView().findViewById(R.id.city);
+        MenuItem itemCity = menu.findItem(R.id.cityItem);
+        citySelectionView = itemCity.getActionView().findViewById(R.id.city);
         citySelectionView.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -206,22 +203,21 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        item = menu.findItem(R.id.searchItem);
-        AutoCompleteTextView searchView = item.getActionView().findViewById(R.id.search);
+//        MenuItem itemSearch = menu.findItem(R.id.searchItem);
+//        AutoCompleteTextView searchView = itemSearch.getActionView().findViewById(R.id.search);
+//        /* Not saved Intentionally */
+//        new SuggestionSearchManager(this, searchView, citySelectionView, mMapManager,
+//                mBtmSheetManager);
 
-        /* Not saved Intentionally */
-        new SuggestionSearchManager(this, searchView, citySelectionView, mMapManager,
-                mBtmSheetManager);
-
-        item = menu.findItem(R.id.searchItem2);
-        EditText searchInput = item.getActionView().findViewById(R.id.searchInput);
+        MenuItem itemSearch2 = menu.findItem(R.id.searchItem2);
+        EditText searchInput = itemSearch2.getActionView().findViewById(R.id.searchInput);
         RecyclerView searchDropDown = findViewById(R.id.searchDropDown);
 
         ViewGroup vMain = (ViewGroup) findViewById(R.id.mapViewContainer);
         ViewGroup vDropDown = (ViewGroup) findViewById(R.id.searchDropDownContainer);
         /* Not saved Intentionally */
         new SuggestionSearchManager2(this, searchInput, searchDropDown, citySelectionView,
-                mMapManager, mBtmSheetManager, item, vMain, vDropDown);
+                mMapManager, mBtmSheetManager, itemSearch2, vMain, vDropDown);
 
         return super.onCreateOptionsMenu(menu);
     }

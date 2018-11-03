@@ -62,6 +62,15 @@ public abstract class OverlayManager implements OnMarkerClickListener, OnPolylin
         }
     }
 
+    public final void setVisibility(boolean isVisible) {
+        if (mBaiduMap == null) {
+            return;
+        }
+        for (Overlay marker : mOverlayList) {
+            marker.setVisible(isVisible);
+        }
+    }
+
     /**
      * 将所有Overlay 从 地图上消除
      */

@@ -10,6 +10,13 @@ public class PageChangeListener implements ViewPager.OnPageChangeListener,
     private int mCurrentPage;
     private PoiResultsPagerAdapter mAdapter;
 
+    public void setVisibility(boolean isVisible) {
+        PoiOverlay overlay = mAdapter.getPoiOverlay(mCurrentPage);
+        if (overlay != null) {
+            overlay.setVisibility(isVisible);
+        }
+    }
+
     public void remove() {
         PoiOverlay overlay = mAdapter.getPoiOverlay(mCurrentPage);
         if (overlay != null) {
