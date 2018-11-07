@@ -2,22 +2,19 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <!--<ImageButton-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:contentDescription="Search"-->
-        <!--android:src="@drawable/ic_search_review"/>-->
-
-    <AutoCompleteTextView
-        android:id="@+id/search"
-        android:minWidth="300dp"
+    <EditText
+        android:id="@+id/searchInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:minWidth="300dp"
         android:theme="@style/Autocomplete"
         android:inputType="textNoSuggestions"
         android:hint="Search location ..."
-        android:imeOptions="actionSearch"/>
+        android:imeOptions="actionSearch"
+        android:singleLine="true"/>
+
 </LinearLayout>

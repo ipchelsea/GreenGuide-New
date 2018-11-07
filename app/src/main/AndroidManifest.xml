@@ -49,6 +49,13 @@
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.guide.green.green_guide.MainActivity"/>
         </activity>
+        <activity
+            android:name=".Utilities.FragContainer"
+            android:label="Green Guide"
+            android:parentActivityName=".MainActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.guide.green.green_guide.MainActivity"/>
+        </activity>
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="q2vm31m0SXgdtXvsyFoNfvesPf3R4KjN" />

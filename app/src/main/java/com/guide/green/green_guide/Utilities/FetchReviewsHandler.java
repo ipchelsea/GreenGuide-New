@@ -17,11 +17,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.baidu.mapapi.map.Overlay;
+import com.baidu.mapapi.model.LatLng;
 import com.guide.green.green_guide.Dialogs.LoadingDialog;
 import com.guide.green.green_guide.R;
 import java.util.ArrayList;
-
-import com.guide.green.green_guide.Utilities.BaiduMapManager.BaiduSuggestion;
 
 /**
  * Manages requesting the reviews for a specific point, displaying a dialog box to show that data
@@ -33,16 +32,15 @@ import com.guide.green.green_guide.Utilities.BaiduMapManager.BaiduSuggestion;
  *  - Does not add any icons to the map
  */
 public class FetchReviewsHandler implements Review.Results {
+    private BaiduSuggestion.Location mSuggestion;
     private BottomSheetManager mBtmSheetManager;
-    private BaiduSuggestion mSuggestion;
     private LoadingDialog mLoadingDialog;
     private AsyncJSONArray mReviewTask;
     private boolean mCompleted = false;
-    private Overlay mMarker;
     private Activity mAct;
 
     public FetchReviewsHandler(@NonNull Activity act,
-                               @NonNull BaiduSuggestion suggestion,
+                               @NonNull BaiduSuggestion.Location suggestion,
                                @NonNull BottomSheetManager manager) {
         mAct = act;
         mSuggestion = suggestion;
@@ -51,8 +49,8 @@ public class FetchReviewsHandler implements Review.Results {
 
         mLoadingDialog.show(mAct.getFragmentManager(), "Retrieving ReviewsHolder");
 
-        mReviewTask = Review.getReviewsForPlace(mSuggestion.point.longitude,
-                mSuggestion.point.latitude, this);
+        mReviewTask = Review.getReviewsForPlace(suggestion.point.longitude,
+                suggestion.point.latitude, this);
 
         mLoadingDialog.setCallback(new LoadingDialog.Canceled() {
             @Override
@@ -65,9 +63,9 @@ public class FetchReviewsHandler implements Review.Results {
 
     @Override
     public void onSuccess(ArrayList<Review> reviews) {
+        mBtmSheetManager.reviews.peekBar.companyName.setText(mSuggestion.name);
         if (mLoadingDialog != null) { mLoadingDialog.dismiss(); }
-        mBtmSheetManager.REVIEWS.peekBar.companyName.setText(mSuggestion.name);
-        mBtmSheetManager.REVIEWS.body.reviews.removeAllViews();
+        mBtmSheetManager.reviews.body.reviews.removeAllViews();
 
         // Calculate histogram values and average rating
         String[] histogramX = new String[] {"+3", "+2", "+1", "0", "-1", "-2", "-3"};
@@ -97,7 +95,7 @@ public class FetchReviewsHandler implements Review.Results {
             // Add review
             LayoutInflater lf = LayoutInflater.from(mAct);
             ViewGroup child = (ViewGroup) lf.inflate(R.layout.review_single_comment,
-                    mBtmSheetManager.REVIEWS.body.reviews, false);
+                    mBtmSheetManager.reviews.body.reviews, false);
             TextView ratingValue = child.findViewById(R.id.ratingValue);
             ImageView ratingImage = child.findViewById(R.id.ratingImage);
             TextView reviewText = child.findViewById(R.id.reviewText);
@@ -118,7 +116,7 @@ public class FetchReviewsHandler implements Review.Results {
             reviewTime.setText(String.format("Time: %s",
                     review.location.get(Review.Location.Key.TIME)));
 
-            mBtmSheetManager.REVIEWS.body.reviews.addView(child);
+            mBtmSheetManager.reviews.body.reviews.addView(child);
 
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams (child.getLayoutParams());
             child.setPadding(0, (int) Drawing.convertDpToPx(mAct,10), 0, 0);
@@ -143,73 +141,46 @@ public class FetchReviewsHandler implements Review.Results {
         // Create the rating stars & add the bitmap to a view
         int h = mAct.getResources().getDimensionPixelSize(
                 R.dimen.reviews_bottom_sheet_peek_height_halved);
-        int w = mBtmSheetManager.REVIEWS.peekBar.ratingStars.getWidth();
+        int w = mBtmSheetManager.reviews.peekBar.ratingStars.getWidth();
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Drawing.drawStars(0, 0, w, h, histogramX.length, ratio,
                 filledStarsColor, Color.GRAY, new Canvas(bmp));
-        mBtmSheetManager.REVIEWS.peekBar.ratingStars.setImageBitmap(bmp);
+        mBtmSheetManager.reviews.peekBar.ratingStars.setImageBitmap(bmp);
 
         // Create a histogram & add the bitmap to a view
         float textSize = Drawing.convertSpToPx(mAct, 13);
         w = mAct.getResources().getDisplayMetrics().widthPixels;
         bmp = Drawing.createBarGraph(histogramX, histogramY, histLeft, histRight, w, textSize,
                 filledStarsColor, Color.WHITE, backgroundColor, 7, 7, 7);
-        mBtmSheetManager.REVIEWS.body.histogram.setImageBitmap(bmp);
-
+        mBtmSheetManager.reviews.body.histogram.setImageBitmap(bmp);
 
         String sTemp;
         sTemp = (average > 0 ? "+" : "") + average;
-        mBtmSheetManager.REVIEWS.peekBar.ratingValue.setText(sTemp);
+        mBtmSheetManager.reviews.peekBar.ratingValue.setText(sTemp);
         sTemp = reviews.size() + " Review" + (reviews.size() != 1 ? "s" : "");
-        mBtmSheetManager.REVIEWS.peekBar.ratingCount.setText(sTemp);
+        mBtmSheetManager.reviews.peekBar.ratingCount.setText(sTemp);
 
-        mBtmSheetManager.REVIEWS.body.address.setText("Address: " + address);
-        mBtmSheetManager.REVIEWS.body.city.setText("City: " + city);
-        mBtmSheetManager.REVIEWS.body.industry.setText("Industry: " + industry);
-        mBtmSheetManager.REVIEWS.body.product.setText("Product: " + product);
+        mBtmSheetManager.reviews.body.address.setText("Address: " + address);
+        mBtmSheetManager.reviews.body.city.setText("City: " + city);
+        mBtmSheetManager.reviews.body.industry.setText("Industry: " + industry);
+        mBtmSheetManager.reviews.body.product.setText("Product: " + product);
 
         if (reviews.size() == 0) {
-            mBtmSheetManager.REVIEWS.peekBar.ratingStars.setVisibility(View.INVISIBLE);
-            mBtmSheetManager.REVIEWS.peekBar.ratingValue.setVisibility(View.INVISIBLE);
-            mBtmSheetManager.REVIEWS.peekBar.ratingCount.setVisibility(View.INVISIBLE);
-            mBtmSheetManager.REVIEWS.body.container.setVisibility(View.INVISIBLE);
-            mBtmSheetManager.REVIEWS.firstReviewButton.setText(R.string.write_first_review_button_text);
+            mBtmSheetManager.reviews.peekBar.ratingStars.setVisibility(View.INVISIBLE);
+            mBtmSheetManager.reviews.peekBar.ratingValue.setVisibility(View.INVISIBLE);
+            mBtmSheetManager.reviews.peekBar.ratingCount.setVisibility(View.INVISIBLE);
+            mBtmSheetManager.reviews.body.container.setVisibility(View.INVISIBLE);
+            mBtmSheetManager.reviews.firstReviewButton.setText(R.string.write_first_review_button_text);
         } else {
-            mBtmSheetManager.REVIEWS.peekBar.ratingStars.setVisibility(View.VISIBLE);
-            mBtmSheetManager.REVIEWS.peekBar.ratingValue.setVisibility(View.VISIBLE);
-            mBtmSheetManager.REVIEWS.peekBar.ratingCount.setVisibility(View.VISIBLE);
-            mBtmSheetManager.REVIEWS.body.container.setVisibility(View.VISIBLE);
-            mBtmSheetManager.REVIEWS.firstReviewButton.setText(R.string.write_review_button_text);
+            mBtmSheetManager.reviews.peekBar.ratingStars.setVisibility(View.VISIBLE);
+            mBtmSheetManager.reviews.peekBar.ratingValue.setVisibility(View.VISIBLE);
+            mBtmSheetManager.reviews.peekBar.ratingCount.setVisibility(View.VISIBLE);
+            mBtmSheetManager.reviews.body.container.setVisibility(View.VISIBLE);
+            mBtmSheetManager.reviews.firstReviewButton.setText(R.string.write_review_button_text);
         }
 
         mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED);
         mCompleted = true;
-    }
-//
-//    /***
-//     * Returns a resource ID for the appropriately colored marker for the supplied rating.
-//     *
-//     * @param averageRating A number in the set [-3,3] inclusive of both.
-//     * @return A resource Id.
-//     */
-//    private int getColoredMarkerFromRating(float averageRating) {
-//        int drawableId;
-//        switch (Math.round(averageRating)) {
-//            case -3: drawableId = R.drawable.icon_markg_red; break;
-//            case -2: drawableId = R.drawable.icon_markg_orange; break;
-//            case -1: drawableId = R.drawable.icon_markg_yellow; break;
-//            case 0: drawableId = R.drawable.icon_markg_white; break;
-//            case 1: drawableId = R.drawable.icon_markg_aqua; break;
-//            case 2: drawableId = R.drawable.icon_markg_lime; break;
-//            default: drawableId = R.drawable.icon_markg_green; break;
-//        }
-//        return drawableId;
-//    }
-
-    public void remove() {
-        if (mMarker != null) {
-            mMarker.remove();
-        }
     }
 
     @Override
@@ -218,6 +189,7 @@ public class FetchReviewsHandler implements Review.Results {
         e.printStackTrace();
         Toast.makeText(mAct, "Error retrieving reviews.", Toast.LENGTH_SHORT).show();
         mCompleted = true;
+        mLoadingDialog.dismiss();
     }
 
     @Override

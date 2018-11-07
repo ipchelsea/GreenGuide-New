@@ -9,11 +9,17 @@ import java.util.ArrayList;
  * Retrieved JSON data from the provided URLs.
  */
 public class AsyncJSONArray extends AsyncTask<String, Long, ArrayList<JSONArray>> {
-    public interface AsyncJSONArrayResult {
+    private OnAsyncJSONArrayResultListener resultListener;
+    private ArrayList<Exception> errors = new ArrayList<>();
+
+    /**
+     * Callback interface for supplying the results of the lookup.
+     */
+    public interface OnAsyncJSONArrayResultListener {
         /**
          * Called on the UI thread when the results are ready.
          *
-         * @param jArray    non-null array with the data where each index of jArray[i] matches to
+         * @param jArray    non-null array with the data where each index of jArray[position] matches to
          *                  the supplied URL in the same index.
          * @param exceptions    non-null array with the the errors that were encountered during
          *                      the background processes.
@@ -23,7 +29,7 @@ public class AsyncJSONArray extends AsyncTask<String, Long, ArrayList<JSONArray>
         /**
          * Called on the UI thread when the task is canceled.
          *
-         * @param jArray    non-null array with the data where each index of jArray[i] matches to
+         * @param jArray    non-null array with the data where each index of jArray[position] matches to
          *                  the supplied URL in the same index.
          * @param exceptions    non-null array with the the errors that were encountered during
          *                      the background processes.
@@ -31,20 +37,17 @@ public class AsyncJSONArray extends AsyncTask<String, Long, ArrayList<JSONArray>
         void onCanceled(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions);
     }
 
-    private AsyncJSONArrayResult resultCallback;
-    private ArrayList<Exception> errors = new ArrayList<>();
-
     /**
      * Default constructor which specified where to return resulting data.
      *
      * @param callback  non-null value which which receive the results and errors of the processing.
      */
-    public AsyncJSONArray(AsyncJSONArrayResult callback) {
+    public AsyncJSONArray(OnAsyncJSONArrayResultListener callback) {
         super();
         if (callback == null)
             throw new IllegalArgumentException("Callback can't be null");
 
-        resultCallback = callback;
+        resultListener = callback;
     }
 
     /**
@@ -54,14 +57,14 @@ public class AsyncJSONArray extends AsyncTask<String, Long, ArrayList<JSONArray>
      */
     @Override
     public void onCancelled(ArrayList<JSONArray> result) {
-        resultCallback.onCanceled(result, errors);
+        resultListener.onCanceled(result, errors);
     }
 
     /**
      * Runs the background process on a non-UI thread.
      *
      * @param strings   List of URL's which return a JSON array e.g., "[...]".
-     * @return  The list of JSON objects with where {@code strings[i]} => {@return[i]}
+     * @return  The list of JSON objects with where {@code strings[position]} => {@return[i]}
      */
     @Override
     protected final ArrayList<JSONArray> doInBackground(String... strings) {
@@ -105,7 +108,6 @@ public class AsyncJSONArray extends AsyncTask<String, Long, ArrayList<JSONArray>
         return result;
     }
 
-
     /**
      * Sends the results and errors to the user supplied callback in to the UI thread.
      *
@@ -113,6 +115,6 @@ public class AsyncJSONArray extends AsyncTask<String, Long, ArrayList<JSONArray>
      */
     @Override
     public final void onPostExecute(ArrayList<JSONArray> json) {
-        resultCallback.onFinish(json, errors);
+        resultListener.onFinish(json, errors);
      }
 }

@@ -57,9 +57,9 @@ public class PoiOverlay extends OverlayManager {
 
     public boolean onPoiClick(int i) {
 //        if (mPoiResult.getAllPoi() != null
-//                && mPoiResult.getAllPoi().get(i) != null) {
+//                && mPoiResult.getAllPoi().get(position) != null) {
 //            Toast.makeText(BMapManager.getInstance().getContext(),
-//                    mPoiResult.getAllPoi().get(i).name, Toast.LENGTH_LONG)
+//                    mPoiResult.getAllPoi().get(position).name, Toast.LENGTH_LONG)
 //                    .show();
 //        }
         return false;

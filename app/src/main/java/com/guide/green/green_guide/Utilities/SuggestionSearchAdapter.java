@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.guide.green.green_guide.R;
-import com.guide.green.green_guide.Utilities.BaiduMapManager.BaiduSuggestion;
 import java.util.ArrayList;
 
 public class SuggestionSearchAdapter
@@ -56,7 +55,6 @@ public class SuggestionSearchAdapter
         result.icon = view.findViewById(R.id.dropdown_typeIcon);
         result.topText = view.findViewById(R.id.dropdown_topText);
         result.btmText = view.findViewById(R.id.dropdown_bottomText);
-        result.uidText = view.findViewById(R.id.dropdown_bottomText);
         return result;
     }
 
@@ -65,13 +63,12 @@ public class SuggestionSearchAdapter
         final BaiduSuggestion suggestion = mSuggestions.get(position);
         holder.position = position;
         if (position == 0) {
-            holder.setFirstSearchItem(suggestion.name);
-        } else if (suggestion.point == null) {
-            holder.setAutoComplete(suggestion.name);
+            holder.setFirstSearchItem(((BaiduSuggestion.TextSuggestion) suggestion).suggestion);
+        } else if (suggestion.getType() == BaiduSuggestion.Type.TEXT_SUGGESTION) {
+            holder.setAutoComplete(((BaiduSuggestion.TextSuggestion) suggestion).suggestion);
         } else {
-            holder.setLocation(suggestion.name, suggestion.address);
-            // TODO: delete the line bellow
-            holder.uidText.setText(suggestion.uid);
+            BaiduSuggestion.Location locationSuggestion = (BaiduSuggestion.Location) suggestion;
+            holder.setLocation(locationSuggestion.name, locationSuggestion.address);
         }
     }
 
@@ -84,8 +81,6 @@ public class SuggestionSearchAdapter
         public ImageView icon;
         public TextView topText;
         public TextView btmText;
-        // TODO: delete the line bellow
-        public TextView uidText;
         public ViewGroup parent;
         public int position;
         public void setFirstSearchItem(String name) {

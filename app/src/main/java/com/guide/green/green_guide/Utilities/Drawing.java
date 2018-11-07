@@ -3,7 +3,6 @@ package com.guide.green.green_guide.Utilities;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -11,14 +10,12 @@ import android.graphics.Shader;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
-import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 
+/**
+ * Provides utilities for drawing shapes & figures and for converting graphical units.
+ */
 public class Drawing {
     /**
      * Converts scale-independent pixels to pixles.
@@ -62,18 +59,6 @@ public class Drawing {
      */
     public static float convertPxToDp(@NonNull Context ctx, float px) {
         return px / ctx.getResources().getDisplayMetrics().density;
-    }
-
-    /**
-     * Hides the virtual keyboard without taking away focus from the view that is using its input.
-     *
-     * @param view  the view which caused the keyboard to appear
-     * @param ctx   the context of the view
-     */
-    public static void hideKeyboard(@NonNull View view, @NonNull Context ctx) {
-        InputMethodManager imm = (InputMethodManager)
-                ctx.getSystemService(ctx.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     /**

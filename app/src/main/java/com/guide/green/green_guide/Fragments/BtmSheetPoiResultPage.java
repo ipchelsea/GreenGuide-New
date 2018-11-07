@@ -18,10 +18,20 @@ import com.baidu.mapapi.search.poi.PoiResult;
 import com.guide.green.green_guide.R;
 
 /**
- * A fragment which represents on of the pages of results for a POI search. It manages the items
- * listed on its page but does not manage the markers corresponding to its listed items.
+ * A fragment which represents one page of results for a POI search. It manages the items
+ * listed on its page.
  */
 public class BtmSheetPoiResultPage extends Fragment {
+    private OnRetrySearchListener mRetrySearchListener;
+    private ViewCreatedListener mViewCreatedListener;
+    private OnItemClickedListener mViewClickedListener;
+    private PoiResult mPoiResult;
+    private int mPageNum;
+
+    /**
+     * Callback interface invoked when the Fragments onCreateView method has been called.
+     * Used to check know when {@code addResultData} can be called.
+     */
     public interface ViewCreatedListener {
         /**
          * A callback called when the fragment's {@code onActivityCreated} method is invoked.
@@ -30,7 +40,12 @@ public class BtmSheetPoiResultPage extends Fragment {
          */
         void onCreateView(BtmSheetPoiResultPage fragment, int pageNumber);
     }
-    public interface RetrySearchListener {
+
+    /**
+     * Callback interface invoked when the retry button is pressed. Used because this object
+     * does not have a way for getting BAIDU map search results.
+     */
+    public interface OnRetrySearchListener {
         /**
          * Is called when the users clicked the retry button. The retry button is available when
          * an error is encountered and {@code onErrorEncountered} is called with the appropriate
@@ -40,28 +55,28 @@ public class BtmSheetPoiResultPage extends Fragment {
          */
         void onRetrySearch(int pageNumber);
     }
-    public interface ItemClickedListener {
+
+    /**
+     * Callback interface called when the "Select" button of one of the items in the list is
+     * clicked.
+     */
+    public interface OnItemClickedListener {
         /**
          * A callback called when one of the items of this page is clicked.
-         * @param poi Information about the point of interest.
+         * @param poi Information about the clicked point of interest.
          */
         void onClicked(PoiInfo poi);
     }
 
-    private RetrySearchListener mRetrySearchListener;
-    private ViewCreatedListener mViewCreatedListener;
-    private ItemClickedListener mViewClickedListner;
-    private PoiResult mPoiResult;
-    private int mPageNum;
-
-    public void setOnRetrySearchListener(RetrySearchListener listener) {
+    // Setters
+    public void setOnRetrySearchListener(OnRetrySearchListener listener) {
         mRetrySearchListener = listener;
     }
     public void setOnViewCreatedListener(ViewCreatedListener listener) {
         mViewCreatedListener = listener;
     }
-    public void setOnItemClickedListener(ItemClickedListener listener) {
-        mViewClickedListner = listener;
+    public void setOnItemClickedListener(OnItemClickedListener listener) {
+        mViewClickedListener = listener;
     }
 
     @Override
@@ -96,7 +111,9 @@ public class BtmSheetPoiResultPage extends Fragment {
     }
 
     /***
-     * Must be called after {@code onCreateView} has already been called.
+     * Must be called after {@code onCreateView} has already been called because it uses the
+     * layout inflated by that method.
+     *
      * @param poiResult an object returned by running a POI search.
      */
     public void addResultData(@NonNull final PoiResult poiResult) {
@@ -122,9 +139,6 @@ public class BtmSheetPoiResultPage extends Fragment {
                     .setText(String.format("City: %s", result.city));
             ((TextView) listItem.findViewById(R.id.poi_lanAndLat))
                     .setText(String.format("Coordinate: (%s, %s)", result.location.longitude, result.location.latitude));
-
-            // TODO: delete bottom line when done testing
-            ((TextView) listItem.findViewById(R.id.poi_uid)).setText(result.uid);
 
             listItem.findViewById(R.id.poi_select)
                     .setOnClickListener(new ListItemClickHandler(iconNumber - 1));
@@ -171,8 +185,8 @@ public class BtmSheetPoiResultPage extends Fragment {
         }
         @Override
         public void onClick(View view) {
-            if (mViewClickedListner != null) {
-                mViewClickedListner.onClicked(mPoiResult.getAllPoi().get(mIndex));
+            if (mViewClickedListener != null) {
+                mViewClickedListener.onClicked(mPoiResult.getAllPoi().get(mIndex));
             }
         }
     }

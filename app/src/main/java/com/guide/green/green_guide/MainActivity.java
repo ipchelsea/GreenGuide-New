@@ -1,6 +1,6 @@
 package com.guide.green.green_guide;
 
-
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.NestedScrollView;
@@ -24,25 +24,42 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.Overlay;
+import com.baidu.mapapi.model.LatLng;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
+import com.guide.green.green_guide.Dialogs.CityPickerDialog.OnCitySelectedListener;
 import com.guide.green.green_guide.Fragments.AboutFragment;
 import com.guide.green.green_guide.Fragments.GuidelinesFragment;
 import com.guide.green.green_guide.Fragments.LogInOutFragment;
 import com.guide.green.green_guide.Fragments.MyReviewsFragment;
 import com.guide.green.green_guide.Fragments.SignUpFragment;
 import com.guide.green.green_guide.Fragments.UserGuideFragment;
+import com.guide.green.green_guide.Utilities.AsyncGetRequest;
+import com.guide.green.green_guide.Utilities.AsyncJSONArray;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
+import com.guide.green.green_guide.Utilities.BaiduSuggestion;
 import com.guide.green.green_guide.Utilities.BottomSheetManager;
-import com.guide.green.green_guide.Utilities.SuggestionSearchManager2;
+import com.guide.green.green_guide.Utilities.FragContainer;
+import com.guide.green.green_guide.Utilities.RomanizedLocation;
+import com.guide.green.green_guide.Utilities.SuggestionSearchManager;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity implements
+public class MainActivity extends AppCompatActivity implements OnCitySelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
     // High level managers
     private BaiduMapManager mMapManager;
     private BottomSheetManager mBtmSheetManager;
-    private Button citySelectionView = null;
+    private Button mCitySelectionView = null;
 
     // Terrain selection
     FloatingActionButton normalMapView;
@@ -55,10 +72,18 @@ public class MainActivity extends AppCompatActivity implements
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
+        ((Button) findViewById(R.id.writeReview)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragContainer.startActivity(MainActivity.this, R.id.write_review);
+            }
+        });
+        
         initMapManager();
         initBottomSheet();
         initToolsAndWidgets();
         initLocationTracker();
+        getGreenGuidePoints();
     }
 
     public void initMapManager() {
@@ -72,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements
         FloatingActionButton btnMyLocation = findViewById(R.id.myLocation);
 
         TrackLocationHandler locationHandler =
-                new TrackLocationHandler(this, btnMyLocation, mMapManager.BAIDU_MAP);
+                new TrackLocationHandler(this, btnMyLocation, mMapManager.baiduMap);
 
         btnMyLocation.setOnClickListener(locationHandler);
     }
@@ -182,6 +207,12 @@ public class MainActivity extends AppCompatActivity implements
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (mBtmSheetManager.getBottomSheetState() != BottomSheetBehavior.STATE_HIDDEN) {
+            if (mBtmSheetManager.getBottomSheetState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+            } else {
+                mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
         } else {
             super.onBackPressed();
         }
@@ -193,82 +224,33 @@ public class MainActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.main, menu);
 
         MenuItem itemCity = menu.findItem(R.id.cityItem);
-        citySelectionView = itemCity.getActionView().findViewById(R.id.city);
-        citySelectionView.setOnClickListener(new Button.OnClickListener() {
+        mCitySelectionView = itemCity.getActionView().findViewById(R.id.city);
+        mCitySelectionView.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final CityPickerDialog cpd = new CityPickerDialog();
-                cpd.setSelectedCityButton(citySelectionView);
-                cpd.show(getSupportFragmentManager(), "Pick a City");
+                CityPickerDialog cityPickerDialog = new CityPickerDialog();
+                cityPickerDialog.setOnCitySelectedListener(MainActivity.this);
+                cityPickerDialog.show(getSupportFragmentManager(), "City Picker");
             }
         });
 
-//        MenuItem itemSearch = menu.findItem(R.id.searchItem);
-//        AutoCompleteTextView searchView = itemSearch.getActionView().findViewById(R.id.search);
-//        /* Not saved Intentionally */
-//        new SuggestionSearchManager(this, searchView, citySelectionView, mMapManager,
-//                mBtmSheetManager);
-
-        MenuItem itemSearch2 = menu.findItem(R.id.searchItem2);
-        EditText searchInput = itemSearch2.getActionView().findViewById(R.id.searchInput);
+        MenuItem itemSearch = menu.findItem(R.id.searchItem);
+        EditText searchInput = itemSearch.getActionView().findViewById(R.id.searchInput);
         RecyclerView searchDropDown = findViewById(R.id.searchDropDown);
 
-        ViewGroup vMain = (ViewGroup) findViewById(R.id.mapViewContainer);
-        ViewGroup vDropDown = (ViewGroup) findViewById(R.id.searchDropDownContainer);
+        ViewGroup mapViewContainer = findViewById(R.id.mapViewContainer);
+        ViewGroup searchDropDownContainer = findViewById(R.id.searchDropDownContainer);
+
         /* Not saved Intentionally */
-        new SuggestionSearchManager2(this, searchInput, searchDropDown, citySelectionView,
-                mMapManager, mBtmSheetManager, itemSearch2, vMain, vDropDown);
+        new SuggestionSearchManager(this, searchInput, searchDropDown, mCitySelectionView,
+                mMapManager, mBtmSheetManager, itemSearch, mapViewContainer, searchDropDownContainer);
 
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.search) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-        Fragment fragment = null;
-        switch (id) {
-            case R.id.my_reviews:
-                fragment = new MyReviewsFragment();
-                break;
-            case R.id.guidelines:
-                fragment = new GuidelinesFragment();
-                break;
-            case R.id.about:
-                fragment = new AboutFragment();
-                break;
-            case R.id.user_guide:
-                fragment = new UserGuideFragment();
-                break;
-            case R.id.sign_up:
-                fragment = new SignUpFragment();
-                break;
-            case R.id.log_in_out:
-                fragment = new LogInOutFragment();
-                break;
-        }
-
-        if (fragment != null) {
-            FragmentManager fm = getSupportFragmentManager();
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.add(R.id.drawer_layout, fragment);
-            ft.commit();
-        }
-
+        FragContainer.startActivity(this, item.getItemId());
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -292,6 +274,187 @@ public class MainActivity extends AppCompatActivity implements
         mMapManager.onDestroy();
     }
 
+    @Override
+    public void onCitySelected(RomanizedLocation city) {
+        mCitySelectionView.setText(city.name);
+    }
+
     /* Temporary Method For Testing Things */
     public void doStuff(View view) {}
+
+
+    private String getString(CharSequence ch, String regexPattern) {
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexPattern);
+        java.util.regex.Matcher matcher = pattern.matcher(ch);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    public void getGreenGuidePoints() {
+        new AsyncJSONArray(new AsyncJSONArray.OnAsyncJSONArrayResultListener() {
+            @Override
+            public void onFinish(ArrayList<JSONArray> jArrays, ArrayList<Exception> exceptions) {
+                final ArrayList<GreenGuideLocation> pos = new ArrayList<>();
+                JSONArray jsonArray = jArrays.get(0);
+                try {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jObj = jsonArray.getJSONObject(i);
+                        String lng = jObj.getString("lng");
+                        String lat = jObj.getString("lat");
+                        String avrg = jObj.getString("avg_r");
+                        String company = jObj.getString("company");
+                        String address = jObj.getString("address");
+                        String city = jObj.getString("city");
+                        if (!lng.equals("") && !lat.equals("") && !avrg.equals("")) {
+                            GreenGuideLocation gL = new GreenGuideLocation();
+                            gL.averageRating = Float.parseFloat(avrg);
+                            gL.point = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+                            gL.companyName = company;
+                            gL.address = address;
+                            gL.city = city;
+                            pos.add(gL);
+                        }
+                    }
+                } catch (JSONException e) { /* Do Nohting */ }
+
+                GreenGuideMarkers markers = new GreenGuideMarkers(mMapManager) {
+                    @Override
+                    public boolean onPoiClick(int index) {
+                        GreenGuideLocation location = pos.get(index);
+                        mBtmSheetManager.getReview(new BaiduSuggestion.Location(
+                                location.companyName, location.address, location.point));
+                        return false;
+                    }
+                };
+                markers.setData(pos);
+            }
+
+            @Override
+            public void onCanceled(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
+                /* Do Nothing */
+            }
+        }).execute("http://www.lovegreenguide.com/map_point_app.php?lng=112.578658&lat=28.247855");
+
+
+        if (true) return;
+        new AsyncGetRequest(new AsyncGetRequest.OnResultListener() {
+            @Override
+            public void onFinish(ArrayList<StringBuilder> result, ArrayList<Exception> e) {
+                final ArrayList<GreenGuideLocation> pos = new ArrayList<>();
+                String g1 = getString(result.get(0), "var data = \\[([^\\]]+)");
+                java.util.regex.Pattern pattern1 = java.util.regex.Pattern.compile("\\{([^\\}]+)");
+                java.util.regex.Matcher matcher1 = pattern1.matcher(g1);
+                while (matcher1.find()) {
+                    String jsonObj = matcher1.group(1);
+                    String lng = getString(jsonObj, "\"lng\":\"([^\"]*)");
+                    String lat = getString(jsonObj, "\"lat\":\"([^\"]*)");
+                    String avrg = getString(jsonObj, "\"avg_r\":\"([^\"]*)");
+                    if (!lng.equals("") && !lat.equals("") && !avrg.equals("")) {
+                        GreenGuideLocation gL = new GreenGuideLocation();
+                        gL.averageRating = Float.parseFloat(avrg);
+                        gL.point = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+                        pos.add(gL);
+                    }
+                }
+
+                GreenGuideMarkers markers = new GreenGuideMarkers(mMapManager) {
+                    @Override
+                    public boolean onPoiClick(int index) {
+                        GreenGuideLocation location = pos.get(index);
+                        mBtmSheetManager.getReview(new BaiduSuggestion.Location("",
+                                "", location.point));
+                        return false;
+                    }
+                };
+                markers.setData(pos);
+            }
+
+            @Override
+            public void onCanceled(ArrayList<StringBuilder> result, ArrayList<Exception> e) {
+                /* Do Nothing */
+            }
+        }).execute("http://www.lovegreenguide.com/map.php");
+
+        mMapManager.baiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                return false;
+            }
+        });
+    }
+
+    public static abstract class GreenGuideMarkers implements BaiduMap.OnMarkerClickListener {
+        private ArrayList<Overlay> mOverlayList;
+        private BaiduMapManager mMapManager;
+
+        public GreenGuideMarkers(BaiduMapManager mapManager) {
+            mMapManager = mapManager;
+            mMapManager.baiduMap.setOnMarkerClickListener(this);
+        }
+
+        public abstract boolean onPoiClick(int index);
+
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            if (!mOverlayList.contains(marker)) {
+                return false;
+            }
+            if (marker.getExtraInfo() != null) {
+                return onPoiClick(marker.getExtraInfo().getInt("index"));
+            }
+            return false;
+        }
+
+        public void setData(ArrayList<GreenGuideLocation> greenGuideLocations) {
+            mOverlayList = new ArrayList<>();
+            for (int i = 0; i < greenGuideLocations.size(); i++) {
+                GreenGuideLocation location = greenGuideLocations.get(i);
+                Bundle bundle = new Bundle();
+                bundle.putInt("index", i);
+                MarkerOptions option = new MarkerOptions()
+                        .position(location.point)
+                        .extraInfo(bundle);
+                mOverlayList.add(mMapManager.addMarker(option,
+                        getColoredMarkerFromRating(location.averageRating)));
+            }
+        }
+    }
+
+    public static class GreenGuideLocation {
+        public float averageRating;
+        public String companyName;
+        public String address;
+        public String city;
+        public LatLng point;
+    }
+
+    private static int roundRating(float rating) {
+        if (rating < 0) {
+            return  -Math.round(-rating);
+        } else {
+            return Math.round(rating);
+        }
+    }
+
+    /***
+     * Returns a resource ID for the appropriately colored marker for the supplied rating.
+     *
+     * @param averageRating A number in the set [-3,3] inclusive of both.
+     * @return A resource Id.
+     */
+    private static int getColoredMarkerFromRating(float averageRating) {
+        int drawableId;
+        switch (roundRating(averageRating)) {
+            case -3: drawableId = R.drawable.icon_markg_red; break;
+            case -2: drawableId = R.drawable.icon_markg_orange; break;
+            case -1: drawableId = R.drawable.icon_markg_yellow; break;
+            case 0: drawableId = R.drawable.icon_markg_white; break;
+            case 1: drawableId = R.drawable.icon_markg_aqua; break;
+            case 2: drawableId = R.drawable.icon_markg_lime; break;
+            default: drawableId = R.drawable.icon_markg_green; break;
+        }
+        return drawableId;
+    }
 }

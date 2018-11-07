@@ -2,34 +2,38 @@ package com.guide.green.green_guide.Utilities;
 
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.search.core.PoiInfo;
 import com.baidu.mapapi.search.poi.PoiSearch;
-import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 
+/**
+ * This class stores the map-related variables who's lifetime is closely related to that of
+ * the main Activity. For example, the {@code poiSearch} variable needs to be destroyed at the
+ * end of the main activities life, the {@code MAP_ACTIVITY} need to be paused when the activity is
+ * pause, and so forth. This class acts as a way for other objects to interact with the map-related
+ * variables it stores.
+ */
 public class BaiduMapManager {
-    public final MapView MAP_VIEW;
-    public final BaiduMap BAIDU_MAP;
-    public final PoiSearch POI_SEARCH;
+    public final MapView mapView;
+    public final BaiduMap baiduMap;
+    public final PoiSearch poiSearch;
     public final SuggestionSearch SUGGESTION_SEARCH;
-    public final SuggestionSearch SUGGESTION_SEARCH2;
 
+    /**
+     * Takes in a the map object ans uses it to create all of the other objects.
+     * @param map the baidu map view.
+     */
     public BaiduMapManager(@NonNull MapView map) {
-        MAP_VIEW = map;
-        BAIDU_MAP = MAP_VIEW.getMap();
-        POI_SEARCH = PoiSearch.newInstance();
+        mapView = map;
+        baiduMap = mapView.getMap();
+        poiSearch = PoiSearch.newInstance();
         SUGGESTION_SEARCH = SuggestionSearch.newInstance();
-        SUGGESTION_SEARCH2 = SuggestionSearch.newInstance();
     }
 
     /**
@@ -52,7 +56,7 @@ public class BaiduMapManager {
      */
     public boolean setMapType(MapType type) {
         if (type != null) {
-            BAIDU_MAP.setMapType(type.BAIDU_TYPE);
+            baiduMap.setMapType(type.BAIDU_TYPE);
             return true;
         }
         return false;
@@ -65,72 +69,55 @@ public class BaiduMapManager {
      * @return The created marker.
      */
     public Overlay addMarker(@NonNull MarkerOptions options, @DrawableRes int resource) {
-        return BAIDU_MAP.addOverlay(options.icon(BitmapDescriptorFactory.fromResource(resource)));
+        return baiduMap.addOverlay(options.icon(BitmapDescriptorFactory.fromResource(resource)));
     }
 
+    /**
+     * Moves the center of the map to the specified location.
+     *
+     * @param location the location to move the map to.
+     */
     public void moveTo(LatLng location) {
-        BAIDU_MAP.animateMapStatus(MapStatusUpdateFactory.newLatLng(location));
+        baiduMap.animateMapStatus(MapStatusUpdateFactory.newLatLng(location));
     }
 
+    // TODO: Figure out who the zoom level works (Fill in the ??)
+    /**
+     * Zooms in the map to the specified level.
+     *
+     * @param zoomLevel A number between [??], inclusive of both, where a higher number results
+     *                  in a greater magnification.
+     */
     public void zoomTo(int zoomLevel) {
-        BAIDU_MAP.animateMapStatus(MapStatusUpdateFactory.zoomTo(zoomLevel));
+        baiduMap.animateMapStatus(MapStatusUpdateFactory.zoomTo(zoomLevel));
     }
 
+    // TODO: Figure out who the zoom level works
+    /**
+     * Moves the center of the map to the specified location while zooming to the specified level.
+     *
+     * @param location the location to move the map to.
+     * @param zoomLevel A number between [??], inclusive of both, where a higher number results
+     *                  in a greater magnification.
+     */
     public void moveAndZoomTo(LatLng location, int zoomLevel) {
-        BAIDU_MAP.animateMapStatus(MapStatusUpdateFactory.newLatLngZoom(location, zoomLevel));
+        baiduMap.animateMapStatus(MapStatusUpdateFactory.newLatLngZoom(location, zoomLevel));
     }
 
     public void onResume() {
-        MAP_VIEW.onResume();
+        mapView.onResume();
     }
 
     public void onPause() {
-        MAP_VIEW.onPause();
+        mapView.onPause();
     }
 
     /**
      * Must be called when the object is no longer in use.
      */
     public void onDestroy() {
-        POI_SEARCH.destroy();
+        poiSearch.destroy();
+        mapView.onDestroy();
         SUGGESTION_SEARCH.destroy();
-        MAP_VIEW.onDestroy();
-        SUGGESTION_SEARCH2.destroy();
-    }
-
-    public static class BaiduSuggestion {
-        public final @NonNull String name;
-        public final @Nullable String address;
-        public final @Nullable LatLng point;
-        // TODO: delete the line bellow when done testing
-        public String uid = "";
-
-        private BaiduSuggestion(String name, String address, LatLng point) {
-            this.name = name;
-            this.address = address;
-            this.point = point;
-        }
-        public BaiduSuggestion(@NonNull String name) {
-            this(name, null, null);
-        }
-        public BaiduSuggestion(@NonNull MapPoi mapPoi) {
-            this(mapPoi.getName(), "MAP POI NULL", mapPoi.getPosition());
-            // TODO: delete the line bellow
-            uid = mapPoi.getUid();
-        }
-        public BaiduSuggestion(@NonNull SuggestionResult.SuggestionInfo info) {
-            this(info.key, info.pt == null ? null : info.pt.toString(), info.pt);
-            // TODO: delete the line bellow
-            uid = info.uid;
-        }
-        public BaiduSuggestion(@NonNull PoiInfo info) {
-            this(info.name, info.address, info.location);
-            // TODO: delete the line bellow
-            uid = info.uid;
-        }
-        @Override
-        public String toString() {
-            return name;
-        }
     }
 }

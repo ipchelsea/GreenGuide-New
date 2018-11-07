@@ -330,7 +330,7 @@ public class Review {
         return  aj;
     }
 
-    private static class ReviewAsyncJSONArrayResult implements AsyncJSONArray.AsyncJSONArrayResult {
+    private static class ReviewAsyncJSONArrayResult implements AsyncJSONArray.OnAsyncJSONArrayResultListener {
         public final Results REVIEWS_CALLBACK;
 
         private static String decodeHTML(String htmlString) {
@@ -370,17 +370,26 @@ public class Review {
                     for (Location.Key key : Location.Key.keys) {
                         review.location.set(key, decodeHTML(subJObj.getString(key.value)));
                     }
-                    subJObj = jObj.getJSONObject("water");
-                    for (WaterIssue.Key key : WaterIssue.Key.keys) {
-                        review.waterIssue.set(key, decodeHTML(subJObj.getString(key.value)));
+                    String waterKey = "water";
+                    if (!jObj.isNull(waterKey)) {
+                        subJObj = jObj.getJSONObject(waterKey);
+                        for (WaterIssue.Key key : WaterIssue.Key.keys) {
+                            review.waterIssue.set(key, decodeHTML(subJObj.getString(key.value)));
+                        }
                     }
-                    subJObj = jObj.getJSONObject("solid");
-                    for (SolidWaste.Key key : SolidWaste.Key.keys) {
-                        review.solidWaste.set(key, decodeHTML(subJObj.getString(key.value)));
+                    String solidKey = "solid";
+                    if (!jObj.isNull(solidKey)) {
+                        subJObj = jObj.getJSONObject(solidKey);
+                        for (SolidWaste.Key key : SolidWaste.Key.keys) {
+                            review.solidWaste.set(key, decodeHTML(subJObj.getString(key.value)));
+                        }
                     }
-                    subJObj = jObj.getJSONObject("air");
-                    for (AirWaste.Key key : AirWaste.Key.keys) {
-                        review.airWaste.set(key, decodeHTML(subJObj.getString(key.value)));
+                    String airKey = "air";
+                    if (!jObj.isNull(airKey)) {
+                        subJObj = jObj.getJSONObject(airKey);
+                        for (AirWaste.Key key : AirWaste.Key.keys) {
+                            review.airWaste.set(key, decodeHTML(subJObj.getString(key.value)));
+                        }
                     }
                     results.add(review);
                 } catch (JSONException e) {

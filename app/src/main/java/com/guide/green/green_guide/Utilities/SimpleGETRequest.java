@@ -17,11 +17,11 @@ import java.nio.charset.CoderResult;
  * Provides a way to run a get request.
  */
 public abstract class SimpleGETRequest {
-    private final String STR_URL;
-    private final int BUFFER_SIZE;
     private boolean isCanceled = false;
-    private int CONNECTION_TIMEOUT;
-    private int READ_TIMEOUT;
+    private int mConnectionTimeout;
+    private final int mBufferSize;
+    private final String mStrUlr;
+    private int mReadTimeout;
 
     /**
      * Constructor which sets the default buffer size to 4096 bytes.
@@ -55,10 +55,10 @@ public abstract class SimpleGETRequest {
      * @param readTimeout   the time in milliseconds to wait to receive data.
      */
     public SimpleGETRequest(String url, int bufferLength, int connectionTimeout, int readTimeout) {
-        STR_URL = url;
-        BUFFER_SIZE = bufferLength;
-        CONNECTION_TIMEOUT = connectionTimeout;
-        READ_TIMEOUT = readTimeout;
+        mStrUlr = url;
+        mBufferSize = bufferLength;
+        mConnectionTimeout = connectionTimeout;
+        mReadTimeout = readTimeout;
         if (bufferLength < 3) {
             throw new IllegalArgumentException("The supplied buffer length \"" + bufferLength
                     + "\" is too small. Must be at least 3.");
@@ -102,7 +102,7 @@ public abstract class SimpleGETRequest {
         StringBuilder sb = null;
 
         try {
-            url = new URL(STR_URL);
+            url = new URL(mStrUlr);
             conn = (HttpURLConnection) url.openConnection();
         } catch (MalformedURLException e) {
             onError(e);
@@ -113,12 +113,11 @@ public abstract class SimpleGETRequest {
         }
 
         conn.setInstanceFollowRedirects(true);
-        conn.setConnectTimeout(15 * 1000);
-        conn.setReadTimeout(10 * 1000);
-//        conn.setRequestProperty("Connection", "close"); // -> Causing "java.net.ProtocolException: unexpected end of stream" at "con.read(..."
+        conn.setConnectTimeout(mConnectionTimeout);
+        conn.setReadTimeout(mReadTimeout);
 
-        byte[] bBuffer = new byte[BUFFER_SIZE];
-        char[] cBuffer = new char[BUFFER_SIZE];
+        byte[] bBuffer = new byte[mBufferSize];
+        char[] cBuffer = new char[mBufferSize];
 
         try {
             long contentLength = -1, contentCount = 0;
@@ -155,7 +154,7 @@ public abstract class SimpleGETRequest {
                     bBuffer[i] = bBuffer[rtnLen - writeOffset + i];
                 }
             } while ((contentLength == -1 || contentCount < contentLength)
-                        && writeOffset != BUFFER_SIZE && !isCanceled);
+                        && writeOffset != mBufferSize && !isCanceled);
         } catch (ProtocolException e) {
             onError(e);
         } catch (IOException e) {

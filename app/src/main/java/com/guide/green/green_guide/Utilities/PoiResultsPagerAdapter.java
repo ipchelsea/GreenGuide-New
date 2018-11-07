@@ -23,7 +23,16 @@ import java.util.List;
 import java.util.Map;
 
 public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
-        OnGetPoiSearchResultListener, BtmSheetPoiResultPage.ItemClickedListener {
+        OnGetPoiSearchResultListener, BtmSheetPoiResultPage.OnItemClickedListener {
+    private int mTotalPages;
+    private BaiduMap mBaiduMap;
+    private PoiSearch mPoiSearch;
+    private PoiCitySearchOption query;
+    private Map<Integer, BtmSheetPoiResultPage> mLoadingPages = new LinkedHashMap<>();
+    private List<PoiOverlay> mPoiOverlay = new ArrayList<>();
+    private PoiResultLoaded mPoiResultLoaded;
+    private PoiSelected mPoiClickHandler;
+
     private class PagerPoiOverlay extends PoiOverlay {
         public PagerPoiOverlay(BaiduMap baiduMap) {
             super(baiduMap);
@@ -39,21 +48,14 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
             return true;
         }
     }
+
     public interface PoiResultLoaded {
         void onResult(PoiOverlay overlay, int pageNumber);
     }
+
     public interface PoiSelected {
         void onPoiSelected(PoiInfo poi);
     }
-
-    private int mTotalPages;
-    private BaiduMap mBaiduMap;
-    private PoiSearch mPoiSearch;
-    private PoiCitySearchOption query;
-    private Map<Integer, BtmSheetPoiResultPage> mLoadingPages = new LinkedHashMap<>();
-    private List<PoiOverlay> mPoiOverlay = new ArrayList<>();
-    private PoiResultLoaded mPoiResultLoaded;
-    private PoiSelected mPoiClickHandler;
 
     @Override
     public void onClicked(PoiInfo poi) {
@@ -66,8 +68,8 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
                                   PoiCitySearchOption query) {
         super(act.getSupportFragmentManager());
         this.query = query;
-        mBaiduMap = mapManager.BAIDU_MAP;
-        mPoiSearch = mapManager.POI_SEARCH;
+        mBaiduMap = mapManager.baiduMap;
+        mPoiSearch = mapManager.poiSearch;
         mPoiSearch.setOnGetPoiSearchResultListener(this);
     }
 
@@ -128,7 +130,7 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
             makePoiQuery(position + 1);
         }
 
-        poiResultFrag.setOnRetrySearchListener(new BtmSheetPoiResultPage.RetrySearchListener() {
+        poiResultFrag.setOnRetrySearchListener(new BtmSheetPoiResultPage.OnRetrySearchListener() {
             @Override
             public void onRetrySearch(int pageNumber) {
                 makePoiQuery(pageNumber);
@@ -160,6 +162,8 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
     private static final String NO_RESULTS_MSG = "No results found.";
     private static final String NET_ERROR_MSG = "Error: Check your network connection.";
     private static final String UNKOWN_ERROR_MSG = "Error: Unknown error encountered.";
+
+
 
     @Override
     public void onGetPoiResult(PoiResult result) {
@@ -210,6 +214,7 @@ public class PoiResultsPagerAdapter extends FragmentStatePagerAdapter implements
     @Override
     public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
         /* Do nothing */
+        poiDetailResult = poiDetailResult;
     }
 
     @Override
