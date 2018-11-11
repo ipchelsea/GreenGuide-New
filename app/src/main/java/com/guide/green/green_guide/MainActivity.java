@@ -1,14 +1,10 @@
 package com.guide.green.green_guide;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.NestedScrollView;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -32,13 +28,6 @@ import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.model.LatLng;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog.OnCitySelectedListener;
-import com.guide.green.green_guide.Fragments.AboutFragment;
-import com.guide.green.green_guide.Fragments.GuidelinesFragment;
-import com.guide.green.green_guide.Fragments.LogInOutFragment;
-import com.guide.green.green_guide.Fragments.MyReviewsFragment;
-import com.guide.green.green_guide.Fragments.SignUpFragment;
-import com.guide.green.green_guide.Fragments.UserGuideFragment;
-import com.guide.green.green_guide.Utilities.AsyncGetRequest;
 import com.guide.green.green_guide.Utilities.AsyncJSONArray;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
 import com.guide.green.green_guide.Utilities.BaiduSuggestion;
@@ -78,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
                 FragContainer.startActivity(MainActivity.this, R.id.write_review);
             }
         });
-        
+
         initMapManager();
         initBottomSheet();
         initToolsAndWidgets();
@@ -282,16 +271,6 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     /* Temporary Method For Testing Things */
     public void doStuff(View view) {}
 
-
-    private String getString(CharSequence ch, String regexPattern) {
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexPattern);
-        java.util.regex.Matcher matcher = pattern.matcher(ch);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
     public void getGreenGuidePoints() {
         new AsyncJSONArray(new AsyncJSONArray.OnAsyncJSONArrayResultListener() {
             @Override
@@ -336,53 +315,6 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
                 /* Do Nothing */
             }
         }).execute("http://www.lovegreenguide.com/map_point_app.php?lng=112.578658&lat=28.247855");
-
-
-        if (true) return;
-        new AsyncGetRequest(new AsyncGetRequest.OnResultListener() {
-            @Override
-            public void onFinish(ArrayList<StringBuilder> result, ArrayList<Exception> e) {
-                final ArrayList<GreenGuideLocation> pos = new ArrayList<>();
-                String g1 = getString(result.get(0), "var data = \\[([^\\]]+)");
-                java.util.regex.Pattern pattern1 = java.util.regex.Pattern.compile("\\{([^\\}]+)");
-                java.util.regex.Matcher matcher1 = pattern1.matcher(g1);
-                while (matcher1.find()) {
-                    String jsonObj = matcher1.group(1);
-                    String lng = getString(jsonObj, "\"lng\":\"([^\"]*)");
-                    String lat = getString(jsonObj, "\"lat\":\"([^\"]*)");
-                    String avrg = getString(jsonObj, "\"avg_r\":\"([^\"]*)");
-                    if (!lng.equals("") && !lat.equals("") && !avrg.equals("")) {
-                        GreenGuideLocation gL = new GreenGuideLocation();
-                        gL.averageRating = Float.parseFloat(avrg);
-                        gL.point = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-                        pos.add(gL);
-                    }
-                }
-
-                GreenGuideMarkers markers = new GreenGuideMarkers(mMapManager) {
-                    @Override
-                    public boolean onPoiClick(int index) {
-                        GreenGuideLocation location = pos.get(index);
-                        mBtmSheetManager.getReview(new BaiduSuggestion.Location("",
-                                "", location.point));
-                        return false;
-                    }
-                };
-                markers.setData(pos);
-            }
-
-            @Override
-            public void onCanceled(ArrayList<StringBuilder> result, ArrayList<Exception> e) {
-                /* Do Nothing */
-            }
-        }).execute("http://www.lovegreenguide.com/map.php");
-
-        mMapManager.baiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                return false;
-            }
-        });
     }
 
     public static abstract class GreenGuideMarkers implements BaiduMap.OnMarkerClickListener {

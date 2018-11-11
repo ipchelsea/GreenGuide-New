@@ -71,14 +71,14 @@ public class AsyncJSONArray extends AsyncTask<String, Long, ArrayList<JSONArray>
         ArrayList<JSONArray> result = new ArrayList<>();
 
         for (String strUrl : strings) {
-            SimpleGETRequest getRequest = new SimpleGETRequest(strUrl) {
+            SimpleTextGETRequest getRequest = new SimpleTextGETRequest(strUrl) {
                 @Override
                 public void onError(Exception e) {
                     errors.add(e);
                 }
 
                 @Override
-                public void onUpdate(StringBuilder sb, long current, long total) {
+                public void onReadUpdate(long current, long total) {
                     if (isCancelled()) {
                         stop();
                     } else {
@@ -87,7 +87,8 @@ public class AsyncJSONArray extends AsyncTask<String, Long, ArrayList<JSONArray>
                 }
             };
 
-            StringBuilder sb = getRequest.send();
+            getRequest.send();
+            StringBuilder sb = getRequest.getResult();
 
             if (isCancelled()) {
                 break;
