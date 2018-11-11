@@ -165,14 +165,14 @@
                     android:layout_gravity="center">
 
                     <Button
-                        android:id="@+id/water_prev"
+                        android:id="@+id/solid_prev"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="left"
                         android:text="Prev" />
 
                     <Button
-                        android:id="@+id/water_next"
+                        android:id="@+id/solid_next"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="right"

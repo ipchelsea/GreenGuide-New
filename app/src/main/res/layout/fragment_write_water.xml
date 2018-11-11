@@ -585,7 +585,6 @@
                         android:layout_width="wrap_content"
                         android:layout_gravity="right"
                         android:text="Next" />
-
                 </GridLayout>
             </LinearLayout>
         </ScrollView>

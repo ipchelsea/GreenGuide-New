@@ -1,5 +1,6 @@
 package com.guide.green.green_guide;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.NestedScrollView;
@@ -32,7 +33,6 @@ import com.guide.green.green_guide.Utilities.AsyncJSONArray;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
 import com.guide.green.green_guide.Utilities.BaiduSuggestion;
 import com.guide.green.green_guide.Utilities.BottomSheetManager;
-import com.guide.green.green_guide.Utilities.FragContainer;
 import com.guide.green.green_guide.Utilities.RomanizedLocation;
 import com.guide.green.green_guide.Utilities.SuggestionSearchManager;
 
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
         ((Button) findViewById(R.id.writeReview)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragContainer.startActivity(MainActivity.this, R.id.write_review);
+                WriteReviewActivity.open(MainActivity.this);
             }
         });
 
@@ -239,7 +239,12 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
 
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
-        FragContainer.startActivity(this, item.getItemId());
+        int itemId = item.getItemId();
+        if (itemId == R.id.write_review) {
+            WriteReviewActivity.open(this);
+        } else {
+            FragmentContainer.startActivity(this, itemId);
+        }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

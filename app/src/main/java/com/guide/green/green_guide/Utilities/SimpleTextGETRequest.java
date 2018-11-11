@@ -1,5 +1,7 @@
 package com.guide.green.green_guide.Utilities;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -141,7 +143,7 @@ public class SimpleTextGETRequest extends SimpleGETRequest {
      */
     @Override
     public void onError(Exception e) {
-        System.out.println(e);
+        Log.e("SimpleTextGet", e.toString());
         e.printStackTrace();
     }
 

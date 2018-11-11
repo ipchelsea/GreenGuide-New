@@ -335,7 +335,6 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
     }
 
     private void sendPostData(SimpleRequest.SendRecvHandler recvArgs) throws IOException {
-        System.out.println("Sending Data");
         OutputStream out = recvArgs.getOutputStream();
         
         ByteArrayOutputStream bArray = new ByteArrayOutputStream(mBoundary.length + 6);
@@ -357,36 +356,5 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
         out.write(FormItem.NEW_LINE);
         out.flush();
         out.close();
-    }
-    
-
-    public static void main(String[] args) {    
-        // SimpleTextGETRequest simpleGet = new SimpleTextGETRequest("http://localhost/unicode.txt");
-        // simpleGet.send();
-        // System.out.println(simpleGet);
-        // try {
-            // java.io.FileOutputStream fsOut = new java.io.FileOutputStream("out.txt");
-            // fsOut.write(simpleGet.toString().getBytes("UTF-8"));
-            // fsOut.close();
-        // } catch (java.io.IOException e) { System.out.println("ERROR WRITING TO FILE"); }
-        
-        System.out.println("DID SOMETHING");
-        
-        List<FormItem> a = new ArrayList<FormItem>();
-        a.add(new TextFormItem("COOL_NAME", "BEST GIRL"));
-        a.add(new FileFormItem("image[]", "abc.png", "image/png", "CAT") {
-            @Override
-            public byte[] getValue() {
-                return ((String) value).getBytes();
-            }
-        });
-        
-        SimplePOSTRequest postRequest =
-                new SimplePOSTRequest("http://students.washington.edu/mugos/GreenGuide/baiduJavaScriptTest/index.php", a);
-        
-        postRequest.send();
-        
-        System.out.println(postRequest);
-        
     }
 }

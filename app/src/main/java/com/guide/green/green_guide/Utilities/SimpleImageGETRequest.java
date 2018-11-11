@@ -1,5 +1,7 @@
 package com.guide.green.green_guide.Utilities;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -57,7 +59,6 @@ public class SimpleImageGETRequest extends SimpleGETRequest {
      */
     @Override
     public void onResponseHeaders(SendRecvHandler recvArgs, long dataLength) {
-        System.out.println("Image Size> " + dataLength);
         if (dataLength > 0) {
           mImageData = new byte[(int) dataLength];
         } else {
@@ -79,7 +80,6 @@ public class SimpleImageGETRequest extends SimpleGETRequest {
      */
     @Override
     public void onRead(SendRecvHandler recvArgs, int rtnLen) {
-        System.out.println("Read");
         int dataLen = rtnLen + recvArgs.recvBufferOffset;
 
         recvArgs.recvBufferLen += getDesiredBufferSize();
@@ -96,14 +96,13 @@ public class SimpleImageGETRequest extends SimpleGETRequest {
      */
     @Override
     public void onError(Exception e) {
-        System.out.println(e);
+        Log.e("SimpleImage", e.toString());
         e.printStackTrace();
     }
 
   public static void main(String[] args) {
     SimpleImageGETRequest simpleGet = new SimpleImageGETRequest("http://localhost/eve.jpg");
     simpleGet.send();
-    System.out.println(simpleGet);
     try {
       java.io.FileOutputStream fsOut = new java.io.FileOutputStream("out.jpg");
       fsOut.write(simpleGet.mImageData);
