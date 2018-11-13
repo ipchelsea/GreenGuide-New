@@ -1,6 +1,5 @@
 package com.guide.green.green_guide;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.NestedScrollView;
@@ -99,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
         BottomSheetManager.Reviews reviews = new BottomSheetManager.Reviews();
 
         reviews.container = findViewById(R.id.btmSheetReviewsContainer);
-        reviews.firstReviewButton = findViewById(R.id.btmSheetWriteReview);
+        reviews.writeReviewButton = findViewById(R.id.btmSheetWriteReview);
 
         reviews.peekBar.companyName = findViewById(R.id.previewCompanyName);
         reviews.peekBar.ratingValue = findViewById(R.id.btmSheetRatingValue);
@@ -282,6 +281,9 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
             public void onFinish(ArrayList<JSONArray> jArrays, ArrayList<Exception> exceptions) {
                 final ArrayList<GreenGuideLocation> pos = new ArrayList<>();
                 JSONArray jsonArray = jArrays.get(0);
+                if (jsonArray == null) {
+                    return;
+                }
                 try {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jObj = jsonArray.getJSONObject(i);
@@ -301,14 +303,15 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
                             pos.add(gL);
                         }
                     }
-                } catch (JSONException e) { /* Do Nohting */ }
+                } catch (JSONException e) { /* Do Nothing */ }
 
                 GreenGuideMarkers markers = new GreenGuideMarkers(mMapManager) {
                     @Override
                     public boolean onPoiClick(int index) {
                         GreenGuideLocation location = pos.get(index);
                         mBtmSheetManager.getReview(new BaiduSuggestion.Location(
-                                location.companyName, location.address, location.point));
+                                location.companyName, location.point, location.address,
+                                location.city, null));
                         return false;
                     }
                 };

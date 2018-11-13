@@ -99,14 +99,4 @@ public class SimpleImageGETRequest extends SimpleGETRequest {
         Log.e("SimpleImage", e.toString());
         e.printStackTrace();
     }
-
-  public static void main(String[] args) {
-    SimpleImageGETRequest simpleGet = new SimpleImageGETRequest("http://localhost/eve.jpg");
-    simpleGet.send();
-    try {
-      java.io.FileOutputStream fsOut = new java.io.FileOutputStream("out.jpg");
-      fsOut.write(simpleGet.mImageData);
-      fsOut.close();
-    } catch (java.io.IOException e) { System.out.println("ERROR WRITING TO FILE"); }
-  }
 }

@@ -16,10 +16,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.baidu.mapapi.map.Overlay;
-import com.baidu.mapapi.model.LatLng;
+
 import com.guide.green.green_guide.Dialogs.LoadingDialog;
 import com.guide.green.green_guide.R;
+import com.guide.green.green_guide.WriteReviewActivity;
+
 import java.util.ArrayList;
 
 /**
@@ -59,6 +60,12 @@ public class FetchReviewsHandler implements Review.Results {
                 mBtmSheetManager.removeMarkers();
             }
         });
+    }
+
+    public void updatePoiResult(BaiduSuggestion.Location suggestion) {
+        if (suggestion.uid.equals(mSuggestion.uid)) {
+            mSuggestion = BaiduSuggestion.Location.merge(mSuggestion, suggestion);
+        }
     }
 
     @Override
@@ -170,17 +177,24 @@ public class FetchReviewsHandler implements Review.Results {
             mBtmSheetManager.reviews.peekBar.ratingValue.setVisibility(View.INVISIBLE);
             mBtmSheetManager.reviews.peekBar.ratingCount.setVisibility(View.INVISIBLE);
             mBtmSheetManager.reviews.body.container.setVisibility(View.INVISIBLE);
-            mBtmSheetManager.reviews.firstReviewButton.setText(R.string.write_first_review_button_text);
+            mBtmSheetManager.reviews.writeReviewButton.setText(R.string.write_first_review_button_text);
         } else {
             mBtmSheetManager.reviews.peekBar.ratingStars.setVisibility(View.VISIBLE);
             mBtmSheetManager.reviews.peekBar.ratingValue.setVisibility(View.VISIBLE);
             mBtmSheetManager.reviews.peekBar.ratingCount.setVisibility(View.VISIBLE);
             mBtmSheetManager.reviews.body.container.setVisibility(View.VISIBLE);
-            mBtmSheetManager.reviews.firstReviewButton.setText(R.string.write_review_button_text);
+            mBtmSheetManager.reviews.writeReviewButton.setText(R.string.write_review_button_text);
         }
 
         mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED);
         mCompleted = true;
+
+        mBtmSheetManager.reviews.writeReviewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                WriteReviewActivity.open(mAct, mSuggestion);
+            }
+        });
     }
 
     @Override

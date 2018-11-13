@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/selected_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:contentDescription="Selected_Image"
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/view_satellite" />
+
+
+    <ImageButton
+        android:id="@+id/remove_selected_image"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:contentDescription="Remove Image"
+        android:src="@drawable/ic_close_black_24dp"
+        android:theme="@style/Widget.AppCompat.Button.Borderless"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="@id/selected_image"
+        app:layout_constraintTop_toTopOf="@id/selected_image"/>
+
+</android.support.constraint.ConstraintLayout>

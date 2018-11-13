@@ -183,7 +183,7 @@ public class SuggestionSearchManager extends AutoComplete implements View.OnKeyL
             replaceAllSuggestions(getAutoCompleteArray());
             mMapManager.SUGGESTION_SEARCH.requestSuggestion(new SuggestionSearchOption()
                     .city(mCitySelector.getText().toString())
-                    .keyword(cs.toString()).citylimit(true));
+                    .keyword(cs.toString()).citylimit(false));
         } else {
             dismissDropDown();
         }
@@ -238,7 +238,11 @@ public class SuggestionSearchManager extends AutoComplete implements View.OnKeyL
         ArrayList<BaiduSuggestion> suggestions = getAutoCompleteArray();
         if (res != null && res.getAllSuggestions() != null) {
             for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
-                suggestions.add(new BaiduSuggestion.Location(info));
+                if (info.pt == null) {
+                    suggestions.add(new BaiduSuggestion.TextSuggestion(info.key));
+                } else {
+                    suggestions.add(new BaiduSuggestion.Location(info));
+                }
             }
         }
 

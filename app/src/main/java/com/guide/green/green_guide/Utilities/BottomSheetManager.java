@@ -16,7 +16,12 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.core.PoiInfo;
+import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
 import com.baidu.mapapi.search.poi.PoiCitySearchOption;
+import com.baidu.mapapi.search.poi.PoiDetailResult;
+import com.baidu.mapapi.search.poi.PoiDetailSearchOption;
+import com.baidu.mapapi.search.poi.PoiIndoorResult;
+import com.baidu.mapapi.search.poi.PoiResult;
 import com.guide.green.green_guide.R;
 
 
@@ -26,7 +31,20 @@ import com.guide.green.green_guide.R;
  * display search for and display POI results.
  */
 public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback implements
-        BaiduMap.OnMapClickListener {
+        BaiduMap.OnMapClickListener, OnGetPoiSearchResultListener {
+
+    @Override
+    public void onGetPoiResult(PoiResult poiResult) {
+    }
+
+    @Override
+    public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
+        if (mFetchReviewsHandler != null) {
+            mFetchReviewsHandler.updatePoiResult(new BaiduSuggestion.Location(poiDetailResult));
+        }}
+
+    @Override
+    public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) {}
 
     public static class Reviews {
         public static class PeekBar {
@@ -47,7 +65,7 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
         }
 
         public ViewGroup container;
-        public Button firstReviewButton;
+        public Button writeReviewButton;
         public PeekBar peekBar = new PeekBar();
         public Body body = new Body();
     }
@@ -78,6 +96,7 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
         mBtmSheet = BottomSheetBehavior.from(mBtmSheetView);
         mBtmSheet.setBottomSheetCallback(this);
         mMapManager.baiduMap.setOnMapClickListener(this);
+        mMapManager.poiSearch.setOnGetPoiSearchResultListener(this);
     }
 
     public void setMarkerVisibility(boolean isVisible) {
@@ -141,6 +160,9 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
 
         mFetchReviewsHandler = new FetchReviewsHandler(mAct, suggestion, this);
 
+        if (suggestion.uid != null) {
+            mMapManager.poiSearch.searchPoiDetail(new PoiDetailSearchOption().poiUid(suggestion.uid));
+        }
         mMapManager.moveTo(suggestion.point);
         mSelectedMarker = mMapManager.addMarker(new MarkerOptions()
                 .position(suggestion.point), R.drawable.icon_star_marker);
@@ -178,6 +200,7 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
     public void onMapClick(LatLng latLng) {
         if (mBtmSheet.getState() != BottomSheetBehavior.STATE_HIDDEN) {
             mBtmSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+            removeMarkers();
         }
     }
 

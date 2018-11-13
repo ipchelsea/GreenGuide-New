@@ -18,20 +18,41 @@ public class Review {
     public AirWaste airWaste = new AirWaste();
     public SolidWaste solidWaste = new SolidWaste();
     public int imageCount;
+    public String id;
 
     /**
      * Parent class for all keys. Will be used to make "enums" for children.
-     * Will contain static final variables and be un-instantiable in child classes.
+     * Will contain static final variables and be un-instantiable in child classes through
+     * private constructors.
+     *
+     * A null postName means that this argument should not be sent in a post request.
      */
-    private static abstract class Key {
-        public final String value;
-        public Key(String s) { value = s; }
+    public static abstract class Key {
+        public final String jsonName;
+        public final String postName;
+        public Key(String jsonName) {
+            this(jsonName, jsonName);
+        }
+        public Key(String jsonName, String postName) {
+            this.jsonName = jsonName;
+            this.postName = postName;
+        }
         public abstract Key[] getKeys();
+        @Override
+        public String toString() {
+            return jsonName;
+        }
     }
 
-    private static abstract class ReviewComponent {
-        private String[] attribVals;
-        private Map<String, Integer> attribLookup;
+    /**
+     * The parent of {@code Location}, {@code WaterIssue}, {@code SolidWaste}, and {@code AirWaste}.
+     * Creates an object similar to a {@code map} where the key can only be from a specific
+     * predefined set. Allows for setting and getting values.
+     *
+     * Provides a way to set the predefined set so each child can have its own keyset.
+     */
+    public static abstract class ReviewComponent {
+        private HashMap<Key, String> attribLookup = new HashMap<>();
 
         /**
          * Default constructor uses STATIC {@code Key} variables from the realized
@@ -39,12 +60,9 @@ public class Review {
          * {@code attribLookup} map of this object.
          */
         public ReviewComponent(Key keySet) {
-            attribLookup = new HashMap<String, Integer>();
-            int i = 0;
             for (Key k : keySet.getKeys()) {
-                attribLookup.put(k.value, i++);
+                attribLookup.put(k, null);
             }
-            attribVals = new String[attribLookup.size()];
         }
 
         /**
@@ -53,12 +71,7 @@ public class Review {
          * @code key    The name of the attribute.
          */
          public String get(Key key) {
-            Integer i = attribLookup.get(key.value);
-            if (i != null && i < attribVals.length) {
-                return attribVals[i];
-            } else {
-                return null;
-            }
+            return attribLookup.get(key);
         }
 
         /**
@@ -66,16 +79,18 @@ public class Review {
          *
          * @code key    The name of the attribute.
          * @code value  The value to set it to.
+         * @return      true if the value was set, else false
          */
         public boolean set(Key key, String value) {
-            Integer i = attribLookup.get(key.value);
-            if (i != null && i < attribVals.length) {
-                attribVals[i] = value;
-                return false;
-            } else {
+            if (attribLookup.containsKey(key)) {
+                attribLookup.put(key, value);
                 return true;
+            } else {
+                return false;
             }
         }
+
+        public abstract Key[] getKeys();
     }
 
     public static class Location extends ReviewComponent {
@@ -86,18 +101,23 @@ public class Review {
             super(Key.keys[0]);
         }
 
+        @Override
+        public Review.Key[] getKeys() {
+            return Key.keys;
+        }
+
         /**
          * Key class containing keys that only work for the Location object.
          */
         public static class Key extends Review.Key {
-            public static final Key SIZE = new Key("size");
-            public static final Key REASON = new Key("reason");
-            public static final Key STATUS = new Key("status");
-            public static final Key MEASURE = new Key("measure");
-            public static final Key EPA = new Key("epa");
-            public static final Key REPORT = new Key("report");
-            public static final Key HELP = new Key("help");
-            public static final Key TIME = new Key("time");
+            public static final Key SIZE = new Key("size", null);
+            public static final Key REASON = new Key("reason", null);
+            public static final Key STATUS = new Key("status", null);
+            public static final Key MEASURE = new Key("measure", null);
+            public static final Key EPA = new Key("epa", null);
+            public static final Key REPORT = new Key("report", null);
+            public static final Key HELP = new Key("help", null);
+            public static final Key TIME = new Key("time", null);
             public static final Key PRODUCT = new Key("product");
             public static final Key INDUSTRY = new Key("industry");
             public static final Key NEWS = new Key("news");
@@ -120,13 +140,24 @@ public class Review {
                     Key.HELP, Key.REPORT, Key.EPA, Key.MEASURE, Key.STATUS, Key.REASON, Key.SIZE};
 
             /**
-             * Private default constructor to insure that no keys can be created outside of this
+             * Private constructor to insure that no keys can be created outside of this
              * object. Effect: enum like structure when the enum values are the static final values.
              *
-             * @param s A unique key name. Uniqueness is not enforced.
+             * @param jsonName A unique key name. Uniqueness is not enforced.
              */
-            private Key(String s) {
-                super(s);
+            public Key(String jsonName) {
+                super(jsonName);
+            }
+
+            /**
+             * Private constructor to insure that no keys can be created outside of this
+             * object. Effect: enum like structure when the enum values are the static final values.
+             *
+             * @param jsonName A unique key name. Uniqueness is not enforced.
+             * @param postName A the value that the REST API expects this to be named.
+             */
+            public Key(String jsonName, String postName) {
+                super(jsonName, postName);
             }
 
             /**
@@ -146,11 +177,16 @@ public class Review {
             super(Key.keys[0]);
         }
 
+        @Override
+        public Review.Key[] getKeys() {
+            return Key.keys;
+        }
+
         /**
          * Key class containing keys that only work for the  object.
          */
         public static class Key extends Review.Key {
-            public static final Key ARSENIC = new Key("Arsenic");
+            public static final Key ARSENIC = new Key("Arsenic", "As");
             public static final Key CD = new Key("Cd");
             public static final Key PB = new Key("Pb");
             public static final Key HG = new Key("Hg");
@@ -160,13 +196,13 @@ public class Review {
             public static final Key TOC = new Key("TOC");
             public static final Key COD = new Key("COD");
             public static final Key BOD = new Key("BOD");
-            public static final Key TURB_PARAMS = new Key("TurbParams");
+            public static final Key TURB_PARAMS = new Key("TurbParams", "Turbidity");
             public static final Key PH = new Key("pH");
             public static final Key DO = new Key("DO");
-            public static final Key FLOATS = new Key("Floats");
-            public static final Key CHECK_FLOAT = new Key("CheckFloat");
-            public static final Key TURB_SCORE = new Key("TurbScore");
-            public static final Key ODOR = new Key("Odor");
+            public static final Key FLOATS = new Key("Floats", "floatType");
+            public static final Key CHECK_FLOAT = new Key("CheckFloat", "float");
+            public static final Key TURB_SCORE = new Key("TurbScore", "turbRate");
+            public static final Key ODOR = new Key("Odor", "WaterOdor");
             public static final Key WATER_COLOR = new Key("WaterColor");
             public static final Key WATER_TYPE = new Key("WaterType");
             public static final Key[] keys = new Key[] {Key.WATER_TYPE, Key.WATER_COLOR, Key.ODOR,
@@ -175,13 +211,24 @@ public class Review {
                     Key.ARSENIC};
 
             /**
-             * Private default constructor to insure that no keys can be created outside of this
+             * Private constructor to insure that no keys can be created outside of this
              * object. Effect: enum like structure when the enum values are the static final values.
              *
-             * @param s A unique key name. Uniqueness is not enforced.
+             * @param jsonName A unique key name. Uniqueness is not enforced.
              */
-            private Key(String s) {
-                super(s);
+            public Key(String jsonName) {
+                super(jsonName);
+            }
+
+            /**
+             * Private constructor to insure that no keys can be created outside of this
+             * object. Effect: enum like structure when the enum values are the static final values.
+             *
+             * @param jsonName A unique key name. Uniqueness is not enforced.
+             * @param postName A the value that the REST API expects this to be named.
+             */
+            public Key(String jsonName, String postName) {
+                super(jsonName, postName);
             }
 
             /**
@@ -200,6 +247,11 @@ public class Review {
             super(Key.keys[0]);
         }
 
+        @Override
+        public Review.Key[] getKeys() {
+            return Key.keys;
+        }
+
         /**
          * Key class containing keys that only work for the  object.
          */
@@ -209,25 +261,36 @@ public class Review {
             public static final Key SOX = new Key("SOx");
             public static final Key O3 = new Key("O3");
             public static final Key PM10 = new Key("PM10");
-            public static final Key PM2_5 = new Key("PM2_5");
+            public static final Key PM2_5 = new Key("PM2_5", "PM2.5");
             public static final Key SYMPTOMDESCR = new Key("symptomDescr");
             public static final Key SYMPTOM = new Key("Symptom");
             public static final Key SMOKE_COLOR = new Key("SmokeColor");
-            public static final Key SMOKE_CHECK = new Key("Smoke_Check");
-            public static final Key ODOR = new Key("Odor");
+            public static final Key SMOKE_CHECK = new Key("Smoke_Check", "SmokeCheck");
+            public static final Key ODOR = new Key("Odor", "AirOdor");
             public static final Key VISIBILITY = new Key("Visibility");
             public static final Key[] keys = new Key[] {Key.VISIBILITY, Key.ODOR, Key.SMOKE_CHECK,
                     Key.SMOKE_COLOR, Key.SYMPTOM, Key.SYMPTOMDESCR, Key.PM2_5, Key.PM10, Key.O3,
                     Key.SOX, Key.NOX, Key.CO};
 
             /**
-             * Private default constructor to insure that no keys can be created outside of this
+             * Private constructor to insure that no keys can be created outside of this
              * object. Effect: enum like structure when the enum values are the static final values.
              *
-             * @param s A unique key name. Uniqueness is not enforced.
+             * @param jsonName A unique key name. Uniqueness is not enforced.
              */
-            private Key(String s) {
-                super(s);
+            public Key(String jsonName) {
+                super(jsonName);
+            }
+
+            /**
+             * Private constructor to insure that no keys can be created outside of this
+             * object. Effect: enum like structure when the enum values are the static final values.
+             *
+             * @param jsonName A unique key name. Uniqueness is not enforced.
+             * @param postName A the value that the REST API expects this to be named.
+             */
+            public Key(String jsonName, String postName) {
+                super(jsonName, postName);
             }
 
             /**
@@ -246,25 +309,41 @@ public class Review {
             super(Key.keys[0]);
         }
 
+        @Override
+        public Review.Key[] getKeys() {
+            return Key.keys;
+        }
+
         /**
          * Key class containing keys that only work for the object.
          */
         public static class Key extends Review.Key {
-            public static final Key MEASUREMENTS = new Key("Measurements");
-            public static final Key ODOR = new Key("Odor");
-            public static final Key AMOUNT = new Key("Amount");
+            public static final Key MEASUREMENTS = new Key("Measurements", "WasteMeasure");
+            public static final Key ODOR = new Key("Odor", "WasteOdor");
+            public static final Key AMOUNT = new Key("Amount", "WasteAmount");
             public static final Key WASTE_TYPE = new Key("WasteType");
             public static final Key[] keys = new Key[] {Key.WASTE_TYPE, Key.AMOUNT, Key.ODOR,
                     Key.MEASUREMENTS};
 
             /**
-             * Private default constructor to insure that no keys can be created outside of this
+             * Private constructor to insure that no keys can be created outside of this
              * object. Effect: enum like structure when the enum values are the static final values.
              *
-             * @param s A unique key name. Uniqueness is not enforced.
+             * @param jsonName A unique key name. Uniqueness is not enforced.
              */
-            private Key(String s) {
-                super(s);
+            public Key(String jsonName) {
+                super(jsonName);
+            }
+
+            /**
+             * Private constructor to insure that no keys can be created outside of this
+             * object. Effect: enum like structure when the enum values are the static final values.
+             *
+             * @param jsonName A unique key name. Uniqueness is not enforced.
+             * @param postName A the value that the REST API expects this to be named.
+             */
+            public Key(String jsonName, String postName) {
+                super(jsonName, postName);
             }
 
             /**
@@ -366,29 +445,29 @@ public class Review {
                     review.imageCount = jObj.getInt("img_count");
                     JSONObject subJObj = null;
                     subJObj = jObj.getJSONObject("review");
-
                     for (Location.Key key : Location.Key.keys) {
-                        review.location.set(key, decodeHTML(subJObj.getString(key.value)));
+                        review.location.set(key, decodeHTML(subJObj.getString(key.jsonName)));
                     }
+                    review.id = subJObj.getString("id");
                     String waterKey = "water";
                     if (!jObj.isNull(waterKey)) {
                         subJObj = jObj.getJSONObject(waterKey);
                         for (WaterIssue.Key key : WaterIssue.Key.keys) {
-                            review.waterIssue.set(key, decodeHTML(subJObj.getString(key.value)));
+                            review.waterIssue.set(key, decodeHTML(subJObj.getString(key.jsonName)));
                         }
                     }
                     String solidKey = "solid";
                     if (!jObj.isNull(solidKey)) {
                         subJObj = jObj.getJSONObject(solidKey);
                         for (SolidWaste.Key key : SolidWaste.Key.keys) {
-                            review.solidWaste.set(key, decodeHTML(subJObj.getString(key.value)));
+                            review.solidWaste.set(key, decodeHTML(subJObj.getString(key.jsonName)));
                         }
                     }
                     String airKey = "air";
                     if (!jObj.isNull(airKey)) {
                         subJObj = jObj.getJSONObject(airKey);
                         for (AirWaste.Key key : AirWaste.Key.keys) {
-                            review.airWaste.set(key, decodeHTML(subJObj.getString(key.value)));
+                            review.airWaste.set(key, decodeHTML(subJObj.getString(key.jsonName)));
                         }
                     }
                     results.add(review);

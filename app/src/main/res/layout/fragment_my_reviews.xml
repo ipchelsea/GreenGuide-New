@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ijk"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:apps="http://schemas.android.com/apk/res-auto">
 
     <TextView
         android:layout_width="match_parent"
@@ -10,4 +14,21 @@
         android:id="@+id/my_reviews"
         android:gravity="center_vertical|center_horizontal"/>
 
-</android.support.constraint.ConstraintLayout>
+    <ImageView
+        android:adjustViewBounds="true"
+        android:id="@+id/abcTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="40dp"
+        android:minHeight="40dp"/>
+
+    <ImageView
+        android:adjustViewBounds="true"
+        android:id="@+id/abcTest2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="40dp"
+        android:minHeight="40dp"
+        android:background="@android:color/holo_purple"/>
+
+</LinearLayout>

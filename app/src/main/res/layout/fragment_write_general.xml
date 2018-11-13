@@ -72,6 +72,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_co_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -93,6 +94,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_co_address"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -115,6 +117,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_co_industry"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -135,6 +138,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_co_products"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -157,6 +161,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_co_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -308,6 +313,12 @@
                     android:layout_width="wrap_content"
                     android:layout_gravity="center"
                     android:text="Upload Images" />
+
+                <LinearLayout
+                    android:id="@+id/selected_Images_Container"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
                 <View
                     android:layout_width="match_parent"

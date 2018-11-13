@@ -1,5 +1,8 @@
 package com.guide.green.green_guide.Utilities;
 
+import android.content.Context;
+import android.net.Uri;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -13,9 +16,15 @@ import java.util.List;
 import java.util.Map;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+
+import static com.guide.green.green_guide.Utilities.Misc.getFileNameFromUri;
+import static com.guide.green.green_guide.Utilities.Misc.getMimeTypeFromUri;
+import static com.guide.green.green_guide.Utilities.Misc.getRndInt;
+import static com.guide.green.green_guide.Utilities.Misc.readAllBytesFromFileUri;
 
 /**
  * Provides a way to run a single GET request.
@@ -27,12 +36,9 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
     public static abstract class FormItem {
         public static final byte[] CONTENT_DISPOSITION = "Content-Disposition: form-data; name=\"".getBytes(StandardCharsets.US_ASCII);
         public static final byte[] FILE_NAME = "\"; filename=\"".getBytes(StandardCharsets.US_ASCII);
-        public static final byte[] CONTENT_TYPE_TEXT = "text/plain; charset=UTF-8".getBytes(StandardCharsets.US_ASCII);
         public static final byte[] CONTENT_TYPE = "Content-Type: ".getBytes(StandardCharsets.US_ASCII);
         public static final byte[] NEW_LINE = "\r\n".getBytes(StandardCharsets.US_ASCII);
         public static final byte QUOTE = (byte) '\"';
-        public static final byte SEMICOLON = (byte) ';';
-        public static final byte SPACE = (byte) ' ';
         private byte[] mHeader;
         
         /**
@@ -133,7 +139,7 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
         public final byte[] mMimeType;
         private final byte[] mFileName;
         private final byte[] mName;
-        public final Object value;
+        public Object value;
         
         public FileFormItem(String inputName, String fileName, Object value) {
             this(inputName, fileName, null, value);
@@ -164,7 +170,29 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
         @Override
         public byte[] getOther() { return null; }
     }
-    
+
+    public static class UriFileFormItem extends FileFormItem {
+        private Context mCtx;
+        private Uri mUri;
+
+        public UriFileFormItem(String inputName, Uri uri, Context ctx) {
+            super(inputName, getFileNameFromUri(uri, ctx), getMimeTypeFromUri(uri, ctx),
+                    null);
+            this.mCtx = ctx;
+            this.mUri = uri;
+        }
+
+        /**
+         * @return the contents of the item. <input value="..." />
+         */
+        @Override
+        public byte[] getValue() {
+            if (value == null) {
+                value = readAllBytesFromFileUri(mUri, mCtx);
+            }
+            return (byte[]) value;
+        }
+    }
     
     private static byte[] getUniqueBoundary(byte[] boundary, int newBoundaryLen) {
         byte[] result = new byte[newBoundaryLen];
@@ -176,7 +204,7 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
             }
         }
         for (int i = resultOffset; i < result.length; i++) {
-            int rndNum = ThreadLocalRandom.current().nextInt(0, 62);
+            int rndNum = getRndInt(0, 62);
             if (rndNum >= 52) {
                 rndNum = '0' + (rndNum - 52);
             } else if (rndNum >= 26) {
@@ -188,7 +216,7 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
         }
         return result;
     }
-    
+
     private static int[] getKMPJmpTable(byte[] patern) {
         int[] result = new int[patern.length];
         for (int i = 1, j = 0; i < patern.length; i++) {
@@ -317,6 +345,7 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
             recvArgs.connection.setRequestMethod("POST");
             recvArgs.connection.setRequestProperty("Content-Type", "multipart/form-data; boundary="
                     + new String(mBoundary, StandardCharsets.US_ASCII));
+            recvArgs.connection.setRequestProperty("Cookie", "PHPSESSID=5vnoc7gkjtlopob841an5g8km");
             // recvArgs.connection.setRequestProperty("Content-Length", "20");
             recvArgs.connection.setDoOutput(true);
             recvArgs.connection.setDoInput(true);
