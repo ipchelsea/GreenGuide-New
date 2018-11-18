@@ -3,14 +3,17 @@ package com.guide.green.green_guide.Utilities;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.text.Html;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Locale;
 
 public class Review {
     public Location location = new Location();
@@ -30,17 +33,30 @@ public class Review {
     public static abstract class Key {
         public final String jsonName;
         public final String postName;
-        public Key(String jsonName) {
-            this(jsonName, jsonName);
-        }
+        /**
+         * Private constructor to insure that no keys can be created outside of this
+         * object. Effect: enum like structure when the enum values are the static final values.
+         *
+         * @param jsonName A unique key name. Uniqueness is not enforced.
+         * @param postName A the value that the REST API expects this to be named.
+         */
         public Key(String jsonName, String postName) {
             this.jsonName = jsonName;
             this.postName = postName;
         }
-        public abstract Key[] getKeys();
+
+        /**
+         * @return  list of the keys unique to the parent object.
+         */
+        public abstract List<? extends Key> getAllKeys();
+
         @Override
         public String toString() {
-            return jsonName;
+            if (jsonName == postName) {
+                return jsonName;
+            } else {
+                return jsonName + "|" + postName;
+            }
         }
     }
 
@@ -51,16 +67,18 @@ public class Review {
      *
      * Provides a way to set the predefined set so each child can have its own keyset.
      */
-    public static abstract class ReviewComponent {
+    public static class ReviewCategory {
         private HashMap<Key, String> attribLookup = new HashMap<>();
+        private List<? extends Key> mKeySet;
 
         /**
          * Default constructor uses STATIC {@code Key} variables from the realized
          * class through a call to {@code createAttribLookup} to create the
          * {@code attribLookup} map of this object.
          */
-        public ReviewComponent(Key keySet) {
-            for (Key k : keySet.getKeys()) {
+        public ReviewCategory(List<? extends Key> keySet) {
+            mKeySet = keySet;
+            for (Key k : mKeySet) {
                 attribLookup.put(k, null);
             }
         }
@@ -90,26 +108,30 @@ public class Review {
             }
         }
 
-        public abstract Key[] getKeys();
+        /**
+         * @return all of the keys associated with {@code k}
+         */
+        public List<? extends Key> allKeys() {
+            return mKeySet;
+        }
     }
 
-    public static class Location extends ReviewComponent {
+    public static class Location extends ReviewCategory {
         /**
          * Default constructor. Insures the right keyset is used by this object.
          */
         public Location() {
-            super(Key.keys[0]);
-        }
-
-        @Override
-        public Review.Key[] getKeys() {
-            return Key.keys;
+            super(Key.allKeys());
         }
 
         /**
          * Key class containing keys that only work for the Location object.
          */
         public static class Key extends Review.Key {
+            public static final Key WEATHER = new Key(null, null);
+            public static final Key OBSERVATION_DATE = new Key(null, null);
+            public static final Key OBSERVATION_TIME = new Key(null, null);
+            public static final Key OTHER_ITEM = new Key(null, "other_item");
             public static final Key SIZE = new Key("size", null);
             public static final Key REASON = new Key("reason", null);
             public static final Key STATUS = new Key("status", null);
@@ -134,10 +156,7 @@ public class Review {
             public static final Key CITY = new Key("city");
             public static final Key ADDRESS = new Key("address");
             public static final Key COMPANY = new Key("company");
-            public static final Key[] keys = new Key[] {Key.COMPANY, Key.ADDRESS, Key.CITY,
-                    Key.REVIEW, Key.LNG, Key.LAT, Key.RATING, Key.WATER, Key.AIR, Key.WASTE,
-                    Key.LAND, Key.LIVING, Key.OTHER, Key.NEWS, Key.INDUSTRY, Key.PRODUCT, Key.TIME,
-                    Key.HELP, Key.REPORT, Key.EPA, Key.MEASURE, Key.STATUS, Key.REASON, Key.SIZE};
+            private static ArrayList<Key> mKeys;
 
             /**
              * Private constructor to insure that no keys can be created outside of this
@@ -145,8 +164,8 @@ public class Review {
              *
              * @param jsonName A unique key name. Uniqueness is not enforced.
              */
-            public Key(String jsonName) {
-                super(jsonName);
+            private Key(String jsonName) {
+                this(jsonName, jsonName);
             }
 
             /**
@@ -158,57 +177,58 @@ public class Review {
              */
             public Key(String jsonName, String postName) {
                 super(jsonName, postName);
+                if (mKeys == null) { mKeys = new ArrayList<>(); }
+                mKeys.add(this);
             }
 
             /**
              * @return  list of the keys unique to the parent object.
              */
             @Override
-            public Key[] getKeys() { return keys; }
+            public List<Key> getAllKeys() { return allKeys(); }
+
+            public static List<Key> allKeys() { return Collections.unmodifiableList(mKeys); }
         }
     }
 
 
-    public static class WaterIssue extends ReviewComponent {
+    public static class WaterIssue extends ReviewCategory {
         /**
          * Default constructor. Insures the right keyset is used by this object.
          */
         public WaterIssue() {
-            super(Key.keys[0]);
-        }
-
-        @Override
-        public Review.Key[] getKeys() {
-            return Key.keys;
+            super(Key.allKeys());
         }
 
         /**
          * Key class containing keys that only work for the  object.
          */
         public static class Key extends Review.Key {
+            public static final Key NITRATE = new Key(null, null);
+            public static final Key WATER_BODY_OTHER = new Key(null, null);
+            public static final Key ODOR_OTHER = new Key(null, null);
+            public static final Key WATER_COLOR_OTHER = new Key(null, null);
+            public static final Key FLOAT_TYPE_OTHER = new Key(null, null);
             public static final Key ARSENIC = new Key("Arsenic", "As");
-            public static final Key CD = new Key("Cd");
-            public static final Key PB = new Key("Pb");
-            public static final Key HG = new Key("Hg");
-            public static final Key TP = new Key("TP");
-            public static final Key NH4 = new Key("NH4");
-            public static final Key TS = new Key("TS");
-            public static final Key TOC = new Key("TOC");
-            public static final Key COD = new Key("COD");
-            public static final Key BOD = new Key("BOD");
+            public static final Key CADMIUM = new Key("Cd");
+            public static final Key LEAD = new Key("Pb");
+            public static final Key MERCURY = new Key("Hg");
+            public static final Key PHOSPHORUS = new Key("TP");
+            public static final Key AMMONIUM = new Key("NH4");
+            public static final Key SOLID = new Key("TS");
+            public static final Key ORGANIC_CARBON = new Key("TOC");
+            public static final Key CHEM_OXYGEN_DEMAND = new Key("COD");
+            public static final Key BIO_OXYGEN_DEMAND = new Key("BOD");
             public static final Key TURB_PARAMS = new Key("TurbParams", "Turbidity");
             public static final Key PH = new Key("pH");
-            public static final Key DO = new Key("DO");
-            public static final Key FLOATS = new Key("Floats", "floatType");
+            public static final Key DISSOLVED_OXYGEN = new Key("DO");
+            public static final Key FLOAT_TYPE = new Key("Floats", "floatType");
             public static final Key CHECK_FLOAT = new Key("CheckFloat", "float");
             public static final Key TURB_SCORE = new Key("TurbScore", "turbRate");
             public static final Key ODOR = new Key("Odor", "WaterOdor");
             public static final Key WATER_COLOR = new Key("WaterColor");
-            public static final Key WATER_TYPE = new Key("WaterType");
-            public static final Key[] keys = new Key[] {Key.WATER_TYPE, Key.WATER_COLOR, Key.ODOR,
-                    Key.TURB_SCORE, Key.CHECK_FLOAT, Key.FLOATS, Key.DO, Key.PH, Key.TURB_PARAMS,
-                    Key.BOD, Key.COD, Key.TOC, Key.TS, Key.NH4, Key.TP, Key.HG, Key.PB, Key.CD,
-                    Key.ARSENIC};
+            public static final Key WATER_BODY = new Key("WaterType");
+            private static ArrayList<Key> mKeys;
 
             /**
              * Private constructor to insure that no keys can be created outside of this
@@ -216,8 +236,8 @@ public class Review {
              *
              * @param jsonName A unique key name. Uniqueness is not enforced.
              */
-            public Key(String jsonName) {
-                super(jsonName);
+            private Key(String jsonName) {
+                this(jsonName, jsonName);
             }
 
             /**
@@ -229,48 +249,47 @@ public class Review {
              */
             public Key(String jsonName, String postName) {
                 super(jsonName, postName);
+                if (mKeys == null) { mKeys = new ArrayList<>(); }
+                mKeys.add(this);
             }
 
             /**
              * @return  list of the keys unique to the parent object.
              */
             @Override
-            public Key[] getKeys() { return keys; }
+            public List<Key> getAllKeys() { return allKeys(); }
+
+            public static List<Key> allKeys() { return Collections.unmodifiableList(mKeys); }
         }
     }
 
-    public static class AirWaste extends ReviewComponent {
+    public static class AirWaste extends ReviewCategory {
         /**
          * Default constructor. Insures the right keyset is used by this object.
          */
         public AirWaste() {
-            super(Key.keys[0]);
-        }
-
-        @Override
-        public Review.Key[] getKeys() {
-            return Key.keys;
+            super(Key.allKeys());
         }
 
         /**
          * Key class containing keys that only work for the  object.
          */
         public static class Key extends Review.Key {
+            public static final Key ODOR_OTHER = new Key(null, null);
+            public static final Key SMOKE_COLOR_OTHER = new Key(null, null);
             public static final Key CO = new Key("CO");
             public static final Key NOX = new Key("NOx");
             public static final Key SOX = new Key("SOx");
             public static final Key O3 = new Key("O3");
             public static final Key PM10 = new Key("PM10");
             public static final Key PM2_5 = new Key("PM2_5", "PM2.5");
-            public static final Key SYMPTOMDESCR = new Key("symptomDescr");
+            public static final Key PHYSICAL_PROBS = new Key("symptomDescr");
             public static final Key SYMPTOM = new Key("Symptom");
             public static final Key SMOKE_COLOR = new Key("SmokeColor");
             public static final Key SMOKE_CHECK = new Key("Smoke_Check", "SmokeCheck");
             public static final Key ODOR = new Key("Odor", "AirOdor");
             public static final Key VISIBILITY = new Key("Visibility");
-            public static final Key[] keys = new Key[] {Key.VISIBILITY, Key.ODOR, Key.SMOKE_CHECK,
-                    Key.SMOKE_COLOR, Key.SYMPTOM, Key.SYMPTOMDESCR, Key.PM2_5, Key.PM10, Key.O3,
-                    Key.SOX, Key.NOX, Key.CO};
+            private static ArrayList<Key> mKeys;
 
             /**
              * Private constructor to insure that no keys can be created outside of this
@@ -278,8 +297,8 @@ public class Review {
              *
              * @param jsonName A unique key name. Uniqueness is not enforced.
              */
-            public Key(String jsonName) {
-                super(jsonName);
+            private Key(String jsonName) {
+                this(jsonName, jsonName);
             }
 
             /**
@@ -291,39 +310,43 @@ public class Review {
              */
             public Key(String jsonName, String postName) {
                 super(jsonName, postName);
+                if (mKeys == null) { mKeys = new ArrayList<>(); }
+                mKeys.add(this);
             }
 
             /**
              * @return  list of the keys unique to the parent object.
              */
             @Override
-            public Key[] getKeys() { return keys; }
+            public List<Key> getAllKeys() {
+                return allKeys();
+            }
+
+            public static List<Key> allKeys() {
+                return Collections.unmodifiableList(mKeys);
+            }
         }
     }
 
-    public static class SolidWaste extends ReviewComponent {
+    public static class SolidWaste extends ReviewCategory {
         /**
          * Default constructor. Insures the right keyset is used by this object.
          */
         public SolidWaste() {
-            super(Key.keys[0]);
-        }
-
-        @Override
-        public Review.Key[] getKeys() {
-            return Key.keys;
+            super(Key.allKeys());
         }
 
         /**
          * Key class containing keys that only work for the object.
          */
         public static class Key extends Review.Key {
+            public static final Key ODOR_OTHER = new Key(null, null);
+            public static final Key WASTE_TYPE_OTHER = new Key(null, null);
             public static final Key MEASUREMENTS = new Key("Measurements", "WasteMeasure");
             public static final Key ODOR = new Key("Odor", "WasteOdor");
             public static final Key AMOUNT = new Key("Amount", "WasteAmount");
             public static final Key WASTE_TYPE = new Key("WasteType");
-            public static final Key[] keys = new Key[] {Key.WASTE_TYPE, Key.AMOUNT, Key.ODOR,
-                    Key.MEASUREMENTS};
+            private static ArrayList<Key> mKeys;
 
             /**
              * Private constructor to insure that no keys can be created outside of this
@@ -331,8 +354,8 @@ public class Review {
              *
              * @param jsonName A unique key name. Uniqueness is not enforced.
              */
-            public Key(String jsonName) {
-                super(jsonName);
+            private Key(String jsonName) {
+                this(jsonName, jsonName);
             }
 
             /**
@@ -344,13 +367,17 @@ public class Review {
              */
             public Key(String jsonName, String postName) {
                 super(jsonName, postName);
+                if (mKeys == null) { mKeys = new ArrayList<>(); }
+                mKeys.add(this);
             }
 
             /**
              * @return  list of the keys unique to the parent object.
              */
             @Override
-            public Key[] getKeys() { return keys; }
+            public List<Key> getAllKeys() { return allKeys(); }
+
+            public static List<Key> allKeys() { return Collections.unmodifiableList(mKeys); }
         }
     }
 
@@ -429,6 +456,18 @@ public class Review {
             REVIEWS_CALLBACK.onCanceled();
         }
 
+        private void getJsonValuesForObject(JSONObject jObj, String objName,
+                                            ReviewCategory category) throws JSONException {
+            if (!jObj.isNull(objName)) {
+                JSONObject subJObj = jObj.getJSONObject(objName);
+                for (Key key : category.allKeys()) {
+                    if (key.jsonName != null) {
+                        category.set(key, decodeHTML(subJObj.getString(key.jsonName)));
+                    }
+                }
+            }
+        }
+
         @Override
         public void onFinish(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
             if (!exceptions.isEmpty() || jArray.isEmpty() || jArray.get(0) == null) {
@@ -443,33 +482,10 @@ public class Review {
                 try {
                     JSONObject jObj = jArr.getJSONObject(i);
                     review.imageCount = jObj.getInt("img_count");
-                    JSONObject subJObj = null;
-                    subJObj = jObj.getJSONObject("review");
-                    for (Location.Key key : Location.Key.keys) {
-                        review.location.set(key, decodeHTML(subJObj.getString(key.jsonName)));
-                    }
-                    review.id = subJObj.getString("id");
-                    String waterKey = "water";
-                    if (!jObj.isNull(waterKey)) {
-                        subJObj = jObj.getJSONObject(waterKey);
-                        for (WaterIssue.Key key : WaterIssue.Key.keys) {
-                            review.waterIssue.set(key, decodeHTML(subJObj.getString(key.jsonName)));
-                        }
-                    }
-                    String solidKey = "solid";
-                    if (!jObj.isNull(solidKey)) {
-                        subJObj = jObj.getJSONObject(solidKey);
-                        for (SolidWaste.Key key : SolidWaste.Key.keys) {
-                            review.solidWaste.set(key, decodeHTML(subJObj.getString(key.jsonName)));
-                        }
-                    }
-                    String airKey = "air";
-                    if (!jObj.isNull(airKey)) {
-                        subJObj = jObj.getJSONObject(airKey);
-                        for (AirWaste.Key key : AirWaste.Key.keys) {
-                            review.airWaste.set(key, decodeHTML(subJObj.getString(key.jsonName)));
-                        }
-                    }
+                    getJsonValuesForObject(jObj, "review", review.location);
+                    getJsonValuesForObject(jObj, "water", review.waterIssue);
+                    getJsonValuesForObject(jObj, "solid", review.solidWaste);
+                    getJsonValuesForObject(jObj, "air", review.airWaste);
                     results.add(review);
                 } catch (JSONException e) {
                     REVIEWS_CALLBACK.onError(e);

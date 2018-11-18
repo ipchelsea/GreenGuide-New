@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.top_bar, menu);
 
         MenuItem itemCity = menu.findItem(R.id.cityItem);
         mCitySelectionView = itemCity.getActionView().findViewById(R.id.city);
@@ -239,11 +239,7 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int itemId = item.getItemId();
-        if (itemId == R.id.write_review) {
-            WriteReviewActivity.open(this);
-        } else {
-            FragmentContainer.startActivity(this, itemId);
-        }
+        FragmentContainer.startActivity(this, itemId);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

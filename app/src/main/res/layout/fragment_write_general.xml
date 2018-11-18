@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
-    android:id="@+id/write_review"
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -38,11 +38,11 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/write_review_page_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="5sp"
             android:gravity="center"
-            android:text="Page 1 of 5"
             android:textColor="@color/grey"
             android:textSize="8sp"
             android:textStyle="bold" />
@@ -58,8 +58,50 @@
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:rowCount="5">
+                    android:columnCount="2">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:paddingBottom="5sp"
+                        android:paddingTop="15sp"
+                        android:text="Latitude*"
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/write_review_gen_lat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="13"
+                        android:inputType="textPersonName"
+                        android:paddingBottom="5sp"
+                        android:paddingTop="5sp"
+                        android:text=""
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:paddingBottom="5sp"
+                        android:paddingTop="15sp"
+                        android:text="Longitude*"
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/write_review_gen_lng"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="13"
+                        android:inputType="textPersonName"
+                        android:paddingBottom="5sp"
+                        android:paddingTop="5sp"
+                        android:text=""
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -72,7 +114,7 @@
                         android:textSize="12sp" />
 
                     <EditText
-                        android:id="@+id/write_review_co_name"
+                        android:id="@+id/write_review_gen_co_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -94,7 +136,7 @@
                         android:textSize="12sp" />
 
                     <EditText
-                        android:id="@+id/write_review_co_address"
+                        android:id="@+id/write_review_gen_co_address"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -112,12 +154,35 @@
                         android:gravity="start"
                         android:paddingBottom="5sp"
                         android:paddingTop="5sp"
-                        android:text="Company Industry Catagory*"
+                        android:text="Company City*"
                         android:textColor="@color/black"
                         android:textSize="12sp" />
 
                     <EditText
-                        android:id="@+id/write_review_co_industry"
+                        android:id="@+id/write_review_gen_co_city"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="13"
+                        android:inputType="textPersonName"
+                        android:paddingBottom="5sp"
+                        android:paddingTop="5sp"
+                        android:text=""
+                        android:hint="City Name"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:paddingBottom="5sp"
+                        android:paddingTop="5sp"
+                        android:text="Company Industry Category*"
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/write_review_gen_co_industry_category"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -138,7 +203,7 @@
                         android:textSize="12sp" />
 
                     <EditText
-                        android:id="@+id/write_review_co_products"
+                        android:id="@+id/write_review_gen_co_products"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -148,7 +213,6 @@
                         android:hint="Main type of products"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="12sp" />
-
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -161,7 +225,7 @@
                         android:textSize="12sp" />
 
                     <EditText
-                        android:id="@+id/write_review_co_date"
+                        android:id="@+id/write_review_gen_observation_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -172,7 +236,6 @@
                         android:hint="MM/DD/YYYY"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="12sp" />
-
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -185,6 +248,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_gen_observation_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -192,9 +256,9 @@
                         android:paddingBottom="5sp"
                         android:paddingTop="5sp"
                         android:text=""
-                        android:hint="00:00"
+                        android:hint="HH:MM"
                         android:textColor="@android:color/darker_gray"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"/>
                 </GridLayout>
 
                 <TextView
@@ -208,9 +272,10 @@
                     android:textSize="12sp"/>
 
                 <Spinner
-                    android:id="@+id/weather_cond_spinner"
+                    android:id="@+id/write_review_gen_weather_cond"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:spinnerMode="dialog"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -223,6 +288,7 @@
                     android:textSize="12sp"/>
 
                 <RadioGroup
+                    android:id="@+id/write_review_gen_rating"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -231,7 +297,8 @@
                     <RadioButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="-3" />
+                        android:checked="false"
+                        android:text="-3"/>
 
                     <RadioButton
                         android:layout_width="wrap_content"
@@ -267,16 +334,6 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:paddingBottom="5sp"
-                    android:paddingTop="5sp"
-                    android:text="Show when pressing radio button"
-                    android:textColor="@color/grey"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:gravity="start"
                     android:paddingBottom="5sp"
                     android:paddingTop="5sp"
@@ -285,10 +342,11 @@
                     android:textSize="12sp"/>
 
                 <EditText
+                    android:id="@+id/write_review_gen_written_experience"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
                     android:hint="Share details of your experience."
+                    android:inputType="textMultiLine"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="10sp" />
 
@@ -302,20 +360,61 @@
                     android:textColor="@color/black"
                     android:textSize="12sp" />
 
-                <Spinner
-                    android:id="@+id/review_focus_spinner"
+                <CheckBox
+                    android:id="@+id/write_review_gen_focus_water"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Water"/>
+
+                <CheckBox
+                    android:id="@+id/write_review_gen_focus_air"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Air"/>
+
+                <CheckBox
+                    android:id="@+id/write_review_gen_focus_waste"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Waste"/>
+
+                <CheckBox
+                    android:id="@+id/write_review_gen_focus_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Land"/>
+
+                <CheckBox
+                    android:id="@+id/write_review_gen_focus_ecosystem"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:text="Ecosystem"/>
+
+                <CheckBox
+                    android:id="@+id/write_review_gen_focus_other"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Other(s)"/>
+
+                <EditText
+                    android:id="@+id/write_review_gen_focus_other_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Others"
+                    android:textSize="10sp"
+                    android:singleLine="true"
+                    android:textColor="@android:color/darker_gray"
+                    android:visibility="gone"/>
 
                 <Button
-                    android:id="@+id/img_up_but"
+                    android:id="@+id/write_review_gen_image_upload_btn"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:layout_gravity="center"
                     android:text="Upload Images" />
 
                 <LinearLayout
-                    android:id="@+id/selected_Images_Container"
+                    android:id="@+id/write_review_gen_selected_images_container"
                     android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
@@ -326,7 +425,7 @@
                     android:background="@android:color/darker_gray" />
 
                 <Button
-                    android:id="@+id/gen_next"
+                    android:id="@+id/write_review_gen_next"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:layout_gravity="right"

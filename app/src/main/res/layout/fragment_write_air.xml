@@ -37,11 +37,11 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/write_review_page_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="5sp"
             android:gravity="center"
-            android:text="Page 3 of 5"
             android:textColor="@color/grey"
             android:textSize="8sp"
             android:textStyle="bold" />
@@ -53,48 +53,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <!--
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="10sp"
-                        android:background="@android:color/darker_gray" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:paddingTop="20sp"
-                        android:text="Does your review pertain to water?"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <RadioGroup
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:orientation="horizontal"
-                        android:paddingBottom="20sp">
-
-                        <RadioButton
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Yes" />
-
-                        <RadioButton
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="No" />
-                    </RadioGroup>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="10sp"
-                        android:background="@android:color/darker_gray"/>
-                                                                          -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -107,7 +65,7 @@
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/air_visi_spinner"
+                    android:id="@+id/write_review_air_visibility"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
@@ -123,29 +81,39 @@
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/air_odor_spinner"
+                    android:id="@+id/write_review_air_odor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
+
+                <EditText
+                    android:id="@+id/write_review_air_odor_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Odor description"
+                    android:visibility="gone"/>
+
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
+                    android:layout_marginTop="10dp"
                     android:paddingBottom="5sp"
                     android:paddingTop="5sp"
-                    android:text="Any Smoke?"
+                    android:text="Is there smoke?"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
-
                 <RadioGroup
+                    android:id="@+id/write_review_air_has_smoke"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:orientation="horizontal">
 
                     <RadioButton
+                        android:id="@+id/write_review_air_has_smoke_yes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Yes" />
@@ -158,25 +126,92 @@
                 </RadioGroup>
 
                 <TextView
+                    android:id="@+id/write_review_air_smoke_color_lable"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:paddingBottom="5sp"
                     android:paddingTop="5sp"
-                    android:text="If there is smoke, please indicate the color:"
+                    android:text="Please indicate the smoke color:"
                     android:textColor="@color/black"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/smoke_color_spinner"
+                    android:id="@+id/write_review_air_smoke_color"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+
+                <EditText
+                    android:id="@+id/write_review_air_smoke_color_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Water odor description"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
+                    android:layout_marginTop="10dp"
+                    android:paddingBottom="5sp"
+                    android:paddingTop="5sp"
+                    android:text="Does the Air Cause Physical Discomfort?"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/write_review_air_causes_physical_probs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/write_review_air_causes_physical_probs_yes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Yes" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No"/>
+
+                </RadioGroup>
+
+                <TextView
+                    android:id="@+id/write_review_air_discomfort_lable"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:paddingBottom="5sp"
+                    android:paddingTop="5sp"
+                    android:text="Please describe the discomfort:"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+
+                <Spinner
+                    android:id="@+id/write_review_air_discomfort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+
+                <EditText
+                    android:id="@+id/write_review_air_discomfort_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Water odor description"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:layout_marginTop="10dp"
                     android:paddingBottom="5sp"
                     android:paddingTop="5sp"
                     android:text="Measurement of Parameters"
@@ -224,6 +259,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_air_pm2_5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -246,6 +282,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_air_pm10"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -268,6 +305,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_air_o3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -290,6 +328,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_air_sox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -311,6 +350,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_air_nox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -332,6 +372,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_air_co"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -340,7 +381,6 @@
                         android:paddingTop="5sp"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="12sp" />
-
                 </GridLayout>
 
                 <View
@@ -355,14 +395,14 @@
                     android:layout_gravity="center">
 
                     <Button
-                        android:id="@+id/air_prev"
+                        android:id="@+id/write_review_air_prev"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="left"
                         android:text="Prev" />
 
                     <Button
-                        android:id="@+id/air_next"
+                        android:id="@+id/write_review_air_next"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="right"

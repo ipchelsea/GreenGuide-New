@@ -37,11 +37,11 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/write_review_page_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="5sp"
             android:gravity="center"
-            android:text="Page 4 of 5"
             android:textColor="@color/grey"
             android:textSize="8sp"
             android:textStyle="bold" />
@@ -53,48 +53,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <!--
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="10sp"
-                        android:background="@android:color/darker_gray" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:paddingTop="20sp"
-                        android:text="Does your review pertain to water?"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <RadioGroup
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:orientation="horizontal"
-                        android:paddingBottom="20sp">
-
-                        <RadioButton
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Yes" />
-
-                        <RadioButton
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="No" />
-                    </RadioGroup>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="10sp"
-                        android:background="@android:color/darker_gray"/>
-                                                                          -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -107,9 +65,16 @@
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/waste_type_spinner"
+                    android:id="@+id/write_review_solid_waste_type"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
+
+                <EditText
+                    android:id="@+id/write_review_solid_waste_type_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Waste type description"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -117,13 +82,13 @@
                     android:gravity="start"
                     android:paddingBottom="5sp"
                     android:paddingTop="5sp"
-                    android:text="Amount*"
+                    android:text="Waste Amount*"
                     android:textColor="@color/black"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/waste_amount_spinner"
+                    android:id="@+id/write_review_solid_waste_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
@@ -138,6 +103,30 @@
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:paddingBottom="5sp"
+                    android:paddingTop="5sp"
+                    android:text="Odor*"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/write_review_solid_odor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <EditText
+                    android:id="@+id/write_review_solid_odor_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Solid waste odor description"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:layout_marginTop="10dp"
+                    android:paddingBottom="5sp"
                     android:paddingTop="30sp"
                     android:text="Miscellaneous Information or Questions"
                     android:textColor="@color/black"
@@ -145,6 +134,7 @@
                     android:textStyle="bold"/>
 
                 <EditText
+                    android:id="@+id/write_review_solid_misc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
@@ -165,14 +155,14 @@
                     android:layout_gravity="center">
 
                     <Button
-                        android:id="@+id/solid_prev"
+                        android:id="@+id/write_review_solid_prev"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="left"
                         android:text="Prev" />
 
                     <Button
-                        android:id="@+id/solid_next"
+                        android:id="@+id/write_review_solid_next"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="right"

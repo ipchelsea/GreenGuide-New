@@ -37,11 +37,11 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/write_review_page_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="5sp"
             android:gravity="center"
-            android:text="Page 2 of 5"
             android:textColor="@color/grey"
             android:textSize="8sp"
             android:textStyle="bold" />
@@ -53,48 +53,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-            <!--
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="10sp"
-                    android:background="@android:color/darker_gray" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:paddingTop="20sp"
-                    android:text="Does your review pertain to water?"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:orientation="horizontal"
-                    android:paddingBottom="20sp">
-
-                    <RadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Yes" />
-
-                    <RadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="No" />
-                </RadioGroup>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="10sp"
-                    android:background="@android:color/darker_gray"/>
-                                                                      -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -107,9 +65,16 @@
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/water_type_spinner"
+                    android:id="@+id/write_review_water_body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
+
+                <EditText
+                    android:id="@+id/write_review_water_body_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Water body name"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -123,9 +88,16 @@
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/water_color_spinner"
+                    android:id="@+id/write_review_water_color"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
+
+                <EditText
+                    android:id="@+id/write_review_water_color_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Water color"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -138,29 +110,11 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
-                <SeekBar
-                    android:id="@+id/turbid_seek"
+                <Spinner
+                    android:id="@+id/write_review_water_turbidity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:max="400"
-                    android:progress="0" />
-
-                <EditText
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="5sp"
-                    android:paddingTop="5sp"
-                    android:text=""
-                    android:hint="Make Turbidity Number Show up"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/turbidity_seek_num"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="" />
+                    android:max="400" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -174,11 +128,19 @@
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/odor_spinner"
+                    android:id="@+id/write_review_water_odor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
+                <EditText
+                    android:id="@+id/write_review_water_odor_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Water odor description"
+                    android:visibility="gone"/>
+
                 <TextView
+                    android:layout_marginTop="10dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
@@ -189,14 +151,14 @@
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
-
                 <RadioGroup
+                    android:id="@+id/write_review_water_has_float"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:orientation="horizontal">
-
                     <RadioButton
+                        android:id="@+id/write_review_water_has_float_yes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Yes" />
@@ -205,24 +167,32 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="No" />
-
                 </RadioGroup>
 
                 <TextView
+                    android:id="@+id/write_review_water_float_type_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:paddingBottom="5sp"
                     android:paddingTop="5sp"
-                    android:text="If there is float, please indicate the type:"
+                    android:text="Float Type:"
                     android:textColor="@color/black"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <Spinner
-                    android:id="@+id/float_type_spinner"
+                    android:id="@+id/write_review_water_float_type"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+
+                <EditText
+                    android:id="@+id/write_review_water_float_type_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Float type name"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -238,8 +208,7 @@
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:rowCount="14">
+                    android:columnCount="2">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -275,6 +244,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_dissolved_oxygen"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -297,6 +267,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_ph"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -319,6 +290,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_turbidity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -341,6 +313,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_bio_oxygen_demand"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -362,6 +335,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_chem_oxygen_demand"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -383,6 +357,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_organic_carbon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -404,6 +379,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_solid"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -425,6 +401,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_ammonium"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -446,6 +423,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_phosphorus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -467,6 +445,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_nitrate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -488,6 +467,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_mercury"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -509,6 +489,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_lead"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -530,6 +511,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_cadmium"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -551,6 +533,7 @@
                         android:textSize="12sp" />
 
                     <EditText
+                        android:id="@+id/write_review_water_measured_arsenic"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
@@ -573,14 +556,14 @@
                     android:layout_gravity="center">
 
                     <Button
-                        android:id="@+id/water_prev"
+                        android:id="@+id/write_review_water_prev"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="left"
                         android:text="Prev" />
 
                     <Button
-                        android:id="@+id/water_next"
+                        android:id="@+id/write_review_water_next"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="right"

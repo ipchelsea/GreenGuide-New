@@ -10,6 +10,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.guide.green.green_guide.Fragments.WriteReviewAirFragment;
 import com.guide.green.green_guide.Fragments.WriteReviewGeneralFragment;
@@ -25,12 +28,32 @@ public class WriteReviewActivity  extends AppCompatActivity {
     public static final int REQUEST_CODE_PICK_IMAGE = 12;
     private final static int FRAGMENT_CONTAINER = R.id.fragment_container;
 
-    private int mCurrentPage;
+    private int mCurrentPage, mLastPage;
     private Review mReview = new Review();
     private WriteReviewGeneralFragment mWriteReviewGeneral;
     private ArrayList<WriteReviewPage> mPages = new ArrayList<>();
+    private ArrayList<ViewGroup> mPageContainers = new ArrayList<>();
 
     public static abstract class WriteReviewPage extends Fragment {
+        private int mPageNumber, mTotalPages;
+        public void setPageNumber(int pageNum, int totalPages) {
+            mPageNumber = pageNum;
+            mTotalPages = totalPages;
+            displayPageNumber();
+        }
+
+        public abstract TextView getPageNumberTextView();
+
+        /**
+         * Called whenever tha page number is changed and when the root view is first created.
+         */
+        public void displayPageNumber() {
+            TextView tv = getPageNumberTextView();
+            if (tv != null) {
+                tv.setText("Page " + mPageNumber + " of " + mTotalPages);
+            }
+        }
+
         public interface OnPageChangeListener {
             void onPageChange(PageDirection direction);
         }
@@ -57,6 +80,22 @@ public class WriteReviewActivity  extends AppCompatActivity {
     }
 
     private void openNextPage() {
+        Review.ReviewCategory components[] = new Review.ReviewCategory[] {
+                mReview.location,
+                mReview.airWaste,
+                mReview.solidWaste,
+                mReview.waterIssue
+        };
+        for (Review.ReviewCategory component : components) {
+            for (Review.Key k : component.allKeys()) {
+                String value = component.get(k);
+                if (value != null) {
+                    Log.i(">>>>", "(" + k + ", " + value + ")");
+                }
+            }
+        }
+
+
         if (mCurrentPage < mPages.size() - 1) {
             mCurrentPage += 1;
             openPage(mCurrentPage);
@@ -66,12 +105,14 @@ public class WriteReviewActivity  extends AppCompatActivity {
     }
 
     private void submit() {
+        if (true) return;
+
         mReview.location.set(Review.Location.Key.INDUSTRY, "StanTestFromAndroidCategory");
         mReview.location.set(Review.Location.Key.PRODUCT, "StanTestFromAndroidProduct");
         mReview.location.set(Review.Location.Key.RATING, "0");
         mReview.location.set(Review.Location.Key.REVIEW, "StanTestFromAndroidPerformanceReview");
 
-        Review.ReviewComponent components[] = new Review.ReviewComponent[] {
+        Review.ReviewCategory components[] = new Review.ReviewCategory[] {
                 mReview.location,
                 mReview.airWaste,
                 mReview.solidWaste,
@@ -79,8 +120,8 @@ public class WriteReviewActivity  extends AppCompatActivity {
         };
 
         ArrayList<SimplePOSTRequest.FormItem> formItems = new ArrayList<>();
-        for (Review.ReviewComponent component : components) {
-            for (Review.Key k : component.getKeys()) {
+        for (Review.ReviewCategory component : components) {
+            for (Review.Key k : component.allKeys()) {
                 if (k.postName != null) {
                     String value = component.get(k);
                     if (value == null) { value = ""; }
@@ -108,7 +149,7 @@ public class WriteReviewActivity  extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_write_review);
+        setContentView(R.layout.activity_write_review);
 
         mWriteReviewGeneral = new WriteReviewGeneralFragment();
         mWriteReviewGeneral.setOnUploadImagesClicked(new View.OnClickListener() {
@@ -119,13 +160,23 @@ public class WriteReviewActivity  extends AppCompatActivity {
         });
 
         mPages.add(mWriteReviewGeneral);
-        mPages.add(new WriteReviewWaterFragment());
-        mPages.add(new WriteReviewAirFragment());
-        mPages.add(new WriteReviewSolidFragment());
+
+        WriteReviewWaterFragment waterFragment = new WriteReviewWaterFragment();
+        WriteReviewAirFragment airFragment = new WriteReviewAirFragment();
+        WriteReviewSolidFragment solidFragment = new WriteReviewSolidFragment();
+
+        mPages.add(waterFragment);
+        mPages.add(airFragment);
+        mPages.add(solidFragment);
+
+        int totalPages = mPages.size();
+        for (int i = 0; i < totalPages; i++) {
+            mPages.get(i).setPageNumber(i + 1, totalPages);
+        }
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            for (Review.Location.Key key : Review.Location.Key.keys) {
+            for (Review.Location.Key key : Review.Location.Key.allKeys()) {
                 if (bundle.containsKey(key.jsonName)) {
                     mReview.location.set(key, bundle.getString(key.jsonName));
                 }
@@ -133,11 +184,15 @@ public class WriteReviewActivity  extends AppCompatActivity {
         }
 
         mWriteReviewGeneral.setLocationObject(mReview.location);
+        waterFragment.setWaterIssueObject(mReview.waterIssue);
+        airFragment.setAirWasteObject(mReview.airWaste);
+        solidFragment.setSolidWasteObject(mReview.solidWaste);
 
         for (WriteReviewPage page : mPages) {
             page.setOnPageChange(onPageChangeListener);
         }
 
+        InitPageContainers();
         openPage(0);
     }
 
@@ -178,17 +233,31 @@ public class WriteReviewActivity  extends AppCompatActivity {
         }
     }
 
-    private Fragment openPage(int pageNumber) {
-        Fragment fragment = mPages.get(pageNumber);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        if (mCurrentPage < 0) {
-            transaction.add(FRAGMENT_CONTAINER, fragment);
-        } else {
-            transaction.replace(FRAGMENT_CONTAINER, fragment);
+    private void InitPageContainers() {
+        ViewGroup fragContainer = findViewById(FRAGMENT_CONTAINER);
+        for (Fragment fragment : mPages) {
+            FrameLayout parent = new FrameLayout(this);
+            fragContainer.addView(parent);
+            parent.setId(FRAGMENT_CONTAINER + 1 + mPageContainers.size());
+            ViewGroup.LayoutParams lParams = parent.getLayoutParams();
+            lParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            lParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            parent.setLayoutParams(lParams);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.add(parent.getId(), fragment);
+            transaction.commit();
+            parent.setVisibility(View.GONE);
+            mPageContainers.add(parent);
         }
-        transaction.commit();
-        mCurrentPage = pageNumber;
-        return fragment;
+        mPageContainers.get(0).setVisibility(View.VISIBLE);
+    }
+
+    private void openPage(int pageNumber) {
+        if (pageNumber >= 0 && pageNumber < mPageContainers.size()) {
+            mPageContainers.get(mLastPage).setVisibility(View.GONE);
+            mPageContainers.get(pageNumber).setVisibility(View.VISIBLE);
+            mLastPage = pageNumber;
+        }
     }
 
     public static void open(Activity act) {

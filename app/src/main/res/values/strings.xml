@@ -30,4 +30,5 @@
     <string name="btmsheet_rating_value_default">+3.0</string>
     <string name="btmsheet_ratings_count_default">(134)</string>
     <string name="poi_results_retry">Retry</string>
+    <string name="list_item_other">Other</string>
 </resources>
