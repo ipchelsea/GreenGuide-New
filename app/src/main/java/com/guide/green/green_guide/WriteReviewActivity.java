@@ -105,13 +105,6 @@ public class WriteReviewActivity  extends AppCompatActivity {
     }
 
     private void submit() {
-        if (true) return;
-
-        mReview.location.set(Review.Location.Key.INDUSTRY, "StanTestFromAndroidCategory");
-        mReview.location.set(Review.Location.Key.PRODUCT, "StanTestFromAndroidProduct");
-        mReview.location.set(Review.Location.Key.RATING, "0");
-        mReview.location.set(Review.Location.Key.REVIEW, "StanTestFromAndroidPerformanceReview");
-
         Review.ReviewCategory components[] = new Review.ReviewCategory[] {
                 mReview.location,
                 mReview.airWaste,
@@ -138,11 +131,11 @@ public class WriteReviewActivity  extends AppCompatActivity {
             @Override
             public void onPostExecute(StringBuilder sb) {
                 Log.i("*********", sb == null ? "NULL" : sb.toString());
-                Toast.makeText(WriteReviewActivity.this, "!!!!Review Submitted!!!!", Toast.LENGTH_LONG).show();
+                Toast.makeText(WriteReviewActivity.this, "Review Submitted", Toast.LENGTH_LONG).show();
             }
         }).execute(formItems);
 
-        Toast.makeText(this, "Review Submitted", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Submitting Review", Toast.LENGTH_LONG).show();
         finish();
     }
 
@@ -265,13 +258,16 @@ public class WriteReviewActivity  extends AppCompatActivity {
         act.startActivity(intent);
     }
 
-    public static void open(Activity act, BaiduSuggestion.Location baiduLocation) {
+    public static void open(Activity act, BaiduSuggestion.Location baiduLocation, String industry) {
         Intent intent = new Intent(act, WriteReviewActivity.class);
         intent.putExtra(Review.Location.Key.COMPANY.jsonName, baiduLocation.name);
         intent.putExtra(Review.Location.Key.ADDRESS.jsonName, baiduLocation.address);
         intent.putExtra(Review.Location.Key.CITY.jsonName, baiduLocation.city);
         intent.putExtra(Review.Location.Key.LAT.jsonName, Double.toString(baiduLocation.point.latitude));
         intent.putExtra(Review.Location.Key.LNG.jsonName, Double.toString(baiduLocation.point.longitude));
+        if (industry != null) {
+            intent.putExtra(Review.Location.Key.INDUSTRY.jsonName, industry.substring("Industry: ".length()));
+        }
         act.startActivity(intent);
     }
 }

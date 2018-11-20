@@ -27,7 +27,7 @@
                 android:text="@string/btmsheet_company_name_default"
                 android:textIsSelectable="true" />
 
-            <LinearLayout
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/reviews_bottom_sheet_peek_height_halved"
                 android:minHeight="@dimen/reviews_bottom_sheet_peek_height_halved"
@@ -37,7 +37,7 @@
                     android:id="@+id/btmSheetRatingValue"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    app:layout_constraintStart_toStartOf="parent"
                     android:paddingStart="4dp"
                     android:paddingEnd="4dp"
                     android:textSize="14sp"
@@ -47,24 +47,25 @@
 
                 <ImageView
                     android:id="@+id/btmSheetRatingStars"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    app:layout_constraintStart_toStartOf="@id/btmSheetRatingValue"
+                    app:layout_constraintEnd_toEndOf="@id/btmSheetRatingsCount"
                     android:contentDescription="@string/Rating_Stars_Description"
-                    android:layout_weight="7"
                     android:scaleType="center"/>
 
                 <TextView
                     android:id="@+id/btmSheetRatingsCount"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="2"
+                    app:layout_constraintEnd_toEndOf="parent"
                     android:paddingStart="4dp"
                     android:paddingEnd="4dp"
                     android:textSize="14sp"
                     android:gravity="center"
                     android:text="@string/btmsheet_ratings_count_default"
                     android:textIsSelectable="true" />
-            </LinearLayout>
+            </android.support.constraint.ConstraintLayout>
         </LinearLayout>
 
         <LinearLayout

@@ -81,7 +81,7 @@ public class LoadingDialog extends DialogFragment {
             });
         Dialog result = builder.create();
         result.setCanceledOnTouchOutside(true);
-        progress = (ProgressBar) pv.findViewById(R.id.progress);
+        progress = pv.findViewById(R.id.progress);
         return result;
     }
 }

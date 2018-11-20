@@ -1,5 +1,6 @@
 package com.guide.green.green_guide.Fragments;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,18 +12,31 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.guide.green.green_guide.Dialogs.ImagePickerDialog;
 import com.guide.green.green_guide.R;
+import com.guide.green.green_guide.Utilities.Drawing;
 import com.guide.green.green_guide.Utilities.FormInput;
 import com.guide.green.green_guide.Utilities.Review;
 import com.guide.green.green_guide.Utilities.Review.AirWaste;
 import com.guide.green.green_guide.WriteReviewActivity;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage {
+    private ImagePickerDialog<VisibilityImage> mVisibilityPicker;
     private OnPageChangeListener mOnPageChangeListener;
     private ViewGroup mViewRoot;
     private AirWaste mAirWaste;
+
+    private class VisibilityImage extends ImagePickerDialog.ImageTitlePair {
+        public final String postValue;
+        public VisibilityImage(String postValue, String title, Drawable image) {
+            super(title, image);
+            this.postValue = postValue;
+        }
+    }
+
 
     @Override
     public void setOnPageChange(OnPageChangeListener listener) {
@@ -68,8 +82,8 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
         super.onViewCreated(view, savedInstanceState);
     }
 
-    public void setAirWasteObject(AirWaste airWate) {
-        mAirWaste = airWate;
+    public void setAirWasteObject(AirWaste airWaste) {
+        mAirWaste = airWaste;
         if (mViewRoot != null) {
             bindViews();
         }
@@ -83,6 +97,56 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
             return;
         }
 
+        addVisibilityDialog();
+        bindSingleDependencyViews();
+        bindDualDependencyViews();
+        bindSimpleNoDependencyTextViews();
+    }
+
+    public void addVisibilityDialog() {
+        final VisibilityImage vsImages[] = new VisibilityImage[] {
+                new VisibilityImage(">100km","Over 100km",
+                        Drawing.getDrawable(getContext(), R.drawable.visibility_112km)),
+                new VisibilityImage("76-100","Between 76km to 100km",
+                        Drawing.getDrawable(getContext(), R.drawable.visibility_77km)),
+                new VisibilityImage("51-75","Between 51km to 75km",
+                        Drawing.getDrawable(getContext(), R.drawable.visibility_77km)),
+                new VisibilityImage("25-50","Between 26km to 50km",
+                        Drawing.getDrawable(getContext(), R.drawable.visibility_23km)),
+                new VisibilityImage("<25","Less than 25km",
+                        Drawing.getDrawable(getContext(), R.drawable.visibility_23km))
+        };
+        final TextView visibility = mViewRoot.findViewById(R.id.write_review_air_visibility);
+        visibility.setFocusable(false);
+        visibility.setLongClickable(false);
+        visibility.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mVisibilityPicker != null) { return; }
+                mVisibilityPicker = new ImagePickerDialog<>();
+                mVisibilityPicker.setData(vsImages);
+                mVisibilityPicker.setOnImagePickedListener(
+                        new ImagePickerDialog.OnImagePickedListener<VisibilityImage>() {
+                    private void onFinish(){
+                                mVisibilityPicker = null;
+                            }
+
+                    @Override
+                    public void onImagePicked(VisibilityImage titleAndImage) {
+                        visibility.setText(titleAndImage.title);
+
+                        onFinish();
+                    }
+
+                    @Override
+                    public void onCancel() { onFinish(); }
+                });
+                mVisibilityPicker.show(Objects.requireNonNull(getFragmentManager()), null);
+            }
+        });
+    }
+
+    private void bindSingleDependencyViews() {
         String otherValue = getContext().getResources().getString(R.string.list_item_other);
 
         // Other odor "forward deceleration"
@@ -94,6 +158,10 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
         FormInput.addAdapterToSpinner(getContext(), odorView,
                 R.array.write_review_odor_dropdown_items);
         new FormInput.DropDown(odorView, AirWaste.Key.ODOR, mAirWaste, otherOdor, otherValue);
+    }
+
+    private void bindDualDependencyViews() {
+        String otherValue = getContext().getResources().getString(R.string.list_item_other);
 
         // Any Smoke other "forward deceleration" * 2
         FormInput.TextInput otherSmokeColor = new FormInput.TextInput((TextView)
@@ -105,7 +173,7 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
         View[] colorGroup = new View[] {mViewRoot.findViewById(
                 R.id.write_review_air_smoke_color_lable)};
         FormInput.addAdapterToSpinner(getContext(), smokeColorView,
-                R.array.write_review_odor_dropdown_items);
+                R.array.write_review_colors_dropdown_items);
         FormInput.DropDown smokeColor = new FormInput.DropDown(smokeColorView,
                 AirWaste.Key.SMOKE_COLOR, mAirWaste, otherSmokeColor, otherValue, colorGroup);
 
@@ -132,7 +200,9 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
         RadioGroup hasProbs = mViewRoot.findViewById(R.id.write_review_air_causes_physical_probs);
         new FormInput.YNRadioBtn(hasProbs, AirWaste.Key.PHYSICAL_PROBS, mAirWaste, discomfortType,
                 probY.getText().toString());
+    }
 
+    private void bindSimpleNoDependencyTextViews() {
         // Parameter measurements
         HashMap<Integer, Review.Key> textViews = new HashMap<>();
         textViews.put(R.id.write_review_air_pm2_5, AirWaste.Key.PM2_5);

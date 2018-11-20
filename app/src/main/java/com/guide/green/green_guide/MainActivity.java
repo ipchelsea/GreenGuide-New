@@ -1,5 +1,6 @@
 package com.guide.green.green_guide;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.NestedScrollView;
@@ -7,6 +8,7 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -26,12 +28,15 @@ import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog.OnCitySelectedListener;
+import com.guide.green.green_guide.Dialogs.ImagePickerDialog;
 import com.guide.green.green_guide.Utilities.AsyncJSONArray;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
 import com.guide.green.green_guide.Utilities.BaiduSuggestion;
 import com.guide.green.green_guide.Utilities.BottomSheetManager;
+import com.guide.green.green_guide.Utilities.Drawing;
 import com.guide.green.green_guide.Utilities.RomanizedLocation;
 import com.guide.green.green_guide.Utilities.SuggestionSearchManager;
 
@@ -60,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
-        ((Button) findViewById(R.id.writeReview)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.writeReview).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 WriteReviewActivity.open(MainActivity.this);
@@ -268,9 +273,6 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
         mCitySelectionView.setText(city.name);
     }
 
-    /* Temporary Method For Testing Things */
-    public void doStuff(View view) {}
-
     public void getGreenGuidePoints() {
         new AsyncJSONArray(new AsyncJSONArray.OnAsyncJSONArrayResultListener() {
             @Override
@@ -392,5 +394,20 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
             default: drawableId = R.drawable.icon_markg_green; break;
         }
         return drawableId;
+    }
+
+    /* Temporary Method For Testing Things */
+    public void doStuff(View view) {
+        ImagePickerDialog imgPicker = new ImagePickerDialog();
+        ImagePickerDialog.ImageTitlePair drawablePair[] = new ImagePickerDialog.ImageTitlePair[] {
+            new ImagePickerDialog.ImageTitlePair("AT", Drawing.getDrawable(this, R.drawable.icon_markg_red)),
+            new ImagePickerDialog.ImageTitlePair("BAT", Drawing.getDrawable(this, R.drawable.ic_home_black_24dp)),
+                new ImagePickerDialog.ImageTitlePair("CAT", Drawing.getDrawable(this, R.drawable.icon_markg_yellow)),
+                new ImagePickerDialog.ImageTitlePair("DAB", Drawing.getDrawable(this, R.drawable.ground_overlay)),
+                new ImagePickerDialog.ImageTitlePair("EAT", Drawing.getDrawable(this, R.drawable.ic_pin_drop_black_24dp)),
+                new ImagePickerDialog.ImageTitlePair("FAT", Drawing.getDrawable(this, R.drawable.icon_geo))
+        };
+        imgPicker.setData(drawablePair);
+        imgPicker.show(getSupportFragmentManager(), null);
     }
 }

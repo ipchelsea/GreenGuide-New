@@ -48,15 +48,9 @@ public class SuggestionSearchManager extends AutoComplete implements View.OnKeyL
                                    @NonNull ViewGroup dropDownContainer) {
         super(act, textInput, dropdown);
         mItemIcons = new SuggestionSearchAdapter.ItemIcons();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mItemIcons.FIRST_ITEM = act.getDrawable(R.drawable.ic_search_review);
-            mItemIcons.AUTO_COMPLETE_TEXT = null;
-            mItemIcons.LOCATION = act.getDrawable(R.drawable.icon_markg_red);
-        } else {
-            mItemIcons.FIRST_ITEM = act.getResources().getDrawable(R.drawable.ic_search_review);
-            mItemIcons.AUTO_COMPLETE_TEXT = null;
-            mItemIcons.LOCATION = act.getResources().getDrawable(R.drawable.icon_markg_red);
-        }
+        mItemIcons.FIRST_ITEM = Drawing.getDrawable(act, R.drawable.ic_search_review);
+        mItemIcons.AUTO_COMPLETE_TEXT = null;
+        mItemIcons.LOCATION = Drawing.getDrawable(act, R.drawable.icon_markg_red);
         mMapViewContainer = mapViewContainer;
         mDropDownContainer = dropDownContainer;
         mSearchBarContainer = searbarContainer;

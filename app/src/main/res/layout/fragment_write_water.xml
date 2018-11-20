@@ -14,22 +14,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:paddingBottom="10sp"
-            android:paddingTop="10sp"
-            android:text="Write a Review"
-            android:textColor="@color/green"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
             android:paddingTop="10sp"
             android:text="Water Issues"
             android:textColor="@color/black"
@@ -179,7 +163,8 @@
                     android:text="Float Type:"
                     android:textColor="@color/black"
                     android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:visibility="gone"/>
 
                 <Spinner
                     android:id="@+id/write_review_water_float_type"
@@ -198,6 +183,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
+                    android:layout_marginTop="10dp"
                     android:paddingBottom="5sp"
                     android:paddingTop="5sp"
                     android:text="Measurement of Parameters"

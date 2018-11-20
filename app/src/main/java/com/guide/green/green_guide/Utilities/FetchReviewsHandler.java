@@ -21,6 +21,10 @@ import com.guide.green.green_guide.Dialogs.LoadingDialog;
 import com.guide.green.green_guide.R;
 import com.guide.green.green_guide.WriteReviewActivity;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
@@ -28,11 +32,11 @@ import java.util.ArrayList;
  * is being retrieved, and filling the bottom sheet with the resulting reviews.
  *
  * Note:
- *  - Does not clear away what was already there.
+ *  - Does not clear away what was already on the map from the last review fetch (such as markers)
  *  - Assumes that the bottom sheet is showing the reviews.
  *  - Does not add any icons to the map
  */
-public class FetchReviewsHandler implements Review.Results {
+public class FetchReviewsHandler implements Review.ReviewResults {
     private BaiduSuggestion.Location mSuggestion;
     private BottomSheetManager mBtmSheetManager;
     private LoadingDialog mLoadingDialog;
@@ -68,6 +72,67 @@ public class FetchReviewsHandler implements Review.Results {
         }
     }
 
+    private ViewGroup createSingleReview(final Review review, int rating) {
+        LayoutInflater lf = LayoutInflater.from(mAct);
+        final ViewGroup child = (ViewGroup) lf.inflate(R.layout.review_single_comment,
+                mBtmSheetManager.reviews.body.reviews, false);
+        TextView ratingValue = child.findViewById(R.id.ratingValue);
+        ImageView ratingImage = child.findViewById(R.id.ratingImage);
+        TextView reviewText = child.findViewById(R.id.reviewText);
+        TextView reviewTime = child.findViewById(R.id.reviewTime);
+        final LinearLayout reviewImages = child.findViewById(R.id.reviewImages);
+//            Button rawDataBtn = (Button) child.findViewById(R.id.rawDataBtn);
+//            Button helpfulBtn = (Button) child.findViewById(R.id.helpfulBtn);
+//            Button inappropriateBtn = (Button) child.findViewById(R.id.inappropriateBtn);
+
+        ratingValue.setText(String.format("Rating: %s%d", rating > 0 ? "+" : "", rating));
+
+        String resourceName = "rate" + (rating < 0 ? "_" : "") + Math.abs(rating);
+        int resoureceId = mAct.getResources().getIdentifier(resourceName, "drawable",
+                mAct.getPackageName());
+        Bitmap bmp = BitmapFactory.decodeResource(mAct.getResources(), resoureceId);
+        ratingImage.setImageBitmap(bmp);
+
+        reviewText.setText(review.location.get(Review.Location.Key.REVIEW));
+        reviewTime.setText(String.format("Time: %s",
+                review.location.get(Review.Location.Key.TIME)));
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(child.getLayoutParams());
+        child.setPadding(0, (int) Drawing.convertDpToPx(mAct,10), 0, 0);
+        child.setLayoutParams(lp);
+
+        new AsyncJSONObject(new AsyncJSONObject.OnAsyncJSONObjectResultListener() {
+            @Override
+            public void onFinish(ArrayList<JSONObject> jObject, ArrayList<Exception> exceptions) {
+                JSONArray imgUrls = null;
+                try {
+                    imgUrls = jObject.get(0).getJSONArray("all_image");
+                    for (int i = 0; i < imgUrls.length(); i++) {
+                        String path = imgUrls.getString(i);
+                        new AsyncGetImage() {
+                            @Override
+                            public void onPostExecute(Bitmap bitmap) {
+                                ImageView imgView = new ImageView(mAct);
+                                imgView.setImageBitmap(bitmap);
+                                reviewImages.addView(imgView);
+                            }
+                        }.execute("http://www.lovegreenguide.com/" + path);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+
+            @Override
+            public void onCanceled(ArrayList<JSONObject> jObject, ArrayList<Exception> exceptions) {
+                /* Do nothing */
+            }
+        }).execute("http://www.lovegreenguide.com/view_app.php?id=" + review.id);
+
+        return child;
+    }
+
     @Override
     public void onSuccess(ArrayList<Review> reviews) {
         mBtmSheetManager.reviews.peekBar.companyName.setText(mSuggestion.name);
@@ -99,35 +164,7 @@ public class FetchReviewsHandler implements Review.Results {
                 product = review.location.get(Review.Location.Key.PRODUCT);
             }
 
-            // Add review
-            LayoutInflater lf = LayoutInflater.from(mAct);
-            ViewGroup child = (ViewGroup) lf.inflate(R.layout.review_single_comment,
-                    mBtmSheetManager.reviews.body.reviews, false);
-            TextView ratingValue = child.findViewById(R.id.ratingValue);
-            ImageView ratingImage = child.findViewById(R.id.ratingImage);
-            TextView reviewText = child.findViewById(R.id.reviewText);
-            TextView reviewTime = child.findViewById(R.id.reviewTime);
-//            Button rawDataBtn = (Button) child.findViewById(R.id.rawDataBtn);
-//            Button helpfulBtn = (Button) child.findViewById(R.id.helpfulBtn);
-//            Button inappropriateBtn = (Button) child.findViewById(R.id.inappropriateBtn);
-
-            ratingValue.setText(String.format("Rating: %s%d", rating > 0 ? "+" : "", rating));
-
-            String resourceName = "rate" + (rating < 0 ? "_" : "") + Math.abs(rating);
-            int resoureceId = mAct.getResources().getIdentifier(resourceName, "drawable",
-                    mAct.getPackageName());
-            Bitmap bmp = BitmapFactory.decodeResource(mAct.getResources(), resoureceId);
-            ratingImage.setImageBitmap(bmp);
-
-            reviewText.setText(review.location.get(Review.Location.Key.REVIEW));
-            reviewTime.setText(String.format("Time: %s",
-                    review.location.get(Review.Location.Key.TIME)));
-
-            mBtmSheetManager.reviews.body.reviews.addView(child);
-
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams (child.getLayoutParams());
-            child.setPadding(0, (int) Drawing.convertDpToPx(mAct,10), 0, 0);
-            child.setLayoutParams(lp);
+            mBtmSheetManager.reviews.body.reviews.addView(createSingleReview(review, rating));
         }
 
         // Remove empty X values from histogram.
@@ -172,19 +209,18 @@ public class FetchReviewsHandler implements Review.Results {
         mBtmSheetManager.reviews.body.industry.setText("Industry: " + industry);
         mBtmSheetManager.reviews.body.product.setText("Product: " + product);
 
+        int visibilityState;
         if (reviews.size() == 0) {
-            mBtmSheetManager.reviews.peekBar.ratingStars.setVisibility(View.INVISIBLE);
-            mBtmSheetManager.reviews.peekBar.ratingValue.setVisibility(View.INVISIBLE);
-            mBtmSheetManager.reviews.peekBar.ratingCount.setVisibility(View.INVISIBLE);
-            mBtmSheetManager.reviews.body.container.setVisibility(View.INVISIBLE);
+            visibilityState = View.INVISIBLE;
             mBtmSheetManager.reviews.writeReviewButton.setText(R.string.write_first_review_button_text);
         } else {
-            mBtmSheetManager.reviews.peekBar.ratingStars.setVisibility(View.VISIBLE);
-            mBtmSheetManager.reviews.peekBar.ratingValue.setVisibility(View.VISIBLE);
-            mBtmSheetManager.reviews.peekBar.ratingCount.setVisibility(View.VISIBLE);
-            mBtmSheetManager.reviews.body.container.setVisibility(View.VISIBLE);
+            visibilityState = View.VISIBLE;
             mBtmSheetManager.reviews.writeReviewButton.setText(R.string.write_review_button_text);
         }
+        mBtmSheetManager.reviews.peekBar.ratingStars.setVisibility(visibilityState);
+        mBtmSheetManager.reviews.peekBar.ratingValue.setVisibility(visibilityState);
+        mBtmSheetManager.reviews.peekBar.ratingCount.setVisibility(visibilityState);
+        mBtmSheetManager.reviews.body.container.setVisibility(visibilityState);
 
         mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED);
         mCompleted = true;
@@ -192,7 +228,8 @@ public class FetchReviewsHandler implements Review.Results {
         mBtmSheetManager.reviews.writeReviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                WriteReviewActivity.open(mAct, mSuggestion);
+                WriteReviewActivity.open(mAct, mSuggestion,
+                        mBtmSheetManager.reviews.body.industry.getText().toString());
             }
         });
     }

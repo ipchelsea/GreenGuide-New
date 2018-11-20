@@ -40,8 +40,14 @@
             android:configChanges="keyboard|keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="open" android:host="greenguide"/>
             </intent-filter>
         </activity>
         <activity
@@ -60,8 +66,10 @@
         </activity>
         <activity
             android:name=".WriteReviewActivity"
-            android:label="Green Guide"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:label="Write a Review"
+            android:screenOrientation="portrait"
+            android:configChanges="keyboard|keyboardHidden|orientation">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.guide.green.green_guide.MainActivity"/>
         </activity>

@@ -11,6 +11,7 @@
         <item>Typhoon/Hurricane</item>
     </string-array>
     <string-array name="write_review_water_bodies_dropdown_items">
+        <item></item>
         <item>Lake</item>
         <item>Ocean</item>
         <item>River and Stream</item>
@@ -20,6 +21,7 @@
         <item>@string/list_item_other</item>
     </string-array>
     <string-array name="write_review_water_float_type_dropdown_items">
+        <item></item>
         <item>Domestic wastes</item>
         <item>Dead fish</item>
         <item>Algae</item>
@@ -27,14 +29,16 @@
         <item>@string/list_item_other</item>
     </string-array>
     <string-array name="write_review_water_turbidity">
-        <item>0NTU\'s</item>
-        <item>2NTU\'s</item>
-        <item>10NTU\'s</item>
-        <item>40NTU\'s</item>
-        <item>80NTU\'s</item>
-        <item>400NTU\'s</item>
+        <item></item>
+        <item>0 NTU\'s</item>
+        <item>2 NTU\'s</item>
+        <item>1 0NTU\'s</item>
+        <item>40 NTU\'s</item>
+        <item>80 NTU\'s</item>
+        <item>400 NTU\'s</item>
     </string-array>
     <string-array name="write_review_colors_dropdown_items">
+        <item></item>
         <item>Green</item>
         <item>Blue</item>
         <item>Brown</item>
@@ -44,24 +48,28 @@
         <item>@string/list_item_other</item>
     </string-array>
     <string-array name="write_review_odor_dropdown_items">
+        <item></item>
         <item>No Smell</item>
         <item>Mild Smell</item>
         <item>Strong Smell</item>
         <item>@string/list_item_other</item>
     </string-array>
     <string-array name="write_review_air_uncomfortable_dropdown_items">
+        <item></item>
         <item>Cough</item>
         <item>Difficult Breathing</item>
         <item>Eyes Pain</item>
         <item>@string/list_item_other</item>
     </string-array>
     <string-array name="write_review_solid_waste_type_dropdown_items">
+        <item></item>
         <item>Industrial</item>
         <item>Domestic</item>
         <item>Agricultural</item>
         <item>@string/list_item_other</item>
     </string-array>
     <string-array name="write_review_solid_waste_amount_dropdown_items">
+        <item></item>
         <item>0</item>
         <item>1</item>
         <item>2</item>

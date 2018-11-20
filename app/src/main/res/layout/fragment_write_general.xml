@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,22 +11,6 @@
         android:orientation="vertical"
         android:layout_marginLeft="10sp"
         android:layout_marginRight="10sp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingBottom="10sp"
-            android:paddingTop="10sp"
-            android:text="Write a Review"
-            android:textColor="@color/green"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray" />
 
         <TextView
             android:layout_width="match_parent"
@@ -59,49 +44,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:columnCount="2">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:paddingBottom="5sp"
-                        android:paddingTop="15sp"
-                        android:text="Latitude*"
-                        android:textColor="@color/black"
-                        android:textSize="12sp" />
-
-                    <EditText
-                        android:id="@+id/write_review_gen_lat"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ems="13"
-                        android:inputType="textPersonName"
-                        android:paddingBottom="5sp"
-                        android:paddingTop="5sp"
-                        android:text=""
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:paddingBottom="5sp"
-                        android:paddingTop="15sp"
-                        android:text="Longitude*"
-                        android:textColor="@color/black"
-                        android:textSize="12sp" />
-
-                    <EditText
-                        android:id="@+id/write_review_gen_lng"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ems="13"
-                        android:inputType="textPersonName"
-                        android:paddingBottom="5sp"
-                        android:paddingTop="5sp"
-                        android:text=""
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="12sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -145,29 +87,6 @@
                         android:paddingTop="5sp"
                         android:text=""
                         android:hint="Province, City, Street and ZIP"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:paddingBottom="5sp"
-                        android:paddingTop="5sp"
-                        android:text="Company City*"
-                        android:textColor="@color/black"
-                        android:textSize="12sp" />
-
-                    <EditText
-                        android:id="@+id/write_review_gen_co_city"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ems="13"
-                        android:inputType="textPersonName"
-                        android:paddingBottom="5sp"
-                        android:paddingTop="5sp"
-                        android:text=""
-                        android:hint="City Name"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="12sp" />
 
@@ -229,7 +148,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
-                        android:inputType="textPersonName"
+                        android:inputType="date"
                         android:paddingBottom="5sp"
                         android:paddingTop="5sp"
                         android:text=""
@@ -252,7 +171,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="13"
-                        android:inputType="textPersonName"
+                        android:inputType="time"
                         android:paddingBottom="5sp"
                         android:paddingTop="5sp"
                         android:text=""

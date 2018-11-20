@@ -345,7 +345,7 @@ public class SimplePOSTRequest extends SimpleTextGETRequest {
             recvArgs.connection.setRequestMethod("POST");
             recvArgs.connection.setRequestProperty("Content-Type", "multipart/form-data; boundary="
                     + new String(mBoundary, StandardCharsets.US_ASCII));
-            recvArgs.connection.setRequestProperty("Cookie", "PHPSESSID=5vnoc7gkjtlopob841an5g8km");
+            recvArgs.connection.setRequestProperty("Cookie", "PHPSESSID=2s0ofoncormde8hkkhqqe8ltt2");
             // recvArgs.connection.setRequestProperty("Content-Length", "20");
             recvArgs.connection.setDoOutput(true);
             recvArgs.connection.setDoInput(true);

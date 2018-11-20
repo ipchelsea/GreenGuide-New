@@ -1,13 +1,5 @@
 package com.guide.green.green_guide.Fragments;
 
-//// Is This deprecated?
-//NEWS = new Key("news");
-//
-//// NO PHP Code For:
-//        write_review_gen_observation_date
-//        write_review_gen_observation_time
-//        write_review_gen_weather_cond
-
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,6 +16,8 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.guide.green.green_guide.Dialogs.DatePickerDialog;
+import com.guide.green.green_guide.Dialogs.TimePickerDialog;
 import com.guide.green.green_guide.R;
 import com.guide.green.green_guide.Utilities.FormInput;
 import com.guide.green.green_guide.Utilities.Review;
@@ -31,12 +25,16 @@ import com.guide.green.green_guide.WriteReviewActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Objects;
 
 public class WriteReviewGeneralFragment extends WriteReviewActivity.WriteReviewPage {
     private OnPageChangeListener mOnPageChangeListener;
     private View.OnClickListener mOnUploadImagesClicked;
-    private ViewGroup mImagesContainer;
     private ArrayList<Uri> mImageUris = new ArrayList<>();
+    private TimePickerDialog mTimePicker;
+    private DatePickerDialog mDatePicker;
+    private ViewGroup mImagesContainer;
     private Review.Location mLocation;
     private ViewGroup mViewRoot;
 
@@ -113,11 +111,9 @@ public class WriteReviewGeneralFragment extends WriteReviewActivity.WriteReviewP
 
         final ViewGroup parent = (ViewGroup) LayoutInflater.from(getContext()).inflate(
                 R.layout.write_review_selected_image_item, null);
-        ImageView imgView = parent.findViewById(R.id.selected_image);
-        ImageButton removeImgBtn = parent.findViewById(R.id.remove_selected_image);
 
-        imgView.setImageURI(imgUri);
-        removeImgBtn.setOnClickListener(new View.OnClickListener() {
+        ((ImageView) parent.findViewById(R.id.selected_image)).setImageURI(imgUri);
+        parent.findViewById(R.id.remove_selected_image).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mImageUris.remove(imgUri);
@@ -144,16 +140,6 @@ public class WriteReviewGeneralFragment extends WriteReviewActivity.WriteReviewP
     private void bindViews() {
         if (mLocation == null || mViewRoot == null) { return; }
 
-        if (mLocation.get(Review.Location.Key.LNG) != null) {
-            EditText coName = mViewRoot.findViewById(R.id.write_review_gen_lng);
-            coName.setEnabled(false);
-        }
-
-        if (mLocation.get(Review.Location.Key.LAT) != null) {
-            EditText coName = mViewRoot.findViewById(R.id.write_review_gen_lat);
-            coName.setEnabled(false);
-        }
-
         if (mLocation.get(Review.Location.Key.COMPANY) != null) {
             EditText coName = mViewRoot.findViewById(R.id.write_review_gen_co_name);
             coName.setEnabled(false);
@@ -164,24 +150,14 @@ public class WriteReviewGeneralFragment extends WriteReviewActivity.WriteReviewP
             coAddress.setEnabled(false);
         }
 
-        if (mLocation.get(Review.Location.Key.CITY) != null) {
-            EditText coName = mViewRoot.findViewById(R.id.write_review_gen_co_city);
-            coName.setEnabled(false);
-        }
+        bindInterDependentViews();
+        addDialogToTimeInput();
+        addDialogToDateInput();
+        bindCheckBoxes();
+        bindTextBoxes();
+    }
 
-        HashMap<Integer, Review.Key> checkBoxes = new HashMap<>();
-        HashMap<Integer, Review.Key> textViews = new HashMap<>();
-
-        textViews.put(R.id.write_review_gen_lat, Review.Location.Key.LAT);
-        textViews.put(R.id.write_review_gen_lng, Review.Location.Key.LNG);
-        textViews.put(R.id.write_review_gen_co_name, Review.Location.Key.COMPANY);
-        textViews.put(R.id.write_review_gen_co_address, Review.Location.Key.ADDRESS);
-        textViews.put(R.id.write_review_gen_co_city, Review.Location.Key.CITY);
-        textViews.put(R.id.write_review_gen_co_industry_category, Review.Location.Key.INDUSTRY);
-        textViews.put(R.id.write_review_gen_co_products, Review.Location.Key.PRODUCT);
-        textViews.put(R.id.write_review_gen_observation_date, Review.Location.Key.OBSERVATION_DATE);
-        textViews.put(R.id.write_review_gen_observation_time, Review.Location.Key.OBSERVATION_TIME);
-
+    public void bindInterDependentViews() {
         // Weather Condition
         Spinner weather = mViewRoot.findViewById(R.id.write_review_gen_weather_cond);
         ArrayAdapter<CharSequence> weatherAdapter = ArrayAdapter.createFromResource(getContext(),
@@ -196,16 +172,6 @@ public class WriteReviewGeneralFragment extends WriteReviewActivity.WriteReviewP
         RadioGroup rating = mViewRoot.findViewById(R.id.write_review_gen_rating);
         new FormInput.RadioBtn(rating, Review.Location.Key.RATING, mLocation);
 
-        // Review (user experience)
-        textViews.put(R.id.write_review_gen_written_experience, Review.Location.Key.REVIEW);
-
-        // Checkboxes
-        checkBoxes.put(R.id.write_review_gen_focus_water, Review.Location.Key.WATER);
-        checkBoxes.put(R.id.write_review_gen_focus_air, Review.Location.Key.AIR);
-        checkBoxes.put(R.id.write_review_gen_focus_waste, Review.Location.Key.WASTE);
-        checkBoxes.put(R.id.write_review_gen_focus_land, Review.Location.Key.LAND);
-        checkBoxes.put(R.id.write_review_gen_focus_ecosystem, Review.Location.Key.LIVING);
-
         // Write Review Other Item "forward deceleration"
         TextView reviewFocusOtherView = mViewRoot.findViewById(R.id.write_review_gen_focus_other_item);
         FormInput.TextInput reviewFocusOther = new FormInput.TextInput(reviewFocusOtherView,
@@ -215,11 +181,83 @@ public class WriteReviewGeneralFragment extends WriteReviewActivity.WriteReviewP
         CheckBox reviewFocusView = mViewRoot.findViewById(R.id.write_review_gen_focus_other);
         new FormInput.CheckBoxInput(reviewFocusView,
                 Review.Location.Key.OTHER, mLocation, reviewFocusOther);
+    }
+
+    public void addDialogToTimeInput() {
+        final TextView time = mViewRoot.findViewById(R.id.write_review_gen_observation_time);
+        time.setFocusable(false);
+        time.setLongClickable(false);
+        time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mTimePicker != null) { return; }
+                mTimePicker = new TimePickerDialog();
+                mTimePicker.setOnTimePickedListener(new TimePickerDialog.OnTimePickedListener() {
+                    private void onFinish(){ mTimePicker = null; }
+                    @Override
+                    public void onTimePicked(int hour, int minute) {
+                        time.setText(String.format(Locale.ENGLISH,
+                                "%d:%02d", hour, minute));
+                        onFinish();
+                    }
+                    @Override
+                    public void onCancel() { onFinish(); }
+                });
+                mTimePicker.show(Objects.requireNonNull(getFragmentManager()), null);
+            }
+        });
+    }
+
+    public void addDialogToDateInput() {
+        final TextView date = mViewRoot.findViewById(R.id.write_review_gen_observation_date);
+        date.setFocusable(false);
+        date.setLongClickable(false);
+        date.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mDatePicker != null) { return; }
+                mDatePicker = new DatePickerDialog();
+                mDatePicker.setOnDatePickedListener(new DatePickerDialog.OnDatePickedListener() {
+                    private void onFinish(){
+                        mDatePicker = null;
+                    }
+                    @Override
+                    public void onDatePicked(int year, int month, int day) {
+                        date.setText(String.format(Locale.ENGLISH,
+                                "%02d/%02d/%04d", month, day, year));
+                        onFinish();
+                    }
+                    @Override
+                    public void onCancel() { onFinish(); }
+                });
+                mDatePicker.show(Objects.requireNonNull(getFragmentManager()), null);
+            }
+        });
+    }
+
+    private void bindTextBoxes() {
+        HashMap<Integer, Review.Key> textViews = new HashMap<>();
+        textViews.put(R.id.write_review_gen_co_name, Review.Location.Key.COMPANY);
+        textViews.put(R.id.write_review_gen_co_address, Review.Location.Key.ADDRESS);
+        textViews.put(R.id.write_review_gen_co_industry_category, Review.Location.Key.INDUSTRY);
+        textViews.put(R.id.write_review_gen_co_products, Review.Location.Key.PRODUCT);
+        textViews.put(R.id.write_review_gen_observation_date, Review.Location.Key.OBSERVATION_DATE);
+        textViews.put(R.id.write_review_gen_observation_time, Review.Location.Key.OBSERVATION_TIME);
+        textViews.put(R.id.write_review_gen_written_experience, Review.Location.Key.REVIEW);
 
         for (int viewId : textViews.keySet()) {
             new FormInput.TextInput((TextView) mViewRoot.findViewById(viewId),
                     textViews.get(viewId), mLocation);
         }
+    }
+
+    private void bindCheckBoxes() {
+        HashMap<Integer, Review.Key> checkBoxes = new HashMap<>();
+        checkBoxes.put(R.id.write_review_gen_focus_water, Review.Location.Key.WATER);
+        checkBoxes.put(R.id.write_review_gen_focus_air, Review.Location.Key.AIR);
+        checkBoxes.put(R.id.write_review_gen_focus_waste, Review.Location.Key.WASTE);
+        checkBoxes.put(R.id.write_review_gen_focus_land, Review.Location.Key.LAND);
+        checkBoxes.put(R.id.write_review_gen_focus_ecosystem, Review.Location.Key.LIVING);
 
         for (int viewId : checkBoxes.keySet()) {
             new FormInput.CheckBoxInput((CheckBox) mViewRoot.findViewById(viewId),

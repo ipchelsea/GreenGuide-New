@@ -3,7 +3,6 @@ package com.guide.green.green_guide.Utilities;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.text.Html;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 public class Review {
     public Location location = new Location();
@@ -381,7 +379,7 @@ public class Review {
         }
     }
 
-    public interface Results {
+    public interface ReviewResults {
         /**
          * Provided the returns of the query.
          *
@@ -420,7 +418,7 @@ public class Review {
      * @return  the object managing the background request.
      */
     public static AsyncJSONArray getReviewsForPlace(double lng, double lat,
-                                                    @NonNull final Results callback) {
+                                                    @NonNull final ReviewResults callback) {
 
         final ReviewAsyncJSONArrayResult jsonCallback = new ReviewAsyncJSONArrayResult(callback);
 
@@ -437,7 +435,7 @@ public class Review {
     }
 
     private static class ReviewAsyncJSONArrayResult implements AsyncJSONArray.OnAsyncJSONArrayResultListener {
-        public final Results REVIEWS_CALLBACK;
+        public final ReviewResults REVIEWS_CALLBACK;
 
         private static String decodeHTML(String htmlString) {
             if (Build.VERSION.SDK_INT >= 24) {
@@ -447,7 +445,7 @@ public class Review {
             }
         }
 
-        ReviewAsyncJSONArrayResult(Results callback) {
+        ReviewAsyncJSONArrayResult(ReviewResults callback) {
             REVIEWS_CALLBACK = callback;
         }
 
@@ -482,6 +480,11 @@ public class Review {
                 try {
                     JSONObject jObj = jArr.getJSONObject(i);
                     review.imageCount = jObj.getInt("img_count");
+
+                    if (!jObj.isNull("review")) {
+                        JSONObject subJObj = jObj.getJSONObject("review");
+                        review.id = subJObj.getString("id");
+                    }
                     getJsonValuesForObject(jObj, "review", review.location);
                     getJsonValuesForObject(jObj, "water", review.waterIssue);
                     getJsonValuesForObject(jObj, "solid", review.solidWaste);

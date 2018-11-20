@@ -45,13 +45,12 @@ public abstract class BaiduSuggestion {
      * Concrete class describing a suggested location.
      */
     public static class Location extends BaiduSuggestion {
-        //TODO: Make actually non-null
         public final String uid;        // Non-null value
-
         public final String name;       // Non-null value
         public final LatLng point;      // Non-null value
         public final String address;    // Null-able value
         public final String city;       // Null-able value
+
 
         public static BaiduSuggestion.Location merge(BaiduSuggestion.Location a, BaiduSuggestion.Location b) {
             return new BaiduSuggestion.Location(

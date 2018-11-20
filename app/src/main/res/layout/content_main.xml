@@ -11,6 +11,7 @@
         android:layout_height="match_parent"/>
 
     <LinearLayout
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="@dimen/reviews_bottom_sheet_peek_height"
         android:layout_weight="0"

@@ -22,6 +22,7 @@ import com.guide.green.green_guide.Utilities.FilteredAutoComplete;
 import com.guide.green.green_guide.Utilities.RomanizedLocation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Manages a dialog box which allows the user to pick a city from an auto-complete list.
@@ -77,20 +78,21 @@ public class CityPickerDialog extends DialogFragment implements DialogInterface.
             if (mOnCitySelectedListener != null) {
                 mOnCitySelectedListener.onCitySelected(city);
             }
-            //hideKeyboard(mInputText, getContext());
             dismiss();
         }
     };
 
     /** Instantiates the adapter which manages the dropdown items */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstState) {
         View layout = inflater.inflate(R.layout.dialog_city_picker, container);
         EditText inputText = layout.findViewById(R.id.searchCity);
         RecyclerView dropDown = layout.findViewById(R.id.searchDropDown);
 
         new FilteredAutoComplete(getContext(), inputText, dropDown,
-                new RomanizedAdapter(getContext(), RomanizedLocation.getCities(), onClickCallback));
+                new RomanizedAdapter(Objects.requireNonNull(getContext()),
+                        RomanizedLocation.getCities(), onClickCallback));
 
         return layout;
     }

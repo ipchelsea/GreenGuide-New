@@ -7,8 +7,11 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -218,5 +221,13 @@ public class Drawing {
         }
 
         return bmp;
+    }
+
+    public static Drawable getDrawable(@NonNull Context context, @DrawableRes int drawableId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return context.getDrawable(drawableId);
+        } else {
+            return context.getResources().getDrawable(drawableId);
+        }
     }
 }
