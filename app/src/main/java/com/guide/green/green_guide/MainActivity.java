@@ -1,6 +1,5 @@
 package com.guide.green.green_guide;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.NestedScrollView;
@@ -8,7 +7,7 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -28,11 +27,11 @@ import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog.OnCitySelectedListener;
 import com.guide.green.green_guide.Dialogs.ImagePickerDialog;
-import com.guide.green.green_guide.Utilities.AsyncJSONArray;
+import com.guide.green.green_guide.HTTPRequest.AbstractRequest;
+import com.guide.green.green_guide.HTTPRequest.AsyncRequest;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
 import com.guide.green.green_guide.Utilities.BaiduSuggestion;
 import com.guide.green.green_guide.Utilities.BottomSheetManager;
@@ -274,53 +273,64 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     }
 
     public void getGreenGuidePoints() {
-        new AsyncJSONArray(new AsyncJSONArray.OnAsyncJSONArrayResultListener() {
-            @Override
-            public void onFinish(ArrayList<JSONArray> jArrays, ArrayList<Exception> exceptions) {
-                final ArrayList<GreenGuideLocation> pos = new ArrayList<>();
-                JSONArray jsonArray = jArrays.get(0);
-                if (jsonArray == null) {
-                    return;
-                }
-                try {
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jObj = jsonArray.getJSONObject(i);
-                        String lng = jObj.getString("lng");
-                        String lat = jObj.getString("lat");
-                        String avrg = jObj.getString("avg_r");
-                        String company = jObj.getString("company");
-                        String address = jObj.getString("address");
-                        String city = jObj.getString("city");
-                        if (!lng.equals("") && !lat.equals("") && !avrg.equals("")) {
-                            GreenGuideLocation gL = new GreenGuideLocation();
-                            gL.averageRating = Float.parseFloat(avrg);
-                            gL.point = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-                            gL.companyName = company;
-                            gL.address = address;
-                            gL.city = city;
-                            pos.add(gL);
-                        }
-                    }
-                } catch (JSONException e) { /* Do Nothing */ }
-
-                GreenGuideMarkers markers = new GreenGuideMarkers(mMapManager) {
+        AsyncRequest.getJsonArray("http://www.lovegreenguide.com/map_point_app.php?lng=112.578658&lat=28.247855",
+                new AbstractRequest.OnRequestResultsListener<JSONArray>() {
                     @Override
-                    public boolean onPoiClick(int index) {
-                        GreenGuideLocation location = pos.get(index);
-                        mBtmSheetManager.getReview(new BaiduSuggestion.Location(
-                                location.companyName, location.point, location.address,
-                                location.city, null));
-                        return false;
+                    public void onProgress(AbstractRequest.RequestProgress progress) {
+                        Log.i("--onProgress", "Progress>" + progress.current + ", " + progress.total);
                     }
-                };
-                markers.setData(pos);
-            }
 
-            @Override
-            public void onCanceled(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
-                /* Do Nothing */
-            }
-        }).execute("http://www.lovegreenguide.com/map_point_app.php?lng=112.578658&lat=28.247855");
+                    @Override
+                    public void onError(Exception error) {
+                        Log.i("--onError_GetPoints", error.toString());
+                        error.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCanceled() {
+                        Log.i("--onCanceled_GetPoints", "Canceled");
+                    }
+
+                    @Override
+                    public void onSuccess(JSONArray jsonArray) {
+                        final ArrayList<GreenGuideLocation> pos = new ArrayList<>();
+                        if (jsonArray == null) {
+                            return;
+                        }
+                        try {
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jObj = jsonArray.getJSONObject(i);
+                                String lng = jObj.getString("lng");
+                                String lat = jObj.getString("lat");
+                                String avrg = jObj.getString("avg_r");
+                                String company = jObj.getString("company");
+                                String address = jObj.getString("address");
+                                String city = jObj.getString("city");
+                                if (!lng.equals("") && !lat.equals("") && !avrg.equals("")) {
+                                    GreenGuideLocation gL = new GreenGuideLocation();
+                                    gL.averageRating = Float.parseFloat(avrg);
+                                    gL.point = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+                                    gL.companyName = company;
+                                    gL.address = address;
+                                    gL.city = city;
+                                    pos.add(gL);
+                                }
+                            }
+                        } catch (JSONException e) { /* Do Nothing */ }
+
+                        GreenGuideMarkers markers = new GreenGuideMarkers(mMapManager) {
+                            @Override
+                            public boolean onPoiClick(int index) {
+                                GreenGuideLocation location = pos.get(index);
+                                mBtmSheetManager.getReview(new BaiduSuggestion.Location(
+                                        location.companyName, location.point, location.address,
+                                        location.city, null));
+                                return false;
+                            }
+                        };
+                        markers.setData(pos);
+                    }
+                });
     }
 
     public static abstract class GreenGuideMarkers implements BaiduMap.OnMarkerClickListener {

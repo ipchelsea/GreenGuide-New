@@ -6,13 +6,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Random;
 
 
@@ -21,6 +24,8 @@ import java.util.Random;
  * class.
  */
 public class Misc {
+    private static Random rndObj = new Random();
+
     /**
      * Hides the virtual keyboard without taking away focus from the view that is using its input.
      *
@@ -33,35 +38,31 @@ public class Misc {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-
-    private static Random rndObj;
+    /**
+     * @param min the smallest number to return.
+     * @param max the largest number to return.
+     * @return a random number between the {@code min} and {@code max} inclusive of both.
+     */
     public static int getRndInt(int min,int max) {
-        if (rndObj == null) {
-            rndObj = new Random();
-        }
         return rndObj.nextInt((max - min) + 1) + min;
     }
 
+    /**
+     * Given a {@code Uri} object. This method returned the name of the file described by that
+     * object.
+     * @param uri a uri pointing to a file on the divice
+     * @param context used to get a getContentResolver
+     * @return the file name or null
+     */
     public static String getFileNameFromUri(Uri uri, Context context) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
-            } finally {
-                cursor.close();
+        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
             }
+            cursor.close();
         }
-        if (result == null) {
-            result = uri.getPath();
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
-        }
-        return result;
+        return null;
     }
 
     public static String getMimeTypeFromUri(Uri uri, Context context) {

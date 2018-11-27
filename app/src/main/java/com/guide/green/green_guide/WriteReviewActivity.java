@@ -18,10 +18,11 @@ import com.guide.green.green_guide.Fragments.WriteReviewAirFragment;
 import com.guide.green.green_guide.Fragments.WriteReviewGeneralFragment;
 import com.guide.green.green_guide.Fragments.WriteReviewSolidFragment;
 import com.guide.green.green_guide.Fragments.WriteReviewWaterFragment;
-import com.guide.green.green_guide.Utilities.AsyncPostRequest;
+import com.guide.green.green_guide.HTTPRequest.AbstractFormItem;
+import com.guide.green.green_guide.HTTPRequest.AbstractRequest;
+import com.guide.green.green_guide.HTTPRequest.AsyncRequest;
 import com.guide.green.green_guide.Utilities.BaiduSuggestion;
 import com.guide.green.green_guide.Utilities.Review;
-import com.guide.green.green_guide.Utilities.SimplePOSTRequest;
 import java.util.ArrayList;
 
 public class WriteReviewActivity  extends AppCompatActivity {
@@ -112,28 +113,29 @@ public class WriteReviewActivity  extends AppCompatActivity {
                 mReview.waterIssue
         };
 
-        ArrayList<SimplePOSTRequest.FormItem> formItems = new ArrayList<>();
+        ArrayList<AbstractFormItem> formItems = new ArrayList<>();
         for (Review.ReviewCategory component : components) {
             for (Review.Key k : component.allKeys()) {
                 if (k.postName != null) {
                     String value = component.get(k);
                     if (value == null) { value = ""; }
-                    formItems.add(new SimplePOSTRequest.TextFormItem(k.postName, value));
+                    formItems.add(new AbstractFormItem.TextFormItem(k.postName, value));
                 }
             }
         }
 
         for (Uri imgUir : mWriteReviewGeneral.getImageUris()) {
-            formItems.add(new SimplePOSTRequest.UriFileFormItem("image[]", imgUir, this));
+            formItems.add(new AbstractFormItem.UriFileFormItem("image[]", imgUir, this));
         }
 
-        (new AsyncPostRequest("http://www.lovegreenguide.com/savereview_app.php") {
-            @Override
-            public void onPostExecute(StringBuilder sb) {
-                Log.i("*********", sb == null ? "NULL" : sb.toString());
-                Toast.makeText(WriteReviewActivity.this, "Review Submitted", Toast.LENGTH_LONG).show();
-            }
-        }).execute(formItems);
+        AsyncRequest.postMultipartData("http://www.lovegreenguide.com/savereview_app.php",
+                formItems, new AbstractRequest.OnRequestResultsListener<StringBuilder>() {
+                    @Override
+                    public void onSuccess(StringBuilder sb) {
+                        Log.i("*********", sb == null ? "NULL" : sb.toString());
+                        Toast.makeText(WriteReviewActivity.this, "Review Submitted", Toast.LENGTH_LONG).show();
+                    }
+                });
 
         Toast.makeText(this, "Submitting Review", Toast.LENGTH_LONG).show();
         finish();
@@ -190,7 +192,7 @@ public class WriteReviewActivity  extends AppCompatActivity {
     }
 
     private void selectImageFiles() {
-        Intent mediaIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent mediaIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         mediaIntent.setType("image/*");
         mediaIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         startActivityForResult(mediaIntent, REQUEST_CODE_PICK_IMAGE);

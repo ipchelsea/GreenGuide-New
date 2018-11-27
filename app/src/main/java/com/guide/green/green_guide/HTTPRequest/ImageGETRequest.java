@@ -1,19 +1,15 @@
-package com.guide.green.green_guide.Utilities;
+package com.guide.green.green_guide.HTTPRequest;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 import android.util.Log;
-
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Provides a way to run a GET request and get a Bitmap output.
  */
-public class SimpleImageGETRequest extends SimpleGETRequest {
-    public byte[] mImageData;
+public class ImageGETRequest extends AbstractGETRequest {
+    private byte[] mImageData;
 
     /**
      * Constructor which sets the default readBuffer size to 4096 bytes.
@@ -21,7 +17,7 @@ public class SimpleImageGETRequest extends SimpleGETRequest {
      *
      * @param url   the url to send the request to.
      */
-    public SimpleImageGETRequest(String url) {
+    private ImageGETRequest(String url) {
         this(url, 4096);
     }
 
@@ -33,7 +29,7 @@ public class SimpleImageGETRequest extends SimpleGETRequest {
      * @param bufferLength  the size of the readBuffer which will be holding the binary data
      *                      and the readBuffer which will hold the converted character data.
      */
-    public SimpleImageGETRequest(String url, int bufferLength) {
+    private ImageGETRequest(String url, int bufferLength) {
         this(url, bufferLength, 15000, 10000);
     }
 
@@ -46,7 +42,7 @@ public class SimpleImageGETRequest extends SimpleGETRequest {
      * @param connectionTimeout the time in milliseconds to wait to connect.
      * @param readTimeout   the time in milliseconds to wait to receive data.
      */
-    public SimpleImageGETRequest(String url, int bufferLength, int connectionTimeout, int readTimeout) {
+    public ImageGETRequest(String url, int bufferLength, int connectionTimeout, int readTimeout) {
         super(url, bufferLength, connectionTimeout, readTimeout);
     }
     
@@ -98,5 +94,47 @@ public class SimpleImageGETRequest extends SimpleGETRequest {
     public void onError(Exception e) {
         Log.e("SimpleImage", e.toString());
         e.printStackTrace();
+    }
+
+    /**
+     * Asynchronously runs an AsyncGetImage request and calls the appropriate callbacks to return
+     * the result.
+     */
+    public static class AsyncGetImage extends AsyncRequest<Bitmap> {
+        /**
+         * Constructor which sets all of the member variables.
+         *
+         * @param callback  the object to return results to.
+         */
+        public AsyncGetImage(@NonNull OnRequestResultsListener<Bitmap> callback) {
+            super(callback);
+        }
+
+        /**
+         * Worker thread which runs the request in the background. Creates an ImageGETRequest
+         * object and overrides some of its classes to insure that callbacks are successfully
+         * run.
+         *
+         * @param strings   an array with 1 element. That one element should be the URL pointing
+         *                  to the location of the image.
+         * @return  a bitmap object of the downloaded image.
+         */
+        @Override
+        protected final Bitmap doInBackground(String... strings) {
+            ImageGETRequest request = new ImageGETRequest(strings[0]) {
+                @Override
+                protected void onReadUpdate(long current, long total) {
+                    publishProgress(new RequestProgress(current, total));
+                }
+                @Override
+                public void onError(Exception e) {
+                    mException = e;
+                }
+            };
+            mRequest = request;
+            request.send();
+            return BitmapFactory.decodeByteArray(
+                    request.mImageData, 0, request.mImageData.length);
+        }
     }
 }

@@ -1,5 +1,6 @@
-package com.guide.green.green_guide.Utilities;
+package com.guide.green.green_guide.HTTPRequest;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -7,12 +8,11 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides a way to run a GET request and get a String output.
  */
-public class SimpleTextGETRequest extends SimpleGETRequest {
+public class GetText extends AbstractGETRequest {
     private char[] mChrBuffer;
     private CharsetDecoder mDecoder;
     private StringBuilder mSBuilder = null;
@@ -23,7 +23,7 @@ public class SimpleTextGETRequest extends SimpleGETRequest {
      *
      * @param url   the url to send the request to.
      */
-    public SimpleTextGETRequest(String url) {
+    public GetText(String url) {
         this(url, 4096);
     }
 
@@ -35,7 +35,7 @@ public class SimpleTextGETRequest extends SimpleGETRequest {
      * @param bufferLength  the size of the readBuffer which will be holding the binary data
      *                      and the readBuffer which will hold the converted character data.
      */
-    public SimpleTextGETRequest(String url, int bufferLength) {
+    public GetText(String url, int bufferLength) {
         this(url, bufferLength, 15000, 10000);
     }
 
@@ -48,7 +48,7 @@ public class SimpleTextGETRequest extends SimpleGETRequest {
      * @param connectionTimeout the time in milliseconds to wait to connect.
      * @param readTimeout   the time in milliseconds to wait to receive data.
      */
-    public SimpleTextGETRequest(String url, int bufferLength, int connectionTimeout, int readTimeout) {
+    public GetText(String url, int bufferLength, int connectionTimeout, int readTimeout) {
         super(url, bufferLength, connectionTimeout, readTimeout);
         mChrBuffer = new char[getDesiredBufferSize()];
     }
@@ -153,5 +153,45 @@ public class SimpleTextGETRequest extends SimpleGETRequest {
         return mSBuilder.toString();
       }
       return "NULL";
+    }
+
+    /**
+     * Asynchronously runs a POST request and calls the appropriate callbacks to return the result.
+     */
+    public static class AsyncGetText extends AsyncRequest<StringBuilder> {
+        /**
+         * Constructor which sets all of the member variables.
+         *
+         * @param callback  the object to return results to.
+         */
+        public AsyncGetText(@NonNull OnRequestResultsListener<StringBuilder> callback) {
+            super(callback);
+        }
+
+        /**
+         * Worker thread which runs the request in the background. Creates an POSTMultipartData
+         * object and overrides some of its classes to insure that callbacks are successfully
+         * run.
+         *
+         * @param strings   an array with 1 element. That one element should be the URL pointing
+         *                  to the location of the image.
+         * @return  a StringBuilder object with the returned text data.
+         */
+        @Override
+        protected StringBuilder doInBackground(String... strings) {
+            GetText request = new GetText(strings[0]) {
+                @Override
+                protected void onReadUpdate(long current, long total) {
+                    publishProgress(new RequestProgress(current, total));
+                }
+                @Override
+                public void onError(Exception e) {
+                    mException = e;
+                }
+            };
+            mRequest = request;
+            request.send();
+            return request.getResult();
+        }
     }
 }

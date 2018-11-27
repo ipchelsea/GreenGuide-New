@@ -32,19 +32,33 @@ import com.guide.green.green_guide.R;
  */
 public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback implements
         BaiduMap.OnMapClickListener, OnGetPoiSearchResultListener {
+    private AppCompatActivity mAct;
+    public final Reviews reviews;
+    public final PoiSearchResults poiResults;
+    private BottomSheetBehavior mBtmSheet;
+    private NestedScrollView mBtmSheetView;
+    private BaiduMapManager mMapManager;
+    private PageChangeListener mPageChangeListener;
+    private FetchReviewsHandler mFetchReviewsHandler;
 
-    @Override
-    public void onGetPoiResult(PoiResult poiResult) {
+    public BottomSheetManager(@NonNull AppCompatActivity act, @NonNull NestedScrollView bottomSheet,
+                              @NonNull Reviews reviews, @NonNull PoiSearchResults poiResults,
+                              @NonNull BaiduMapManager mapManager) {
+        mAct = act;
+        this.reviews = reviews;
+        this.poiResults = poiResults;
+        mMapManager = mapManager;
+        mBtmSheetView = bottomSheet;
+        mBtmSheet = BottomSheetBehavior.from(mBtmSheetView);
+        mBtmSheet.setBottomSheetCallback(this);
+        mMapManager.baiduMap.setOnMapClickListener(this);
+        mMapManager.poiSearch.setOnGetPoiSearchResultListener(this);
     }
 
-    @Override
-    public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
-        if (mFetchReviewsHandler != null) {
-            mFetchReviewsHandler.updatePoiResult(new BaiduSuggestion.Location(poiDetailResult));
-        }}
-
-    @Override
-    public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) {}
+    public static class PoiSearchResults {
+        public ViewGroup container;
+        public ViewPager swipeView;
+    }
 
     public static class Reviews {
         public static class PeekBar {
@@ -70,38 +84,9 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
         public Body body = new Body();
     }
 
-    public static class PoiSearchResults {
-        public ViewGroup container;
-        public ViewPager swipeView;
-    }
-
-    private Overlay mSelectedMarker;                    // Star marker for a single location
-    private AppCompatActivity mAct;
-    public final Reviews reviews;
-    public final PoiSearchResults poiResults;
-    private BottomSheetBehavior mBtmSheet;
-    private NestedScrollView mBtmSheetView;
-    private BaiduMapManager mMapManager;
-    private PageChangeListener mPageChangeListener;
-    private FetchReviewsHandler mFetchReviewsHandler;
-
-    public BottomSheetManager(@NonNull AppCompatActivity act, @NonNull NestedScrollView bottomSheet,
-                              @NonNull Reviews reviews, @NonNull PoiSearchResults poiResults,
-                              @NonNull BaiduMapManager mapManager) {
-        mAct = act;
-        this.reviews = reviews;
-        this.poiResults = poiResults;
-        mMapManager = mapManager;
-        mBtmSheetView = bottomSheet;
-        mBtmSheet = BottomSheetBehavior.from(mBtmSheetView);
-        mBtmSheet.setBottomSheetCallback(this);
-        mMapManager.baiduMap.setOnMapClickListener(this);
-        mMapManager.poiSearch.setOnGetPoiSearchResultListener(this);
-    }
-
     public void setMarkerVisibility(boolean isVisible) {
-        if (mSelectedMarker != null) {
-            mSelectedMarker.setVisible(isVisible);
+        if (mFetchReviewsHandler != null) {
+            mFetchReviewsHandler.marker.setVisible(isVisible);
         }
         if (mPageChangeListener != null) {
             mPageChangeListener.setVisibility(isVisible);
@@ -109,8 +94,8 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
     }
 
     public void removeMarkers() {
-        if (mSelectedMarker != null) {
-            mSelectedMarker.remove();
+        if (mFetchReviewsHandler != null) {
+            mFetchReviewsHandler.marker.remove();
         }
         if (mPageChangeListener != null) {
             mPageChangeListener.remove();
@@ -158,14 +143,16 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
             mFetchReviewsHandler.cancel();
         }
 
-        mFetchReviewsHandler = new FetchReviewsHandler(mAct, suggestion, this);
+
+        mMapManager.moveTo(suggestion.point);
+
+        mFetchReviewsHandler = new FetchReviewsHandler(mAct, suggestion, this,
+                mMapManager.addMarker(new MarkerOptions().position(suggestion.point),
+                        R.drawable.icon_star_marker));
 
         if (suggestion.uid != null) {
             mMapManager.poiSearch.searchPoiDetail(new PoiDetailSearchOption().poiUid(suggestion.uid));
         }
-        mMapManager.moveTo(suggestion.point);
-        mSelectedMarker = mMapManager.addMarker(new MarkerOptions()
-                .position(suggestion.point), R.drawable.icon_star_marker);
     }
 
     public void poiSearchCity(@NonNull PoiCitySearchOption searchOption) {
@@ -209,6 +196,20 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
         /* Do nothing */
         return false;
     }
+
+    @Override
+    public void onGetPoiResult(PoiResult poiResult) {
+    }
+
+    @Override
+    public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
+        if (mFetchReviewsHandler != null) {
+            mFetchReviewsHandler.updatePoiResult(new BaiduSuggestion.Location(poiDetailResult));
+        }
+    }
+
+    @Override
+    public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) {}
 
     private int mState;
     public void saveAndHide() {

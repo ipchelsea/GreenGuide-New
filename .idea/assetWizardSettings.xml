@@ -19,8 +19,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
-                                      <entry key="imageAsset" value="C:\Users\sandunr\Desktop\view_satellite.bmp" />
-                                      <entry key="outputName" value="ic_view_satellite" />
+                                      <entry key="imageAsset" value="C:\Users\stanm\Downloads\baseline-thumb_up-24px.svg" />
+                                      <entry key="outputName" value="ic_thumb_up" />
                                       <entry key="theme" value="HOLO_DARK" />
                                       <entry key="themeColor" value="cbe52c" />
                                     </map>
@@ -69,8 +69,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_baseline_my_location_24px" />
-                            <entry key="sourceFile" value="C:\Downloads\baseline-my_location-24px.svg" />
+                            <entry key="outputName" value="ic_thumb_up" />
+                            <entry key="sourceFile" value="C:\Users\stanm\Downloads\baseline-thumb_up-24px.svg" />
                           </map>
                         </option>
                       </PersistentState>

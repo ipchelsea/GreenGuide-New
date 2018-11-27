@@ -1,6 +1,5 @@
 package com.guide.green.green_guide.Utilities;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,24 +7,31 @@ import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.baidu.mapapi.map.Overlay;
 import com.guide.green.green_guide.Dialogs.LoadingDialog;
+import com.guide.green.green_guide.HTTPRequest.AbstractRequest.OnRequestResultsListener;
+import com.guide.green.green_guide.HTTPRequest.AbstractRequest.RequestProgress;
 import com.guide.green.green_guide.R;
+import com.guide.green.green_guide.Utilities.Review.AsyncGetReview;
 import com.guide.green.green_guide.WriteReviewActivity;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
+import java.util.List;
+
+import static com.guide.green.green_guide.HTTPRequest.AsyncRequest.getReviewsForPlace;
 
 /**
  * Manages requesting the reviews for a specific point, displaying a dialog box to show that data
@@ -36,17 +42,20 @@ import java.util.ArrayList;
  *  - Assumes that the bottom sheet is showing the reviews.
  *  - Does not add any icons to the map
  */
-public class FetchReviewsHandler implements Review.ReviewResults {
-    private BaiduSuggestion.Location mSuggestion;
+public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Review>> {
+    private BaiduSuggestion.Location mSuggestion; // Used to retrieve the name of the company
     private BottomSheetManager mBtmSheetManager;
     private LoadingDialog mLoadingDialog;
-    private AsyncJSONArray mReviewTask;
+    private AsyncGetReview mReviewTask;
     private boolean mCompleted = false;
-    private Activity mAct;
+    private AppCompatActivity mAct;
+    public final Overlay marker;
 
-    public FetchReviewsHandler(@NonNull Activity act,
+    public FetchReviewsHandler(@NonNull AppCompatActivity act,
                                @NonNull BaiduSuggestion.Location suggestion,
-                               @NonNull BottomSheetManager manager) {
+                               @NonNull BottomSheetManager manager,
+                               @NonNull Overlay marker) {
+        this.marker = marker;
         mAct = act;
         mSuggestion = suggestion;
         mBtmSheetManager = manager;
@@ -54,8 +63,8 @@ public class FetchReviewsHandler implements Review.ReviewResults {
 
         mLoadingDialog.show(mAct.getFragmentManager(), "Retrieving ReviewsHolder");
 
-        mReviewTask = Review.getReviewsForPlace(suggestion.point.longitude,
-                suggestion.point.latitude, this);
+        mReviewTask = getReviewsForPlace(suggestion.point.longitude, suggestion.point.latitude,
+                this);
 
         mLoadingDialog.setCallback(new LoadingDialog.Canceled() {
             @Override
@@ -66,21 +75,100 @@ public class FetchReviewsHandler implements Review.ReviewResults {
         });
     }
 
+    /**
+     * Adds more information to the {@code BaiduSuggestion.Location} passed in the constructor.
+     * Used for POI's where a detailed search of the location is done after the fact.
+     *
+     * @param suggestion the suggestion whose information should be merged with the suggestion
+     *                   provided to the constructor.
+     */
     public void updatePoiResult(BaiduSuggestion.Location suggestion) {
         if (suggestion.uid.equals(mSuggestion.uid)) {
             mSuggestion = BaiduSuggestion.Location.merge(mSuggestion, suggestion);
         }
     }
 
+    private class GetReviewImagesHandler extends OnRequestResultsListener<List<String>> implements
+            View.OnClickListener {
+        private Review mReview;
+        private ViewGroup mRoot;
+
+//        private ViewPager rImagesPager;
+        private RecyclerView recycleView;
+        private ProgressBar rImgProgress;
+        private Button rImgRetry;
+        private String url;
+
+        public GetReviewImagesHandler(Review review, ViewGroup rootView) {
+            mReview = review;
+            mRoot = rootView;
+//            rImagesPager = rootView.findViewById(R.id.reviewImages);
+            recycleView = rootView.findViewById(R.id.reviewImages);
+            rImgProgress = rootView.findViewById(R.id.reviewImages_progress);
+            rImgRetry = rootView.findViewById(R.id.reviewImages_retry);
+            url = "http://www.lovegreenguide.com/view_app.php?id=" + review.id;
+            rImgRetry.setOnClickListener(this);
+            mReview.getImages(this);
+        }
+
+        @Override
+        public void onSuccess(List<String> imageUrls) {
+            rImgProgress.setVisibility(View.GONE);
+            rImgRetry.setVisibility(View.GONE);
+            if (imageUrls.isEmpty()) {
+//                rImagesPager.setVisibility(View.GONE);
+                return;
+            }
+//            rImagesPager.setVisibility(View.VISIBLE);
+//            PictureCarouselAdapter adapter = new PictureCarouselAdapter(
+//                    mAct.getSupportFragmentManager(), imageUrls);
+//            rImagesPager.addOnPageChangeListener(adapter);
+//            rImagesPager.setAdapter(adapter);
+//            adapter.notifyDataSetChanged();
+
+
+            RecyclerView.Adapter<PictureCarouselAdapter2.CarouselViewHolder> adapter = new
+                    PictureCarouselAdapter2(mAct.getApplicationContext(), imageUrls);
+            recycleView.setAdapter(adapter);
+            recycleView.setHasFixedSize(true);
+
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(mAct,
+                    LinearLayoutManager.HORIZONTAL, false);
+
+            recycleView.setLayoutManager(mLayoutManager);
+            Log.i("--onSuccess_GetPoints", "Count: " + imageUrls.size());
+        }
+
+        @Override
+        public void onError(Exception error) {
+//            rImagesPager.setVisibility(View.GONE);
+            rImgProgress.setVisibility(View.GONE);
+            rImgRetry.setVisibility(View.VISIBLE);
+            Log.i("--onError_GetImgUrls", error.toString());
+            error.printStackTrace();
+        }
+
+        @Override
+        public void onClick(View view) {
+            mReview.getImages(this);
+        }
+    }
+
+    /**
+     * Creates a view which encapsulates on review.
+     *
+     * @param review the review object to display
+     * @param rating the ratting of the review
+     * @return the view displaying the review
+     */
     private ViewGroup createSingleReview(final Review review, int rating) {
         LayoutInflater lf = LayoutInflater.from(mAct);
-        final ViewGroup child = (ViewGroup) lf.inflate(R.layout.review_single_comment,
+        ViewGroup child = (ViewGroup) lf.inflate(R.layout.review_single_comment,
                 mBtmSheetManager.reviews.body.reviews, false);
         TextView ratingValue = child.findViewById(R.id.ratingValue);
         ImageView ratingImage = child.findViewById(R.id.ratingImage);
         TextView reviewText = child.findViewById(R.id.reviewText);
         TextView reviewTime = child.findViewById(R.id.reviewTime);
-        final LinearLayout reviewImages = child.findViewById(R.id.reviewImages);
 //            Button rawDataBtn = (Button) child.findViewById(R.id.rawDataBtn);
 //            Button helpfulBtn = (Button) child.findViewById(R.id.helpfulBtn);
 //            Button inappropriateBtn = (Button) child.findViewById(R.id.inappropriateBtn);
@@ -101,34 +189,7 @@ public class FetchReviewsHandler implements Review.ReviewResults {
         child.setPadding(0, (int) Drawing.convertDpToPx(mAct,10), 0, 0);
         child.setLayoutParams(lp);
 
-        new AsyncJSONObject(new AsyncJSONObject.OnAsyncJSONObjectResultListener() {
-            @Override
-            public void onFinish(ArrayList<JSONObject> jObject, ArrayList<Exception> exceptions) {
-                JSONArray imgUrls = null;
-                try {
-                    imgUrls = jObject.get(0).getJSONArray("all_image");
-                    for (int i = 0; i < imgUrls.length(); i++) {
-                        String path = imgUrls.getString(i);
-                        new AsyncGetImage() {
-                            @Override
-                            public void onPostExecute(Bitmap bitmap) {
-                                ImageView imgView = new ImageView(mAct);
-                                imgView.setImageBitmap(bitmap);
-                                reviewImages.addView(imgView);
-                            }
-                        }.execute("http://www.lovegreenguide.com/" + path);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return;
-                }
-            }
-
-            @Override
-            public void onCanceled(ArrayList<JSONObject> jObject, ArrayList<Exception> exceptions) {
-                /* Do nothing */
-            }
-        }).execute("http://www.lovegreenguide.com/view_app.php?id=" + review.id);
+        new GetReviewImagesHandler(review, child);
 
         return child;
     }
@@ -235,19 +296,19 @@ public class FetchReviewsHandler implements Review.ReviewResults {
     }
 
     @Override
+    public void onProgress(RequestProgress progress) {
+        if (!progress.remainingIsUnknown()) {
+            mLoadingDialog.setProgress((double) progress.current / progress.total);
+        }
+    }
+
+    @Override
     public void onError(Exception e) {
         Log.e("Getting Review", e.toString());
         e.printStackTrace();
         Toast.makeText(mAct, "Error retrieving reviews.", Toast.LENGTH_SHORT).show();
         mCompleted = true;
         mLoadingDialog.dismiss();
-    }
-
-    @Override
-    public void onUpdate(long current, long total) {
-        if (total != -1) {
-            mLoadingDialog.setProgress((double) current / total);
-        }
     }
 
     @Override

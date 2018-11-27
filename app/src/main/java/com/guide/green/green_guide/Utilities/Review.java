@@ -4,10 +4,16 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.text.Html;
 
+import com.guide.green.green_guide.HTTPRequest.AbstractRequest;
+import com.guide.green.green_guide.HTTPRequest.AbstractRequest.OnRequestResultsListener;
+import com.guide.green.green_guide.HTTPRequest.AbstractRequest.RequestProgress;
+import com.guide.green.green_guide.HTTPRequest.AsyncRequest;
+import com.guide.green.green_guide.HTTPRequest.GetText;
+import com.guide.green.green_guide.HTTPRequest.JSON;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +26,84 @@ public class Review {
     public SolidWaste solidWaste = new SolidWaste();
     public int imageCount;
     public String id;
+
+    private ArrayList<String> mImagesUrls;
+    private JSON.AsyncGetJsonObject mGetImgUrlsRequest;
+    final private List<OnRequestResultsListener<List<String>>> mImgListCallbacks = new ArrayList<>();
+
+    /**
+     * Thread safe function which retrieves a list of images associated with a review with the
+     * set {@code id}.
+     *
+     * @param callback contains methods which will called on the data retrieval progresses.
+     */
+    public void getImages(OnRequestResultsListener<List<String>> callback) {
+        // Probably no need because the results are always handled in the main thread.
+        synchronized (mImgListCallbacks) {
+            if (mImagesUrls != null) {
+                callback.onSuccess(Collections.unmodifiableList(mImagesUrls));
+                return;
+            }
+            mImgListCallbacks.add(callback);
+        }
+
+        if (mGetImgUrlsRequest == null) {
+            String url = "http://www.lovegreenguide.com/view_app.php?id=" + id;
+            mGetImgUrlsRequest = AsyncRequest.getJsonObject(url,
+                    new OnRequestResultsListener<JSONObject>() {
+                        @Override
+                        public void onSuccess(JSONObject jsonObject) {
+                            ArrayList<String> imageUrls = new ArrayList<>();
+                            JSONArray imgUrls = null;
+                            try {
+                                imgUrls = jsonObject.getJSONArray("all_image");
+                                for (int i = 0; i < imgUrls.length(); i++) {
+                                    imageUrls.add(imgUrls.getString(i));
+                                }
+                                mImagesUrls = imageUrls;
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                return;
+                            }
+                            synchronized (mImgListCallbacks) {
+                                for (OnRequestResultsListener<List<String>> c : mImgListCallbacks) {
+                                    c.onSuccess(mImagesUrls);
+                                }
+                                mImgListCallbacks.clear();
+                            }
+                        }
+
+                        @Override
+                        public void onProgress(RequestProgress progress) {
+                            synchronized (mImgListCallbacks) {
+                                for (OnRequestResultsListener<List<String>> c : mImgListCallbacks) {
+                                    c.onProgress(progress);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onError(Exception error) {
+                            synchronized (mImgListCallbacks) {
+                                for (OnRequestResultsListener<List<String>> c : mImgListCallbacks) {
+                                    c.onError(error);
+                                }
+                                mImgListCallbacks.clear();
+                            }
+                        }
+
+                        @Override
+                        public void onCanceled() {
+                            synchronized (mImgListCallbacks) {
+                                for (OnRequestResultsListener<List<String>> c : mImgListCallbacks) {
+                                    c.onCanceled();
+                                }
+                                mImgListCallbacks.clear();
+                            }
+                        }
+                    });
+        }
+    }
 
     /**
      * Parent class for all keys. Will be used to make "enums" for children.
@@ -188,7 +272,6 @@ public class Review {
             public static List<Key> allKeys() { return Collections.unmodifiableList(mKeys); }
         }
     }
-
 
     public static class WaterIssue extends ReviewCategory {
         /**
@@ -379,102 +462,53 @@ public class Review {
         }
     }
 
-    public interface ReviewResults {
-        /**
-         * Provided the returns of the query.
-         *
-         * @param reviews   non-null value.
-         */
-        public void onSuccess(ArrayList<Review> reviews);
-
-        /**
-         *  Provides the exception that messed up getting the results.
-         *
-         * @param e non-null value.
-         */
-        public void onError(Exception e);
-
-        /**
-         * Called every time more data is obtained from the webserver.
-         *
-         * @param current   the total amount of bytes read so far from the server.
-         * @param total the expected total number of bytes that will be read from the server.
-         *              if unknown, this value is set to -1.
-         */
-        public void onUpdate(long current, long total);
-
-        /**
-         * Called when the background task is canceled.
-         */
-        public void onCanceled();
-    }
-
     /**
-     * Gets the reviews stored for a specific point on the Green Guide database.
-     *
-     * @param lng longitude
-     * @param lat latitude
-     * @param callback non-null value where the results will be returned to.
-     * @return  the object managing the background request.
+     * Asynchronously runs a POST request and calls the appropriate callbacks to return the result.
      */
-    public static AsyncJSONArray getReviewsForPlace(double lng, double lat,
-                                                    @NonNull final ReviewResults callback) {
-
-        final ReviewAsyncJSONArrayResult jsonCallback = new ReviewAsyncJSONArrayResult(callback);
-
-        AsyncJSONArray aj = new AsyncJSONArray(jsonCallback) {
-            @Override
-            protected void onProgressUpdate(Long... values) {
-                jsonCallback.REVIEWS_CALLBACK.onUpdate(values[0], values[1]);
-            }
-        };
-
-        String url = "http://www.lovegreenguide.com/map_point_co_app.php?lng=" + lng + "&lat=" +lat;
-        aj.execute(url);
-        return  aj;
-    }
-
-    private static class ReviewAsyncJSONArrayResult implements AsyncJSONArray.OnAsyncJSONArrayResultListener {
-        public final ReviewResults REVIEWS_CALLBACK;
-
-        private static String decodeHTML(String htmlString) {
-            if (Build.VERSION.SDK_INT >= 24) {
-                return Html.fromHtml(htmlString , Html.FROM_HTML_MODE_LEGACY).toString();
-            } else {
-                return Html.fromHtml(htmlString).toString();
-            }
+    public static class AsyncGetReview extends AsyncRequest<ArrayList<Review>> {
+        /**
+         * Constructor which sets all of the member variables.
+         *
+         * @param callback  the object to return results to.
+         */
+        public AsyncGetReview(@NonNull OnRequestResultsListener<ArrayList<Review>> callback) {
+            super(callback);
         }
 
-        ReviewAsyncJSONArrayResult(ReviewResults callback) {
-            REVIEWS_CALLBACK = callback;
-        }
-
+        /**
+         * Worker thread which runs the request in the background. Creates an POSTMultipartData
+         * object and overrides some of its classes to insure that callbacks are successfully
+         * run.
+         *
+         * @param strings   an array with 1 element. That one element should be the URL pointing
+         *                  to the location of the image.
+         * @return  a StringBuilder object with the returned text data.
+         */
         @Override
-        public void onCanceled(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
-            REVIEWS_CALLBACK.onCanceled();
-        }
-
-        private void getJsonValuesForObject(JSONObject jObj, String objName,
-                                            ReviewCategory category) throws JSONException {
-            if (!jObj.isNull(objName)) {
-                JSONObject subJObj = jObj.getJSONObject(objName);
-                for (Key key : category.allKeys()) {
-                    if (key.jsonName != null) {
-                        category.set(key, decodeHTML(subJObj.getString(key.jsonName)));
-                    }
+        protected ArrayList<Review> doInBackground(String... strings) {
+            GetText request = new GetText(strings[0]) {
+                @Override
+                protected void onReadUpdate(long current, long total) {
+                    publishProgress(new RequestProgress(current, total));
                 }
-            }
-        }
+                @Override
+                public void onError(Exception e) {
+                    mException = e;
+                }
+            };
+            mRequest = request;
+            request.send();
+            StringBuilder sb = request.getResult();
 
-        @Override
-        public void onFinish(ArrayList<JSONArray> jArray, ArrayList<Exception> exceptions) {
-            if (!exceptions.isEmpty() || jArray.isEmpty() || jArray.get(0) == null) {
-                REVIEWS_CALLBACK.onError(exceptions.get(0));
-                return;
+            JSONArray jArr = null;
+            try {
+                jArr = new JSONArray(sb.toString());
+            } catch (Exception e) {
+                mException = e;
+                return null;
             }
 
             ArrayList<Review> results = new ArrayList<>();
-            JSONArray jArr = jArray.get(0);
             for (int i = jArr.length() - 1; i >= 0; i--) {
                 Review review = new Review();
                 try {
@@ -491,11 +525,43 @@ public class Review {
                     getJsonValuesForObject(jObj, "air", review.airWaste);
                     results.add(review);
                 } catch (JSONException e) {
-                    REVIEWS_CALLBACK.onError(e);
-                    return;
+                    mException = e;
+                    return null;
                 }
             }
-            REVIEWS_CALLBACK.onSuccess(results);
+
+            return results;
+        }
+
+        private static String decodeHTML(String htmlString) {
+            if (Build.VERSION.SDK_INT >= 24) {
+                return Html.fromHtml(htmlString , Html.FROM_HTML_MODE_LEGACY).toString();
+            } else {
+                return Html.fromHtml(htmlString).toString();
+            }
+        }
+
+        /**
+         * For the specified category, it goes through all of its keys. For all the once with a
+         * jsonName, it retrieves stores the value of the {@code JSONObject[jsonName]} in that
+         * key.
+         *
+         * @param jObj the json object which which contains another object corresponding to the
+         *             category. E.g., jObj = { 'water': {...}, 'air': {...} }
+         * @param objName the name of the category in the object. E.g., 'water'
+         * @param category the category to fill the data of
+         * @throws JSONException
+         */
+        private void getJsonValuesForObject(JSONObject jObj, String objName,
+                                            ReviewCategory category) throws JSONException {
+            if (!jObj.isNull(objName)) {
+                JSONObject subJObj = jObj.getJSONObject(objName);
+                for (Key key : category.allKeys()) {
+                    if (key.jsonName != null) {
+                        category.set(key, decodeHTML(subJObj.getString(key.jsonName)));
+                    }
+                }
+            }
         }
     }
 }

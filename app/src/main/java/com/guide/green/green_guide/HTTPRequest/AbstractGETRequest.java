@@ -1,22 +1,13 @@
-package com.guide.green.green_guide.Utilities;
+package com.guide.green.green_guide.HTTPRequest;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Provides a way to run a single GET request.
  */
-public abstract class SimpleGETRequest extends SimpleRequest {
-    private boolean isCanceled = false;
+public abstract class AbstractGETRequest extends AbstractRequest {
     public final int connectionTimeout;
     public final int readTimeout;
 
@@ -26,7 +17,7 @@ public abstract class SimpleGETRequest extends SimpleRequest {
      *
      * @param url   the url to send the request to.
      */
-    public SimpleGETRequest(String url) {
+    public AbstractGETRequest(String url) {
         this(url, 4096);
     }
 
@@ -38,7 +29,7 @@ public abstract class SimpleGETRequest extends SimpleRequest {
      * @param bufferLength  the size of the readBuffer which will be holding the binary data
      *                      from the remote host.
      */
-    public SimpleGETRequest(String url, int bufferLength) {
+    protected AbstractGETRequest(String url, int bufferLength) {
         this(url, bufferLength, 15000, 10000);
     }
 
@@ -51,7 +42,8 @@ public abstract class SimpleGETRequest extends SimpleRequest {
      * @param connectionTimeout the time in milliseconds to wait to connect.
      * @param readTimeout   the time in milliseconds to wait to receive data.
      */
-    public SimpleGETRequest(String url, int bufferLength, int connectionTimeout, int readTimeout) {
+    protected AbstractGETRequest(String url, int bufferLength, int connectionTimeout,
+                                 int readTimeout) {
         super(url, bufferLength);
         this.connectionTimeout = connectionTimeout;
         this.readTimeout = readTimeout;
@@ -63,13 +55,10 @@ public abstract class SimpleGETRequest extends SimpleRequest {
      * @param recvBuffer the readBuffer to use if not null, else a readBuffer of the supplied
      *               {@code bufferLength} will be created.
      */
-    public void send(byte[] recvBuffer) {
-        SimpleRequest.SendRecvHandler recvArgs;
+    protected void send(byte[] recvBuffer) {
+        SendRecvHandler recvArgs;
         try {
             recvArgs = getSendRecvHandler(recvBuffer);
-        } catch (MalformedURLException e) {
-            onError(e);
-            return;
         } catch (IOException e) {
             onError(e);
             return;
@@ -84,22 +73,10 @@ public abstract class SimpleGETRequest extends SimpleRequest {
             recvArgs.connection.connect();
             recvArgs.openInputStream();
             recv(recvArgs);
-        } catch (ProtocolException e) {
-            onError(e);
         } catch (IOException e) {
             onError(e);
         } finally {
             recvArgs.connection.disconnect();
         }
     }
-
-    /**
-     * Stops any pending request.
-     */
-    public void stop() { isCanceled = true; }
-
-    /**
-     * @return true if a call to {@code stop} was made.
-     */
-    public boolean isStopped() { return isCanceled; };
 }
