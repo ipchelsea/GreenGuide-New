@@ -147,17 +147,11 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
     }
 
     private void bindSingleDependencyViews() {
-        String otherValue = getContext().getResources().getString(R.string.list_item_other);
-
-        // Other odor "forward deceleration"
-        FormInput.TextInput otherOdor = new FormInput.TextInput((TextView) mViewRoot.findViewById(
-                R.id.write_review_air_odor_other), AirWaste.Key.ODOR_OTHER, mAirWaste);
-
         // Odor type selector
         Spinner odorView = mViewRoot.findViewById(R.id.write_review_air_odor);
         FormInput.addAdapterToSpinner(getContext(), odorView,
-                R.array.write_review_odor_dropdown_items);
-        new FormInput.DropDown(odorView, AirWaste.Key.ODOR, mAirWaste, otherOdor, otherValue);
+                R.array.write_review_air_odor_dropdown_items);
+        new FormInput.DropDown(odorView, AirWaste.Key.ODOR, mAirWaste);
     }
 
     private void bindDualDependencyViews() {

@@ -1,93 +1,120 @@
 package com.guide.green.green_guide.Utilities;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import com.guide.green.green_guide.Fragments.CarouselPicture;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest;
 import com.guide.green.green_guide.HTTPRequest.AsyncRequest;
+import com.guide.green.green_guide.R;
 
 import java.util.List;
 
-public class PictureCarouselAdapter extends FragmentStatePagerAdapter
-        implements OnPageChangeListener {
+public class PictureCarouselAdapter extends RecyclerView.Adapter<PictureCarouselAdapter.CarouselViewHolder> {
     private List<String> mImageUrls;
     private Bitmap mBmps[];
+    public Context mContext;
 
-    public PictureCarouselAdapter(FragmentManager fm, @NonNull List<String> imgUrls) {
-        super(fm);
+    public static class CarouselViewHolder extends RecyclerView.ViewHolder {
+        public ImageView image;
+        public ProgressBar progress;
+        public Button retry;
+        public int position;
+        public void showOnlyImage() {
+            image.setVisibility(View.VISIBLE);
+            progress.setVisibility(View.GONE);
+            retry.setVisibility(View.GONE);
+        }
+        public void showOnlyRetry() {
+            image.setVisibility(View.GONE);
+            progress.setVisibility(View.GONE);
+            retry.setVisibility(View.VISIBLE);
+        }
+        public void showOnlyProgress() {
+            image.setVisibility(View.GONE);
+            progress.setVisibility(View.VISIBLE);
+            retry.setVisibility(View.GONE);
+        }
+        public CarouselViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+
+    public PictureCarouselAdapter(Context context, @NonNull List<String> imgUrls) {
+        mContext = context;
         mImageUrls = imgUrls;
         mBmps = new Bitmap[mImageUrls.size()];
     }
 
-    /**
-     * Return the Fragment associated with a specified position.
-     *
-     * @param position
-     */
+
+    @NonNull
     @Override
-    public Fragment getItem(int position) {
-        Log.i("getItem", "New: " + position);
-        CarouselPicture cPic = CarouselPicture.newInstance(position);
-        getImage(position, cPic);
-        return cPic;
+    public CarouselViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ViewGroup root = (ViewGroup) LayoutInflater.from(mContext).inflate(
+                R.layout.fragment_carousel_picture, parent, false);
+        final CarouselViewHolder viewHolder = new CarouselViewHolder(root);
+        viewHolder.image = root.findViewById(R.id.carousel_img);
+        viewHolder.progress = root.findViewById(R.id.carousel_img_progress);
+        viewHolder.retry = root.findViewById(R.id.carousel_img_retry);
+        viewHolder.retry.findViewById(R.id.carousel_img_retry).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        requestImageHandler(viewHolder.getAdapterPosition(), viewHolder);
+                    }
+                });
+        return viewHolder;
     }
 
-    /**
-     * Return the number of views available.
-     */
-    @Override
-    public int getCount() {
-        return mImageUrls.size();
+    private void requestImageHandler(final int imgPosition, final CarouselViewHolder holder) {
+        AsyncRequest.getImage("http://www.lovegreenguide.com/" + mImageUrls.get(imgPosition),
+                new AbstractRequest.OnRequestResultsListener<Bitmap>() {
+                    @Override
+                    public void onSuccess(Bitmap bitmap) {
+                        mBmps[imgPosition] = bitmap;
+                        if (holder.getAdapterPosition() == imgPosition) {
+                            holder.image.setImageBitmap(bitmap);
+                            holder.showOnlyImage();
+                        }
+                    }
+                    @Override
+                    public void onError(Exception error) {
+                        holder.showOnlyRetry();
+                        Log.i("--onError_CarouselPic", error.toString());
+                        error.printStackTrace();
+                    }
+                });
     }
 
-    /**
-     * This method will be invoked when a new page becomes selected. Animation is not
-     * necessarily complete.
-     *
-     * @param position Position index of the new selected page.
-     */
     @Override
-    public void onPageSelected(int position) {
-//        getImage(position);
-    }
-
-    private void getImage(final int position, final CarouselPicture cPic) {
+    public void onBindViewHolder(final @NonNull CarouselViewHolder holder, int position) {
         if (mBmps[position] != null) {
-            Log.i("--getImage", "Reuse: " + position);
-            cPic.addResultData(mBmps[position]);
+            holder.image.setImageBitmap(mBmps[position]);
+            holder.showOnlyImage();
         } else {
-            Log.i("--getImage", "GetNew: " + position);
-            AsyncRequest.getImage("http://www.lovegreenguide.com/" + mImageUrls.get(position),
-                    new AbstractRequest.OnRequestResultsListener<Bitmap>() {
-                        @Override
-                        public void onSuccess(Bitmap bitmap) {
-                            mBmps[position] = bitmap;
-                            cPic.addResultData(bitmap);
-                            Log.i("--onSuccess_CarouselPic", "Bmp>" + position);
-                        }
-                        @Override
-                        public void onError(Exception error) {
-                            cPic.onErrorEncountered();
-                            Log.i("--onError_CarouselPic", error.toString());
-                            error.printStackTrace();
-                        }
-                    });
+            holder.showOnlyProgress();
+            holder.image.setImageBitmap(null);
+            requestImageHandler(position, holder);
         }
+        holder.image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i("onBindViewHolder>>>>", "CLICKED IMAGE " + holder.getAdapterPosition());
+            }
+        });
     }
 
     @Override
-    public void onPageScrollStateChanged(int state) {
-        /* Do Nothing */
-    }
-
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        /* Do Nothing */
+    public int getItemCount() {
+        return mImageUrls.size();
     }
 }

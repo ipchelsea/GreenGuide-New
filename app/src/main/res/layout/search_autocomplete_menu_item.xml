@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal">
 
     <EditText
@@ -15,6 +15,20 @@
         android:inputType="textNoSuggestions"
         android:hint="Search location ..."
         android:imeOptions="actionSearch"
-        android:singleLine="true"/>
+        android:singleLine="true"
+        android:layout_marginRight="24dp"/>
 
-</LinearLayout>
+    <ImageButton
+        android:id="@+id/searchInputClear"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:layout_width="24dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_x_close"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@id/searchInput"
+        app:layout_constraintTop_toTopOf="@id/searchInput"
+        app:layout_constraintRight_toRightOf="@id/searchInput"
+        android:contentDescription="Close" />
+
+</android.support.constraint.ConstraintLayout>

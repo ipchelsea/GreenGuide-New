@@ -64,7 +64,8 @@
                         android:paddingTop="5sp"
                         android:text=""
                         android:textColor="@android:color/darker_gray"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        android:layout_gravity="right"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -80,17 +81,10 @@
                     <Spinner
                         android:id="@+id/write_review_air_odor"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
 
                 </GridLayout>
-
-                <EditText
-                    android:id="@+id/write_review_air_odor_other"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:hint="Odor description"
-                    android:visibility="gone"/>
-
 
                 <TextView
                     android:layout_width="match_parent"
@@ -134,7 +128,8 @@
                     android:text="Please indicate the smoke color:"
                     android:textColor="@color/black"
                     android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:visibility="gone"/>
 
                 <Spinner
                     android:id="@+id/write_review_air_smoke_color"
@@ -146,7 +141,7 @@
                     android:id="@+id/write_review_air_smoke_color_other"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:hint="Water odor description"
+                    android:hint="Smoke odor description"
                     android:visibility="gone"/>
 
                 <TextView
@@ -191,7 +186,8 @@
                     android:text="Please describe the discomfort:"
                     android:textColor="@color/black"
                     android:textSize="12sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:visibility="gone"/>
 
                 <Spinner
                     android:id="@+id/write_review_air_discomfort"
@@ -203,7 +199,7 @@
                     android:id="@+id/write_review_air_discomfort_other"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:hint="Water odor description"
+                    android:hint="Discomfort description"
                     android:visibility="gone"/>
 
                 <TextView

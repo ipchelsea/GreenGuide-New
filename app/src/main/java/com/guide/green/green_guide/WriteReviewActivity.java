@@ -25,7 +25,7 @@ import com.guide.green.green_guide.Utilities.BaiduSuggestion;
 import com.guide.green.green_guide.Utilities.Review;
 import java.util.ArrayList;
 
-public class WriteReviewActivity  extends AppCompatActivity {
+public class WriteReviewActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_PICK_IMAGE = 12;
     private final static int FRAGMENT_CONTAINER = R.id.fragment_container;
 

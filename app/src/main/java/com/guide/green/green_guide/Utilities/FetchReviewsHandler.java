@@ -92,64 +92,52 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
             View.OnClickListener {
         private Review mReview;
         private ViewGroup mRoot;
-
-//        private ViewPager rImagesPager;
-        private RecyclerView recycleView;
-        private ProgressBar rImgProgress;
-        private Button rImgRetry;
-        private String url;
+        private RecyclerView mRecycleView;
+        private ProgressBar mImgProgress;
+        private Button mImgRetry;
 
         public GetReviewImagesHandler(Review review, ViewGroup rootView) {
             mReview = review;
             mRoot = rootView;
-//            rImagesPager = rootView.findViewById(R.id.reviewImages);
-            recycleView = rootView.findViewById(R.id.reviewImages);
-            rImgProgress = rootView.findViewById(R.id.reviewImages_progress);
-            rImgRetry = rootView.findViewById(R.id.reviewImages_retry);
-            url = "http://www.lovegreenguide.com/view_app.php?id=" + review.id;
-            rImgRetry.setOnClickListener(this);
+            mRecycleView = rootView.findViewById(R.id.reviewImages);
+            mImgProgress = rootView.findViewById(R.id.reviewImages_progress);
+            mImgRetry = rootView.findViewById(R.id.reviewImages_retry);
+            mImgRetry.setOnClickListener(this);
             mReview.getImages(this);
         }
 
         @Override
         public void onSuccess(List<String> imageUrls) {
-            rImgProgress.setVisibility(View.GONE);
-            rImgRetry.setVisibility(View.GONE);
             if (imageUrls.isEmpty()) {
-//                rImagesPager.setVisibility(View.GONE);
+                mRoot.setVisibility(View.GONE);
                 return;
             }
-//            rImagesPager.setVisibility(View.VISIBLE);
-//            PictureCarouselAdapter adapter = new PictureCarouselAdapter(
-//                    mAct.getSupportFragmentManager(), imageUrls);
-//            rImagesPager.addOnPageChangeListener(adapter);
-//            rImagesPager.setAdapter(adapter);
-//            adapter.notifyDataSetChanged();
+            mImgProgress.setVisibility(View.GONE);
+            mRecycleView.setVisibility(View.VISIBLE);
 
-
-            RecyclerView.Adapter<PictureCarouselAdapter2.CarouselViewHolder> adapter = new
-                    PictureCarouselAdapter2(mAct.getApplicationContext(), imageUrls);
-            recycleView.setAdapter(adapter);
-            recycleView.setHasFixedSize(true);
+            RecyclerView.Adapter<PictureCarouselAdapter.CarouselViewHolder> adapter = new
+                    PictureCarouselAdapter(mAct.getApplicationContext(), imageUrls);
+            mRecycleView.setAdapter(adapter);
+            mRecycleView.setHasFixedSize(true);
 
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(mAct,
                     LinearLayoutManager.HORIZONTAL, false);
 
-            recycleView.setLayoutManager(mLayoutManager);
-            Log.i("--onSuccess_GetPoints", "Count: " + imageUrls.size());
+            mRecycleView.setLayoutManager(mLayoutManager);
         }
 
         @Override
         public void onError(Exception error) {
-//            rImagesPager.setVisibility(View.GONE);
-            rImgProgress.setVisibility(View.GONE);
-            rImgRetry.setVisibility(View.VISIBLE);
-            Log.i("--onError_GetImgUrls", error.toString());
+            mImgProgress.setVisibility(View.GONE);
+            mImgProgress.setVisibility(View.GONE);
+            mImgRetry.setVisibility(View.VISIBLE);
             error.printStackTrace();
         }
 
         @Override
         public void onClick(View view) {
+            mImgProgress.setVisibility(View.VISIBLE);
+            mImgRetry.setVisibility(View.GONE);
             mReview.getImages(this);
         }
     }
@@ -169,9 +157,6 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
         ImageView ratingImage = child.findViewById(R.id.ratingImage);
         TextView reviewText = child.findViewById(R.id.reviewText);
         TextView reviewTime = child.findViewById(R.id.reviewTime);
-//            Button rawDataBtn = (Button) child.findViewById(R.id.rawDataBtn);
-//            Button helpfulBtn = (Button) child.findViewById(R.id.helpfulBtn);
-//            Button inappropriateBtn = (Button) child.findViewById(R.id.inappropriateBtn);
 
         ratingValue.setText(String.format("Rating: %s%d", rating > 0 ? "+" : "", rating));
 
@@ -189,7 +174,7 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
         child.setPadding(0, (int) Drawing.convertDpToPx(mAct,10), 0, 0);
         child.setLayoutParams(lp);
 
-        new GetReviewImagesHandler(review, child);
+        new GetReviewImagesHandler(review, (ViewGroup) child.findViewById(R.id.reviewImages_root));
 
         return child;
     }

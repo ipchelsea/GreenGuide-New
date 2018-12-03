@@ -211,8 +211,8 @@ public class Review {
          */
         public static class Key extends Review.Key {
             public static final Key WEATHER = new Key(null, null);
-            public static final Key OBSERVATION_DATE = new Key(null, null);
-            public static final Key OBSERVATION_TIME = new Key(null, null);
+            public static final Key OBSERVATION_DATE = new Key(null, "observation_date");
+            public static final Key OBSERVATION_TIME = new Key(null, "observation_time");
             public static final Key OTHER_ITEM = new Key(null, "other_item");
             public static final Key SIZE = new Key("size", null);
             public static final Key REASON = new Key("reason", null);
@@ -285,11 +285,11 @@ public class Review {
          * Key class containing keys that only work for the  object.
          */
         public static class Key extends Review.Key {
-            public static final Key NITRATE = new Key(null, null);
-            public static final Key WATER_BODY_OTHER = new Key(null, null);
-            public static final Key ODOR_OTHER = new Key(null, null);
-            public static final Key WATER_COLOR_OTHER = new Key(null, null);
-            public static final Key FLOAT_TYPE_OTHER = new Key(null, null);
+            public static final Key NITRATE = new Key(null, "nitrate");
+            public static final Key WATER_BODY_OTHER = new Key(null, "water_body_other");
+            public static final Key ODOR_OTHER = new Key(null, "water_odor_other");
+            public static final Key WATER_COLOR_OTHER = new Key(null, "water_color_other");
+            public static final Key FLOAT_TYPE_OTHER = new Key(null, "float_type_other");
             public static final Key ARSENIC = new Key("Arsenic", "As");
             public static final Key CADMIUM = new Key("Cd");
             public static final Key LEAD = new Key("Pb");
@@ -357,7 +357,7 @@ public class Review {
          */
         public static class Key extends Review.Key {
             public static final Key ODOR_OTHER = new Key(null, null);
-            public static final Key SMOKE_COLOR_OTHER = new Key(null, null);
+            public static final Key SMOKE_COLOR_OTHER = new Key(null, "smoke_color_other");
             public static final Key CO = new Key("CO");
             public static final Key NOX = new Key("NOx");
             public static final Key SOX = new Key("SOx");
@@ -376,10 +376,10 @@ public class Review {
              * Private constructor to insure that no keys can be created outside of this
              * object. Effect: enum like structure when the enum values are the static final values.
              *
-             * @param jsonName A unique key name. Uniqueness is not enforced.
+             * @param jsonPostName A unique key name. Uniqueness is not enforced.
              */
-            private Key(String jsonName) {
-                this(jsonName, jsonName);
+            private Key(String jsonPostName) {
+                this(jsonPostName, jsonPostName);
             }
 
             /**
@@ -422,7 +422,7 @@ public class Review {
          */
         public static class Key extends Review.Key {
             public static final Key ODOR_OTHER = new Key(null, null);
-            public static final Key WASTE_TYPE_OTHER = new Key(null, null);
+            public static final Key WASTE_TYPE_OTHER = new Key(null, "waste_type_other");
             public static final Key MEASUREMENTS = new Key("Measurements", "WasteMeasure");
             public static final Key ODOR = new Key("Odor", "WasteOdor");
             public static final Key AMOUNT = new Key("Amount", "WasteAmount");

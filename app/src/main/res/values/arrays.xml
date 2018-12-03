@@ -47,6 +47,12 @@
         <item>Black</item>
         <item>@string/list_item_other</item>
     </string-array>
+    <string-array name="write_review_air_odor_dropdown_items">
+        <item></item>
+        <item>No Smell</item>
+        <item>Mild Smell</item>
+        <item>Strong Smell</item>
+    </string-array>
     <string-array name="write_review_odor_dropdown_items">
         <item></item>
         <item>No Smell</item>

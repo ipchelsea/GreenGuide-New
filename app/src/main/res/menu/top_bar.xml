@@ -13,6 +13,8 @@
         android:id="@+id/searchItem"
         android:icon="@drawable/ic_search_black_24dp"
         android:title="Search for Locations"
-        app:showAsAction="ifRoom|collapseActionView"
+        app:showAsAction="always"
         app:actionLayout="@layout/search_autocomplete_menu_item"/>
+
+    <!--app:showAsAction="ifRoom|collapseActionView"-->
 </menu>

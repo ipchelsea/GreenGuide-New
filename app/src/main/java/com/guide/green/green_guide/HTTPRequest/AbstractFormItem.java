@@ -177,7 +177,6 @@ public abstract class AbstractFormItem {
         public byte[] getOther() { return null; }
     }
 
-
     /**
      * Describes a <input type="file"> tag.
      */
