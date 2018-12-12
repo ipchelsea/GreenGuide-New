@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -87,15 +88,6 @@ public class WriteReviewActivity extends AppCompatActivity {
                 mReview.solidWaste,
                 mReview.waterIssue
         };
-        for (Review.ReviewCategory component : components) {
-            for (Review.Key k : component.allKeys()) {
-                String value = component.get(k);
-                if (value != null) {
-                    Log.i(">>>>", "(" + k + ", " + value + ")");
-                }
-            }
-        }
-
 
         if (mCurrentPage < mPages.size() - 1) {
             mCurrentPage += 1;

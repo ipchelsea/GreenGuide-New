@@ -131,11 +131,11 @@ public abstract class AbstractFormItem {
     /**
      * Describes a <input type="file"> tag.
      */
-    public static abstract class AbstractFileFormItem extends AbstractFormItem {
+    public static abstract class FileFormItem extends AbstractFormItem {
         public final byte[] mMimeType;
         private final byte[] mFileName;
         private final byte[] mName;
-        protected Object value;
+        protected byte[] mValue;
 
         /**
          * Constructor which sets the <input type="file" name="@{code inputName}">, the file's name
@@ -146,12 +146,12 @@ public abstract class AbstractFormItem {
          * @param fileName the name of the file.
          * @param value user defined storage.
          */
-        public AbstractFileFormItem(String inputName, String fileName, Object value) {
+        public FileFormItem(String inputName, String fileName, byte[] value) {
             this(inputName, fileName, null, value);
         }
 
-        public AbstractFileFormItem(String inputName, String fileName, String mimeType,
-                                    Object value) {
+        public FileFormItem(String inputName, String fileName, String mimeType,
+                            byte[] value) {
             mFileName = fileName.getBytes(StandardCharsets.UTF_8);
             mName = inputName.getBytes(StandardCharsets.UTF_8);
 
@@ -161,7 +161,7 @@ public abstract class AbstractFormItem {
                 mMimeType = mimeType.getBytes(StandardCharsets.UTF_8);
             }
 
-            this.value = value;
+            mValue = value;
         }
 
         @Override
@@ -175,39 +175,44 @@ public abstract class AbstractFormItem {
 
         @Override
         public byte[] getOther() { return null; }
-    }
-
-    /**
-     * Describes a <input type="file"> tag.
-     */
-    public static class UriFileFormItem extends AbstractFileFormItem {
-        private Context mCtx;
-        private Uri mUri;
-
-        /**
-         * Constructor which sets the <input type="file" name="@{code inputName}">, the location on
-         * the device to retrieve the file from, and a Context to use to read the file.
-         *
-         * @param inputName the file name.
-         * @param uri the location on this device where the file is located.
-         * @param ctx a Context used to read the file.
-         */
-        public UriFileFormItem(String inputName, Uri uri, Context ctx) {
-            super(inputName, getFileNameFromUri(uri, ctx), getMimeTypeFromUri(uri, ctx),
-                    null);
-            this.mCtx = ctx;
-            this.mUri = uri;
-        }
 
         /**
          * @return the contents of the item. <input value="..." />
          */
         @Override
         public byte[] getValue() {
-            if (value == null) {
-                value = readAllBytesFromFileUri(mUri, mCtx);
-            }
-            return (byte[]) value;
+            return mValue;
+        }
+    }
+
+    /**
+     * Describes a <input type="file"> tag.
+     */
+    public static class UriFileFormItem extends FileFormItem {
+        /**
+         * Constructor which sets the <input type="file" name="@{code inputName}">, the location on
+         * the device to retrieve the file from, and a Context to use to read the file.
+         *
+         * @param inputName the filed name.
+         * @param uri the location on this device where the file is located.
+         * @param ctx a Context used to read the file.
+         */
+        public UriFileFormItem(String inputName, Uri uri, Context ctx) {
+            super(inputName, getFileNameFromUri(ctx, uri), getMimeTypeFromUri(ctx, uri),
+                    readAllBytesFromFileUri(ctx, uri));
+        }
+
+        /**
+         * Constructor which sets the <input type="file" name="@{code inputName}">, the location on
+         * the device to retrieve the file from, and a Context to use to read the file.
+         *
+         * @param inputName the filed name.
+         * @param uri the location on this device where the file is located.
+         * @param data the bytes of this file.
+         * @param ctx a Context used to read the file.
+         */
+        public UriFileFormItem(String inputName, Uri uri, byte[] data, Context ctx) {
+            super(inputName, getFileNameFromUri(ctx, uri), getMimeTypeFromUri(ctx, uri), data);
         }
     }
 }

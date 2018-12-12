@@ -37,7 +37,6 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
         }
     }
 
-
     @Override
     public void setOnPageChange(OnPageChangeListener listener) {
         mOnPageChangeListener = listener;
@@ -110,11 +109,19 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
                 new VisibilityImage("76-100","Between 76km to 100km",
                         Drawing.getDrawable(getContext(), R.drawable.visibility_77km)),
                 new VisibilityImage("51-75","Between 51km to 75km",
-                        Drawing.getDrawable(getContext(), R.drawable.visibility_77km)),
-                new VisibilityImage("25-50","Between 26km to 50km",
+                        Drawing.getDrawable(getContext(), R.drawable.visibility_52km)),
+                new VisibilityImage("26-50","Between 26km to 50km",
                         Drawing.getDrawable(getContext(), R.drawable.visibility_23km)),
-                new VisibilityImage("<25","Less than 25km",
-                        Drawing.getDrawable(getContext(), R.drawable.visibility_23km))
+                new VisibilityImage("11-25","Between 11km to 25km",
+                        Drawing.getDrawable(getContext(), R.drawable.visibility_15km)),
+                new VisibilityImage("10","About 10km",
+                        Drawing.getDrawable(getContext(), R.drawable.ic_stan_no_img_available)),
+                new VisibilityImage("2","About 2km",
+                        Drawing.getDrawable(getContext(), R.drawable.ic_stan_no_img_available)),
+                new VisibilityImage("0.5","About 500 meters",
+                        Drawing.getDrawable(getContext(), R.drawable.ic_stan_no_img_available)),
+                new VisibilityImage("0.1","About 100 meters",
+                        Drawing.getDrawable(getContext(), R.drawable.ic_stan_no_img_available))
         };
         final TextView visibility = mViewRoot.findViewById(R.id.write_review_air_visibility);
         visibility.setFocusable(false);
@@ -134,7 +141,6 @@ public class WriteReviewAirFragment extends WriteReviewActivity.WriteReviewPage 
                     @Override
                     public void onImagePicked(VisibilityImage titleAndImage) {
                         visibility.setText(titleAndImage.title);
-
                         onFinish();
                     }
 

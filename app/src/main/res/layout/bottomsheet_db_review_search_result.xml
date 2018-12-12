@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/db_search_result_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/db_search_result_company"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLACE"/>
+
+    <TextView
+        android:id="@+id/db_search_result_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLACE"/>
+
+    <TextView
+        android:id="@+id/db_search_result_city"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLACE"/>
+
+    <TextView
+        android:id="@+id/db_search_result_industry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLACE"/>
+
+    <TextView
+        android:id="@+id/db_search_result_product"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLACE"/>
+
+    <TextView
+        android:id="@+id/db_search_result_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLACE"/>
+
+    <Button
+        android:id="@+id/db_search_result_reviews"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLACE"/>
+
+    <View android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@android:color/black"/>
+</LinearLayout>

@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
     tools:context=".MainActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -74,13 +75,24 @@
             android:src="@drawable/ic_my_location_24px"
             android:backgroundTint="@color/white"
             app:backgroundTint="@color/colorPrimary"/>
+
+        <Button
+            android:id="@+id/doSomething"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="183dp"
+            android:src="@drawable/ic_my_location_24px"
+            android:text="Click Me"
+            android:visibility="gone"/>
     </android.support.design.widget.CoordinatorLayout>
 
     <LinearLayout
         android:layout_marginTop="?android:attr/actionBarSize"
         android:id="@+id/searchDropDownContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/searchDropDown"

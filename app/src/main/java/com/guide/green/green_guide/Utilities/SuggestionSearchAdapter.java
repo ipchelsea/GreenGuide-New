@@ -68,7 +68,7 @@ public class SuggestionSearchAdapter
             holder.setAutoComplete(((BaiduSuggestion.TextSuggestion) suggestion).suggestion);
         } else {
             BaiduSuggestion.Location locationSuggestion = (BaiduSuggestion.Location) suggestion;
-            holder.setLocation(locationSuggestion.name, locationSuggestion.address);
+            holder.setLocation(locationSuggestion.name, locationSuggestion.uid);
         }
     }
 
@@ -97,10 +97,10 @@ public class SuggestionSearchAdapter
             topText.setVisibility(View.VISIBLE);
             btmText.setVisibility(View.GONE);
         }
-        public void setLocation(String name, String address) {
+        public void setLocation(String name, String uid) {
             icon.setImageDrawable(mItemIcons.LOCATION);
             topText.setText(name);
-            btmText.setText(address);
+            btmText.setText(uid);
             icon.setVisibility(View.VISIBLE);
             topText.setVisibility(View.VISIBLE);
             btmText.setVisibility(View.VISIBLE);

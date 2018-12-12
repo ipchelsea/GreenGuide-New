@@ -48,51 +48,80 @@ public class Misc {
     }
 
     /**
-     * Given a {@code Uri} object. This method returned the name of the file described by that
+     * Given a {@code Uri} object. This method returns the name of the file described by that
      * object.
-     * @param uri a uri pointing to a file on the divice
+     * @param uri a uri pointing to a file on the device
      * @param context used to get a getContentResolver
      * @return the file name or null
      */
-    public static String getFileNameFromUri(Uri uri, Context context) {
+    public static String getFileNameFromUri(Context context, Uri uri) {
+        String result = null;
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
             }
             cursor.close();
         }
-        return null;
+        return result;
     }
 
-    public static String getMimeTypeFromUri(Uri uri, Context context) {
+    /**
+     * Given a {@code Uri} object. This method returns the MIME type of the file.
+     *
+     * @param uri a uri pointing to a file on the device
+     * @param context used to get a getContentResolver
+     * @return the file name or null
+     */
+    public static String getMimeTypeFromUri(Context context, Uri uri) {
         ContentResolver cR = context.getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         return mime.getExtensionFromMimeType(cR.getType(uri));
     }
 
-    public static byte[] readAllBytesFromFileUri(Uri fileUri, Context context) {
+
+    /**
+     * Given a {@code Uri} object. This method returns all of the bytes of the file.
+     *
+     * @param context used to get a getContentResolver
+     * @param uri a uri pointing to a file on the device
+     * @return the file name or null
+     */
+    public static byte[] readAllBytesFromFileUri(Context context, Uri uri) {
         try {
-            InputStream iStream = context.getContentResolver().openInputStream(fileUri);
-            byte[] result = getBytes(iStream);
+            InputStream iStream = context.getContentResolver().openInputStream(uri);
+            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+            int bufferSize = 1024;
+            byte[] buffer = new byte[bufferSize];
+
+            int len;
+            while ((len = iStream.read(buffer)) != -1) {
+                byteBuffer.write(buffer, 0, len);
+            }
             iStream.close();
-            return result;
+            return byteBuffer.toByteArray();
         } catch (IOException e) {
             /* Do Nothing */
         }
-
         return null;
     }
 
-    private static byte[] getBytes(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-
-        int len;
-        while ((len = inputStream.read(buffer)) != -1) {
-            byteBuffer.write(buffer, 0, len);
+    /**
+     * Gets the file size of a file on the device.
+     *
+     * @param context the context used to acquire a {@code getContentResolver}
+     * @param uri a file on this device
+     * @return the size of the file of -1 if the size could not be obtained
+     */
+    public static long getFileSize(Context context, Uri uri) {
+        long result = -1;
+        Cursor cursor =
+                context.getContentResolver().query(uri, null, null, null, null);
+        int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+        if (cursor.moveToFirst()) {
+            result = cursor.getLong(sizeIndex);
         }
-        return byteBuffer.toByteArray();
+        cursor.close();
+        return result;
     }
 }

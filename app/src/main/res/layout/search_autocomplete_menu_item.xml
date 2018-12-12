@@ -1,34 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="fill_horizontal">
 
-    <EditText
-        android:id="@+id/searchInput"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:minWidth="300dp"
-        android:theme="@style/Autocomplete"
-        android:inputType="textNoSuggestions"
-        android:hint="Search location ..."
-        android:imeOptions="actionSearch"
-        android:singleLine="true"
-        android:layout_marginRight="24dp"/>
+        android:orientation="horizontal">
 
-    <ImageButton
-        android:id="@+id/searchInputClear"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:layout_width="24dp"
-        android:layout_height="match_parent"
-        android:src="@drawable/ic_x_close"
-        android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="@id/searchInput"
-        app:layout_constraintTop_toTopOf="@id/searchInput"
-        app:layout_constraintRight_toRightOf="@id/searchInput"
-        android:contentDescription="Close" />
+        <EditText
+            android:id="@+id/searchInput"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="fill_horizontal"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:hint="Search location ..."
+            android:imeOptions="actionSearch"
+            android:inputType="textNoSuggestions"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/city" />
 
-</android.support.constraint.ConstraintLayout>
+        <Button
+            android:id="@+id/city"
+            style="@android:style/Widget.Holo.Button.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="北京"
+            app:layout_constraintBottom_toBottomOf="@id/searchInput"
+            app:layout_constraintTop_toTopOf="@id/searchInput"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </android.support.constraint.ConstraintLayout>
+</RelativeLayout>

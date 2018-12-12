@@ -294,6 +294,7 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
         Toast.makeText(mAct, "Error retrieving reviews.", Toast.LENGTH_SHORT).show();
         mCompleted = true;
         mLoadingDialog.dismiss();
+        mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     @Override
