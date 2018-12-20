@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
@@ -23,8 +24,11 @@ import com.guide.green.green_guide.HTTPRequest.AbstractFormItem;
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest;
 import com.guide.green.green_guide.HTTPRequest.AsyncRequest;
 import com.guide.green.green_guide.Utilities.BaiduSuggestion;
+import com.guide.green.green_guide.Utilities.CredentialManager;
+import com.guide.green.green_guide.Utilities.ImageResizer;
 import com.guide.green.green_guide.Utilities.Review;
 import java.util.ArrayList;
+import java.util.List;
 
 public class WriteReviewActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_PICK_IMAGE = 12;
@@ -105,7 +109,7 @@ public class WriteReviewActivity extends AppCompatActivity {
                 mReview.waterIssue
         };
 
-        ArrayList<AbstractFormItem> formItems = new ArrayList<>();
+        final ArrayList<AbstractFormItem> formItems = new ArrayList<>();
         for (Review.ReviewCategory component : components) {
             for (Review.Key k : component.allKeys()) {
                 if (k.postName != null) {
@@ -116,18 +120,35 @@ public class WriteReviewActivity extends AppCompatActivity {
             }
         }
 
-        for (Uri imgUir : mWriteReviewGeneral.getImageUris()) {
-            formItems.add(new AbstractFormItem.UriFileFormItem("image[]", imgUir, this));
-        }
+        ImageResizer.ResizeCompletedListener listener = new ImageResizer.ResizeCompletedListener() {
+            @Override
+            public void onResizeCompleted(AbstractFormItem.FileFormItem[] images) {
+                for (AbstractFormItem formItem : images) {
+                    formItems.add(formItem);
+                }
 
-        AsyncRequest.postMultipartData("http://www.lovegreenguide.com/savereview_app.php",
-                formItems, new AbstractRequest.OnRequestResultsListener<StringBuilder>() {
-                    @Override
-                    public void onSuccess(StringBuilder sb) {
-                        Log.i("*********", sb == null ? "NULL" : sb.toString());
-                        Toast.makeText(WriteReviewActivity.this, "Review Submitted", Toast.LENGTH_LONG).show();
-                    }
-                });
+                ArrayList<Pair<String, String>> httpHeader = null;
+                if (CredentialManager.isLoggedIn()) {
+                    httpHeader = new ArrayList<>();
+                    httpHeader.add(CredentialManager.getCookie());
+                    formItems.add(new AbstractFormItem.TextFormItem("token",
+                            CredentialManager.getToken()));
+                }
+
+                AsyncRequest.postMultipartData("http://www.lovegreenguide.com/savereview_app.php",
+                        formItems, new AbstractRequest.OnRequestResultsListener<StringBuilder>() {
+                            @Override
+                            public void onSuccess(StringBuilder sb) {
+                                Log.i("*********", sb == null ? "NULL" : sb.toString());
+                                Toast.makeText(WriteReviewActivity.this, "Review Submitted", Toast.LENGTH_LONG).show();
+                            }
+                        }, httpHeader);
+
+            }
+        };
+        int oneMegaByte = 1048576; // 2^20
+        ImageResizer.resizeImages(getApplicationContext(), oneMegaByte, "image[]",
+                mWriteReviewGeneral.getImageUris(), listener);
 
         Toast.makeText(this, "Submitting Review", Toast.LENGTH_LONG).show();
         finish();

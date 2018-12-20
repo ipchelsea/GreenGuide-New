@@ -22,6 +22,10 @@ public class ImageResizer extends AsyncTask<Uri, Object, FileFormItem[]> {
     private String mFieldName;
     private final int MAX_FILE_SIZE;
     private static final int BYTES_PER_PIXEL = 4;
+    private final ResizeCompletedListener mCompletedListener;
+    public interface ResizeCompletedListener {
+        void onResizeCompleted(FileFormItem[] results);
+    }
 
     /**
      * Default constructor which initializes all needed variables.
@@ -29,11 +33,14 @@ public class ImageResizer extends AsyncTask<Uri, Object, FileFormItem[]> {
      * @param ctx a context object
      * @param maxSize the maximum file size in bytes
      * @param inputName the name of the input: <input name="<THIS>" ...
+     * @param completedListener the callback to call when finished resizing all images.
      */
-    public ImageResizer(Context ctx, int maxSize, String inputName) {
+    private ImageResizer(Context ctx, int maxSize, String inputName,
+                         ResizeCompletedListener completedListener) {
         mCtx = ctx;
         MAX_FILE_SIZE = maxSize;
         mFieldName = inputName;
+        mCompletedListener = completedListener;
     }
 
     private InputStream getFileStream(Uri filePath) {
@@ -56,7 +63,7 @@ public class ImageResizer extends AsyncTask<Uri, Object, FileFormItem[]> {
     @Override
     protected FileFormItem[] doInBackground(Uri... uris) {
         FileFormItem[] results = new FileFormItem[uris.length];
-        for (int i = 0; i < uris.length; i++) {
+        for (int i = 0; i < uris.length && !isCancelled(); i++) {
             long fileSize = Misc.getFileSize(mCtx.getApplicationContext(), uris[i]);
             InputStream iStream = getFileStream(uris[i]);
             if (iStream == null) return null;
@@ -101,5 +108,19 @@ public class ImageResizer extends AsyncTask<Uri, Object, FileFormItem[]> {
         }
 
         return results;
+    }
+
+    @Override
+    public void onPostExecute(FileFormItem[] results) {
+        if (mCompletedListener != null) {
+            mCompletedListener.onResizeCompleted(results);
+        }
+    }
+
+    public static ImageResizer resizeImages(Context context, int maxFileSize, String fieldName,
+                                            Uri[] uris, ResizeCompletedListener listener) {
+        ImageResizer imgResizer = new ImageResizer(context, maxFileSize, fieldName, listener);
+        imgResizer.execute(uris);
+        return imgResizer;
     }
 }

@@ -131,6 +131,7 @@ public class POSTMultipartData extends AbstractPOSTRequest {
                 }
             };
             mRequest = request;
+            request.setHttpHeaders(mHttpHeaders);
             request.send();
             return request.getResult();
         }

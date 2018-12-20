@@ -97,7 +97,7 @@ public class DBReviewSearchManager {
         Button reviewsView = childRoot.findViewById(R.id.db_search_result_reviews);
         ImageView iconView = childRoot.findViewById(R.id.db_search_result_icon);
 
-        String imgName = "Icon_mark" + markerNumber + ".png";
+        String imgName = "Icon_mark" + (1 + markerNumber % 10) + ".png";
         Bitmap bmp = BitmapDescriptorFactory.fromAssetWithDpi(imgName).getBitmap();
         iconView.setImageBitmap(bmp);
 

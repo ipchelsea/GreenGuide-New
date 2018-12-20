@@ -1,13 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Log In/Out"
-        android:id="@+id/my_reviews"
-        android:gravity="center_vertical|center_horizontal"/>
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:padding="16dp"
+        android:visibility="visible">
 
-</android.support.constraint.ConstraintLayout>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email Address"
+            android:id="@+id/log_in_username"
+            android:inputType="textEmailAddress"
+            android:textColor="@android:color/black"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:id="@+id/log_in_password"
+            android:inputType="textPassword"
+            android:textColor="@android:color/black"/>
+
+        <CheckBox
+            android:id="@+id/log_in_remember_me"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Keep me signed in"/>
+
+        <Button
+            android:id="@+id/log_in"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Log In"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/log_in_goto_sign_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Sign up!"
+            android:layout_gravity="center"/>
+    </LinearLayout>
+</FrameLayout>

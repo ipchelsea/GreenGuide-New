@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -21,52 +22,54 @@ import com.guide.green.green_guide.Utilities.CredentialManager;
 
 import java.util.ArrayList;
 
-public class SignUpFragment extends AbstractLogInOutSignup {
-    private EditText mSignUpUsername;
-    private EditText mSignUpPassword;
-    private EditText mSignUpPasswordRetype;
+public class LogInFragment extends AbstractLogInOutSignup {
+    private EditText mLogInUsername;
+    private EditText mLogInPassword;
+    private CheckBox mLogInRemember;
     private LoadingDialog ld;
+    private String mTentativeToken;
+    private String mTentativeUsername;
+    private boolean mTentativeRememberUser;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_sign_up, null);
-        mSignUpUsername = root.findViewById(R.id.sign_up_username);
-        mSignUpPassword = root.findViewById(R.id.sign_up_password);
-        mSignUpPasswordRetype = root.findViewById(R.id.sign_up_password_retype);
-        root.findViewById(R.id.sign_up).setOnClickListener(new View.OnClickListener() {
+        ViewGroup mRoot = (ViewGroup) inflater.inflate(R.layout.fragment_login, null);
+        mLogInUsername = mRoot.findViewById(R.id.log_in_username);
+        mLogInPassword = mRoot.findViewById(R.id.log_in_password);
+        mLogInRemember = mRoot.findViewById(R.id.log_in_remember_me);
+        mRoot.findViewById(R.id.log_in).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                signUpUser();
+                logUserIn();
             }
         });
-        root.findViewById(R.id.sign_up_goto_log_in).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchPageTo(LogInOutSignUpActivity.PageOption.LOGIN);
-            }
-        });
-        return root;
+        mRoot.findViewById(R.id.log_in_goto_sign_up).findViewById(R.id.log_in_goto_sign_up)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        switchPageTo(LogInOutSignUpActivity.PageOption.SIGN_UP);
+                    }
+                });
+        return mRoot;
     }
 
-    private void signUpUser() {
-        String password = mSignUpPasswordRetype.getText().toString();
-        if (!mSignUpPassword.getText().toString().equals(password)) {
-            Toast.makeText(getContext(), "Password mismatch", Toast.LENGTH_LONG).show();
-            return;
-        }
-        String mTentativeToken = "06232017Job$";
-        String mTentativeUsername = mSignUpUsername.getText().toString();
+    // Instance methods
+
+    private void logUserIn() {
+        mTentativeToken = "06232017Job$"; // Make the value randomly generated when the REST code is changed.
+        mTentativeUsername = mLogInUsername.getText().toString();
+        mTentativeRememberUser = mLogInRemember.isChecked();
         ArrayList<AbstractFormItem> formItems = new ArrayList<>();
         formItems.add(new AbstractFormItem.TextFormItem("email", mTentativeUsername));
-        formItems.add(new AbstractFormItem.TextFormItem("password", password));
+        formItems.add(new AbstractFormItem.TextFormItem("password", mLogInPassword.getText().toString()));
         formItems.add(new AbstractFormItem.TextFormItem("token_signup", mTentativeToken));
 
         ld = new LoadingDialog();
-        ld.show(getActivity().getFragmentManager(), "Signing Up...");
+        ld.show(getActivity().getFragmentManager(), "Login In...");
         final POSTMultipartData.AsyncPostData postRequest = AsyncRequest.postMultipartData(
-                "http://www.lovegreenguide.com/register_app.php", formItems, mSignUpHandler);
+                "http://www.lovegreenguide.com/login_app.php", formItems, mLogInHandler);
         ld.setCallback(new LoadingDialog.Canceled() {
             @Override
             public void onCancel() {
@@ -75,11 +78,20 @@ public class SignUpFragment extends AbstractLogInOutSignup {
         });
     }
 
-    private AbstractRequest.OnRequestResultsListener<StringBuilder> mSignUpHandler =
+    private AbstractRequest.OnRequestResultsListener<StringBuilder> mLogInHandler =
             new AbstractRequest.OnRequestResultsListener<StringBuilder>() {
                 @Override
                 public void onSuccess(StringBuilder stringBuilder) {
-                    Log.i("SIGN_UP_SUCCESS>", stringBuilder.toString() + ">" + stringBuilder.toString());
+                    if (stringBuilder.indexOf("Login successful") != -1) {
+                        if (mTentativeRememberUser) {
+                            CredentialManager.logIn(mTentativeToken, mTentativeUsername, getContext());
+                        } else {
+                            CredentialManager.logIn(mTentativeToken, mTentativeUsername, null);
+                        }
+                        switchPageTo(LogInOutSignUpActivity.PageOption.LOGOUT);
+                        getActivity().finish();
+                    }
+
                     Toast.makeText(getContext(),stringBuilder.toString(), Toast.LENGTH_LONG).show();
                     ld.dismiss();
                 }

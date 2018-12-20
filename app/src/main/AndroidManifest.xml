@@ -58,7 +58,7 @@
                 android:value="com.guide.green.green_guide.MainActivity"/>
         </activity>
         <activity
-            android:name=".FragmentContainer"
+            android:name=".FragmentContainerActivity"
             android:label="Green Guide"
             android:parentActivityName=".MainActivity">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
@@ -73,7 +73,13 @@
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.guide.green.green_guide.MainActivity"/>
         </activity>
-
+        <activity
+            android:name=".LogInOutSignUpActivity"
+            android:label="Green Guide"
+            android:parentActivityName=".MainActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.guide.green.green_guide.MainActivity"/>
+        </activity>
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="q2vm31m0SXgdtXvsyFoNfvesPf3R4KjN" />

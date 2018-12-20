@@ -8,12 +8,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import com.guide.green.green_guide.Fragments.AboutFragment;
 import com.guide.green.green_guide.Fragments.GuidelinesFragment;
-import com.guide.green.green_guide.Fragments.LogInOutFragment;
+import com.guide.green.green_guide.Fragments.LogInFragment;
 import com.guide.green.green_guide.Fragments.MyReviewsFragment;
-import com.guide.green.green_guide.Fragments.SignUpFragment;
 import com.guide.green.green_guide.Fragments.UserGuideFragment;
 
-public class FragmentContainer extends AppCompatActivity {
+public class FragmentContainerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,8 +37,7 @@ public class FragmentContainer extends AppCompatActivity {
             case R.id.guidelines: return new GuidelinesFragment();
             case R.id.about: return new AboutFragment();
             case R.id.user_guide: return new UserGuideFragment();
-            case R.id.sign_up: return new SignUpFragment();
-            case R.id.log_in_out: return new LogInOutFragment();
+            case R.id.drawable_log_in_out: return new LogInFragment();
         }
         return null;
     }
@@ -56,7 +54,7 @@ public class FragmentContainer extends AppCompatActivity {
     }
 
     public static void startActivity(Activity act, int layoutId) {
-        Intent intent = new Intent(act, FragmentContainer.class);
+        Intent intent = new Intent(act, FragmentContainerActivity.class);
         intent.putExtra("itemId", layoutId);
         act.startActivity(intent);
     }

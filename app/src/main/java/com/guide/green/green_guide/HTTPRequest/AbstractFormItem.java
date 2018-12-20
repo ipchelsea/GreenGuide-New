@@ -12,12 +12,12 @@ import static com.guide.green.green_guide.Utilities.Misc.readAllBytesFromFileUri
  * Describes a form item which would be found in HTML code as a <input>.
  */
 public abstract class AbstractFormItem {
-    public static final byte[] CONTENT_DISPOSITION = "Content-Disposition: form-data; name=\""
+    private static final byte[] CONTENT_DISPOSITION = "Content-Disposition: form-data; name=\""
             .getBytes(StandardCharsets.US_ASCII);
-    public static final byte[] FILE_NAME = "\"; filename=\"".getBytes(StandardCharsets.US_ASCII);
-    public static final byte[] CONTENT_TYPE = "Content-Type: ".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] FILE_NAME = "\"; filename=\"".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] CONTENT_TYPE = "Content-Type: ".getBytes(StandardCharsets.US_ASCII);
     public static final byte[] NEW_LINE = "\r\n".getBytes(StandardCharsets.US_ASCII);
-    public static final byte QUOTE = (byte) '\"';
+    private static final byte QUOTE = (byte) '\"';
     private byte[] mHeader;
 
     /**
