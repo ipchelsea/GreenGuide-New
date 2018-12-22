@@ -3,6 +3,8 @@ package com.guide.green.green_guide.HTTPRequest;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.util.Pair;
+
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest.OnRequestResultsListener;
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest.RequestProgress;
 import com.guide.green.green_guide.HTTPRequest.GetText.AsyncGetText;
@@ -24,6 +26,7 @@ public abstract class AsyncRequest<Result> extends AsyncTask<String, RequestProg
     private OnRequestResultsListener<Result> mCallback;
     protected Exception mException;
     protected AbstractRequest mRequest;
+    protected List<Pair<String, String>> mHttpHeaders;
 
     /**
      * Constructor which sets all of the member variables.
@@ -32,6 +35,16 @@ public abstract class AsyncRequest<Result> extends AsyncTask<String, RequestProg
      */
     public AsyncRequest(@NonNull OnRequestResultsListener<Result> callback) {
         mCallback = callback;
+    }
+
+    /**
+     * Sets the headers. The headers are stored as a key-value pair.
+     *
+     * @param headers the key value pair containing the HTTP header name and its value as the second
+     *                parameter.
+     */
+    public void setHttpHeaders(List<Pair<String, String>> headers) {
+        mHttpHeaders = headers;
     }
 
     /**
@@ -95,7 +108,23 @@ public abstract class AsyncRequest<Result> extends AsyncTask<String, RequestProg
      */
     public static AsyncGetJsonArray getJsonArray(String url,
                                                  OnRequestResultsListener<JSONArray> callback) {
+        return getJsonArray(url, callback, null);
+    }
+
+    /**
+     * Performs an asynchronous get request to retrieve an the data from.
+     *
+     * @param url the web address to query.
+     * @param callback the object to invoke to notify about the completion of the operation.
+     * @param httpHeaders the key value pair containing the HTTP header name and its value as
+     *                    the second parameter.
+     * @return a request object to allow for stopping the request.
+     */
+    public static AsyncGetJsonArray getJsonArray(String url,
+                                                 OnRequestResultsListener<JSONArray> callback,
+                                                 List<Pair<String, String>> httpHeaders) {
         AsyncGetJsonArray asyncTask = new AsyncGetJsonArray(callback);
+        asyncTask.setHttpHeaders(httpHeaders);
         asyncTask.execute(url);
         return asyncTask;
     }
@@ -109,7 +138,23 @@ public abstract class AsyncRequest<Result> extends AsyncTask<String, RequestProg
      */
     public static AsyncGetJsonObject getJsonObject(String url,
                                                    OnRequestResultsListener<JSONObject> callback) {
+        return getJsonObject(url, callback, null);
+    }
+
+    /**
+     * Performs an asynchronous get request to retrieve an the data from.
+     *
+     * @param url the web address to query.
+     * @param callback the object to invoke to notify about the completion of the operation.
+     * @param httpHeaders the key value pair containing the HTTP header name and its value as
+     *                    the second parameter.
+     * @return a request object to allow for stopping the request.
+     */
+    public static AsyncGetJsonObject getJsonObject(String url,
+                                                   OnRequestResultsListener<JSONObject> callback,
+                                                   List<Pair<String, String>> httpHeaders) {
         AsyncGetJsonObject asyncTask = new AsyncGetJsonObject(callback);
+        asyncTask.setHttpHeaders(httpHeaders);
         asyncTask.execute(url);
         return asyncTask;
     }
@@ -124,7 +169,24 @@ public abstract class AsyncRequest<Result> extends AsyncTask<String, RequestProg
      */
     public static AsyncPostData postMultipartData(String url, List<AbstractFormItem> postData,
                                               OnRequestResultsListener<StringBuilder> callback) {
+        return postMultipartData(url, postData, callback, null);
+    }
+
+    /**
+     * Performs an asynchronous get request to send HTTP post data. The response is also returned
+     * and interpreted as text.
+     *
+     * @param url the web address to send the data to.
+     * @param callback the object to invoke to notify about the completion of the operation.
+     * @param httpHeaders the key value pair containing the HTTP header name and its value as
+     *                    the second parameter.
+     * @return a request object to allow for stopping the request.
+     */
+    public static AsyncPostData postMultipartData(String url, List<AbstractFormItem> postData,
+                                              OnRequestResultsListener<StringBuilder> callback,
+                                              List<Pair<String, String>> httpHeaders) {
         AsyncPostData asyncTask = new AsyncPostData(postData, callback);
+        asyncTask.setHttpHeaders(httpHeaders);
         asyncTask.execute(url);
         return asyncTask;
     }
@@ -138,7 +200,23 @@ public abstract class AsyncRequest<Result> extends AsyncTask<String, RequestProg
      */
     public static AsyncGetText getText(String url,
                                        OnRequestResultsListener<StringBuilder> callback) {
+        return getText(url, callback, null);
+    }
+
+    /**
+     * Performs an asynchronous get request to retrieve text from the remote host.
+     *
+     * @param url the web address to get the text from.
+     * @param callback the object to invoke to notify about the completion of the operation.
+     * @param httpHeaders the key value pair containing the HTTP header name and its value as
+     *                    the second parameter.
+     * @return a request object to allow for stopping the request.
+     */
+    public static AsyncGetText getText(String url,
+                                       OnRequestResultsListener<StringBuilder> callback,
+                                       List<Pair<String, String>> httpHeaders) {
         AsyncGetText asyncTask = new AsyncGetText(callback);
+        asyncTask.setHttpHeaders(httpHeaders);
         asyncTask.execute(url);
         return asyncTask;
     }

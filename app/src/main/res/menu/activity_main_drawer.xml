@@ -26,13 +26,9 @@
     <item android:title="Communicate">
         <menu>
             <item
-                android:id="@+id/sign_up"
-                android:icon="@drawable/ic_signup_24dp"
-                android:title="Sign Up" />
-            <item
-                android:id="@+id/log_in_out"
+                android:id="@+id/drawable_log_in_out"
                 android:icon="@drawable/ic_login_24dp"
-                android:title="Log In/Out" />
+                android:title="@string/log_in_text" />
         </menu>
     </item>
 

@@ -3,6 +3,7 @@ package com.guide.green.green_guide.Utilities;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -27,9 +28,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.baidu.mapapi.map.Overlay;
 import com.guide.green.green_guide.Dialogs.LoadingDialog;
-import com.guide.green.green_guide.FragmentContainer;
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest.OnRequestResultsListener;
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest.RequestProgress;
+import com.guide.green.green_guide.LogInOutSignUpActivity;
 import com.guide.green.green_guide.R;
 import com.guide.green.green_guide.Utilities.Review.AsyncGetReview;
 import com.guide.green.green_guide.ViewOneReview;
@@ -302,8 +303,12 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
         mBtmSheetManager.reviews.writeReviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                WriteReviewActivity.open(mAct, mSuggestion,
-                        mBtmSheetManager.reviews.body.industry.getText().toString());
+                if (CredentialManager.isLoggedIn()) {
+                    WriteReviewActivity.open(mAct, mSuggestion,
+                            mBtmSheetManager.reviews.body.industry.getText().toString());
+                } else {
+                    LogInOutSignUpActivity.startActivity(mAct);
+                }
             }
         });
     }

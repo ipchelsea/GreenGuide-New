@@ -18,6 +18,9 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.MapView;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
@@ -25,13 +28,15 @@ import com.guide.green.green_guide.Dialogs.CityPickerDialog.OnCitySelectedListen
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
 import com.guide.green.green_guide.Utilities.BaiduSuggestion;
 import com.guide.green.green_guide.Utilities.BottomSheetManager;
+import com.guide.green.green_guide.Utilities.CredentialManager;
 import com.guide.green.green_guide.Utilities.DBReviewSearchManager;
 import com.guide.green.green_guide.Utilities.RomanizedLocation;
 import com.guide.green.green_guide.Utilities.SuggestionSearchManager;
 
 
 public class MainActivity extends AppCompatActivity implements OnCitySelectedListener,
-        NavigationView.OnNavigationItemSelectedListener, SuggestionSearchManager.DrawerController {
+        NavigationView.OnNavigationItemSelectedListener, SuggestionSearchManager.DrawerController,
+        CredentialManager.OnLoginStateChanged {
     // Main managers
     private BaiduMapManager mMapManager;
     private BottomSheetManager mBtmSheetManager;
@@ -47,6 +52,13 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     private DrawerLayout mDrawer;
     private ActionBarDrawerToggle mActionBarToggle;
     private boolean mBackButtonDisplaied = false;
+
+    // Logout & login state handler
+    private MenuItem mLoginOut;
+
+    // Image View
+    private TextView mDrawerUsername;
+    private ImageView mDrawerImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
         initBottomSheet();
         initToolsAndWidgets();
         initLocationTracker();
+        CredentialManager.addLoginStateChangedListener(this);
+        CredentialManager.initialize(this);
 
         mMapManager.setOnLocationClickListener(new BaiduMapManager.OnLocationClickListener() {
             @Override
@@ -160,7 +174,10 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        mLoginOut = navigationView.getMenu().findItem(R.id.drawable_log_in_out);
 
+        mDrawerUsername = navigationView.getHeaderView(0).findViewById(R.id.drawer_user_name);
+        mDrawerImage = navigationView.getHeaderView(0).findViewById(R.id.drawer_user_picture);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -269,9 +286,12 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int itemId = item.getItemId();
-        FragmentContainer.startActivity(this, itemId);
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if (itemId == R.id.drawable_log_in_out) {
+            LogInOutSignUpActivity.startActivity(this);
+        } else {
+            FragmentContainerActivity.startActivity(this, itemId);
+        }
+        mDrawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -325,5 +345,17 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
 
     /* Temporary Method For Testing Things */
     public void doStuff(View view) {
+
+    }
+
+    @Override
+    public void onLoginStateChanged(boolean isLoggedIn) {
+        if (isLoggedIn) {
+            mDrawerUsername.setText(CredentialManager.getUsername());
+            mLoginOut.setTitle(getResources().getString(R.string.log_out_text));
+        } else {
+            mDrawerUsername.setText("");
+            mLoginOut.setTitle(getResources().getString(R.string.log_in_text));
+        }
     }
 }

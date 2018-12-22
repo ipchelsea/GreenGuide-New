@@ -89,7 +89,6 @@ public abstract class AbstractPOSTRequest extends GetText {
         try {
             recvArgs.connection.setRequestMethod("POST");
             setContentType(recvArgs);
-            recvArgs.connection.setRequestProperty("Cookie", "PHPSESSID=svvcj1va143knsd7a63bgj2a65");
             assignHttpHeaders(recvArgs.connection);
             recvArgs.connection.setDoOutput(true);
             recvArgs.connection.setDoInput(true);

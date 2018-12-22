@@ -13,8 +13,8 @@ import java.util.List;
 public abstract class AbstractRequest {
     private final int mBufferSize; // The buffer to temporarily stored the returned data
     private final String mStrUlr; // The URL to send data to
-    protected List<Pair<String, String>> httpHeaders;
-    protected RequestState mRequestState;
+    protected List<Pair<String, String>> mHttpHeaders;
+    protected RequestState mRequestState = RequestState.NOT_STARTED;
     protected volatile boolean mStopRequested = false;
     protected volatile boolean mStopped = false;
     public int id; // Used to uniquely identify the request
@@ -100,18 +100,18 @@ public abstract class AbstractRequest {
      *                parameter.
      */
     public void setHttpHeaders(List<Pair<String, String>> headers) {
-        if (mRequestState != RequestState.PRE_OPEN_CONNECTION) {
+        if (mRequestState != RequestState.NOT_STARTED) {
             throw new IllegalStateException("The Headers Have Already Been Sent.");
         }
-        httpHeaders = headers;
+        mHttpHeaders = headers;
     }
 
     /**
      * @param connection the HTTP headers add to the provided {@code HttpURLConnection}.
      */
     protected void assignHttpHeaders(HttpURLConnection connection) {
-        if (httpHeaders == null) return;
-        for (Pair<String, String> header : httpHeaders) {
+        if (mHttpHeaders == null) return;
+        for (Pair<String, String> header : mHttpHeaders) {
             connection.setRequestProperty(header.first, header.second);
         }
     }

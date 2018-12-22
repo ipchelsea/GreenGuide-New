@@ -190,6 +190,7 @@ public class GetText extends AbstractGETRequest {
                 }
             };
             mRequest = request;
+            request.setHttpHeaders(mHttpHeaders);
             request.send();
             return request.getResult();
         }

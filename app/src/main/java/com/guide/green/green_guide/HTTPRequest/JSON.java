@@ -42,6 +42,7 @@ public class JSON {
                 }
             };
             mRequest = request;
+            request.setHttpHeaders(mHttpHeaders);
             request.send();
             StringBuilder sb = request.getResult();
 
@@ -90,6 +91,7 @@ public class JSON {
                 }
             };
             mRequest = request;
+            request.setHttpHeaders(mHttpHeaders);
             request.send();
             StringBuilder sb = request.getResult();
 
