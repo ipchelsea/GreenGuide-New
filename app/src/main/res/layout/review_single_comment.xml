@@ -25,8 +25,11 @@
 
         <ImageView
             android:id="@+id/ratingImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="192dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="4dp" />
 
         <TextView
             android:layout_width="wrap_content"

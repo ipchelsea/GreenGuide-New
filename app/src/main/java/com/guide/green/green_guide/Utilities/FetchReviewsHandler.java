@@ -257,26 +257,37 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
             backgroundColor = mAct.getResources().getColor(R.color.white);
         }
 
-        // Create the rating stars & add the bitmap to a view
-        int h = mAct.getResources().getDimensionPixelSize(
+        // Create the rating image for preview
+        /*int h = mAct.getResources().getDimensionPixelSize(
                 R.dimen.reviews_bottom_sheet_peek_height_halved);
         int w = mBtmSheetManager.reviews.peekBar.ratingStars.getWidth();
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Drawing.drawStars(0, 0, w, h, histogramX.length, ratio,
-                filledStarsColor, Color.GRAY, new Canvas(bmp));
+                filledStarsColor, Color.GRAY, new Canvas(bmp));*/
         //mBtmSheetManager.reviews.peekBar.ratingStars.setImageBitmap(bmp);
+
+        int rating = Math.abs((int) average);
+        String resourceName = "rate" + (rating < 0 ? "_" : "") + Math.abs(rating);
+        int resoureceId = mAct.getResources().getIdentifier(resourceName, "drawable",
+                mAct.getPackageName());
+        Bitmap ratingBmp = BitmapFactory.decodeResource(mAct.getResources(), resoureceId);
+        ViewGroup.LayoutParams lp = mBtmSheetManager.reviews.peekBar.ratingImage.getLayoutParams();
+        lp.height = mBtmSheetManager.reviews.peekBar.ratingImage.getHeight();
+        lp.width = lp.height * 8;
+        mBtmSheetManager.reviews.peekBar.ratingImage.setLayoutParams(lp);
+        mBtmSheetManager.reviews.peekBar.ratingImage.setImageBitmap(ratingBmp);
 
         // Create a histogram & add the bitmap to a view
         float textSize = Drawing.convertSpToPx(mAct, 13);
-        w = mAct.getResources().getDisplayMetrics().widthPixels - (int) Drawing.convertDpToPx(mAct, 48);
-        bmp = Drawing.createBarGraph(histogramX, histogramY, histLeft, histRight, w, textSize,
+        int w = mAct.getResources().getDisplayMetrics().widthPixels - (int) Drawing.convertDpToPx(mAct, 48);
+        Bitmap bmp = Drawing.createBarGraph(histogramX, histogramY, histLeft, histRight, w, textSize,
                 filledStarsColor, Color.GRAY, backgroundColor, 7, 7, 7);
         mBtmSheetManager.reviews.body.histogram.setImageBitmap(bmp);
 
         String sTemp;
         sTemp = (average > 0 ? "+" : "") + average;
         mBtmSheetManager.reviews.peekBar.ratingValue.setText(sTemp);
-        sTemp = reviews.size() + " Review" + (reviews.size() != 1 ? "s" : "");
+        sTemp = "(" + reviews.size() + ")";
         mBtmSheetManager.reviews.peekBar.ratingCount.setText(sTemp);
 
         mBtmSheetManager.reviews.body.address.setText("Address: " + address);
@@ -292,7 +303,7 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
             visibilityState = View.VISIBLE;
             mBtmSheetManager.reviews.writeReviewButton.setText(R.string.write_review_button_text);
         }
-        mBtmSheetManager.reviews.peekBar.ratingStars.setVisibility(visibilityState);
+        mBtmSheetManager.reviews.peekBar.ratingImage.setVisibility(visibilityState);
         mBtmSheetManager.reviews.peekBar.ratingValue.setVisibility(visibilityState);
         mBtmSheetManager.reviews.peekBar.ratingCount.setVisibility(visibilityState);
         mBtmSheetManager.reviews.body.container.setVisibility(visibilityState);

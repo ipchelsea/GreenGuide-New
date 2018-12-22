@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
 
         reviews.peekBar.companyName = findViewById(R.id.previewCompanyName);
         reviews.peekBar.ratingValue = findViewById(R.id.btmSheetRatingValue);
-        reviews.peekBar.ratingStars = findViewById(R.id.btmSheetRatingStars);
+        reviews.peekBar.ratingImage = findViewById(R.id.btmSheetRatingImage);
         reviews.peekBar.ratingCount = findViewById(R.id.btmSheetRatingsCount);
 
         reviews.body.container = findViewById(R.id.btmSheetReviewBody);

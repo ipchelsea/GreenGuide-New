@@ -49,7 +49,7 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
         public static class PeekBar {
             public TextView companyName;
             public TextView ratingValue;
-            public ImageView ratingStars;
+            public ImageView ratingImage;
             public TextView ratingCount;
         }
 
