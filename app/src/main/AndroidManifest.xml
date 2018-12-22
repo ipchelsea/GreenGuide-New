@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.guide.green.green_guide">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     //获取设备网络状态，禁用后无法获取网络状态
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     //网络权限，当禁用后，无法进行检索等相关业务
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     //读取设备硬件信息，统计数据
@@ -13,13 +12,13 @@
     //读取系统信息，包含系统版本等信息，用作统计
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     //获取设备的网络状态，鉴权所需网络代理
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     //获取统计数据
     <uses-permission android:name="android.permission.GET_TASKS" />
     //鉴权所需该权限获取进程列表
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!--Permission will be requested at runtime-->
+    <!-- Permission will be requested at runtime -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
     <uses-feature android:name="android.hardware.location.network" />
@@ -34,49 +33,61 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"
-            android:configChanges="keyboard|keyboardHidden|orientation">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="open" android:host="greenguide"/>
+
+                <data
+                    android:host="greenguide"
+                    android:scheme="open" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ResultDetail"
             android:label="ResultDetail"
             android:parentActivityName=".MainActivity">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.guide.green.green_guide.MainActivity"/>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.guide.green.green_guide.MainActivity" />
         </activity>
         <activity
             android:name=".FragmentContainer"
             android:label="Green Guide"
             android:parentActivityName=".MainActivity">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.guide.green.green_guide.MainActivity"/>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.guide.green.green_guide.MainActivity" />
         </activity>
         <activity
             android:name=".WriteReviewActivity"
-            android:parentActivityName=".MainActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation"
             android:label="Write a Review"
-            android:screenOrientation="portrait"
-            android:configChanges="keyboard|keyboardHidden|orientation">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.guide.green.green_guide.MainActivity"/>
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.guide.green.green_guide.MainActivity" />
         </activity>
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="q2vm31m0SXgdtXvsyFoNfvesPf3R4KjN" />
+            android:value="vyQ8H9HuUFD5kZiG9sjfpzGd6YDnojRV" />
+
+        <activity
+            android:name=".ViewOneReview"
+            android:label="@string/title_activity_view_one_review"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

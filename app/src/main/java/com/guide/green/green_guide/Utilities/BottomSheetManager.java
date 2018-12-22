@@ -96,11 +96,11 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
     public void onStateChanged(@NonNull View bottomSheet, int newState) {
         if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
             reviews.peekBar.companyName.setSingleLine(true);
-            reviews.peekBar.companyName.setPadding(0, 0, 0, 0);
+            //reviews.peekBar.companyName.setPadding(0, 0, 0, 0);
         } else {
             int px = (int) Drawing.convertDpToPx(mAct, 10);
             reviews.peekBar.companyName.setSingleLine(false);
-            reviews.peekBar.companyName.setPadding(0, px,0, px);
+            //reviews.peekBar.companyName.setPadding(0, px,0, px);
             if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 setMarkerVisibility(false);
             }

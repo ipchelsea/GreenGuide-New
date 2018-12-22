@@ -6,26 +6,29 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/bottom_sheet_blue">
+        android:background="@color/white">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:minHeight="@dimen/reviews_bottom_sheet_peek_height"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:layout_marginBottom="12dp">
 
             <TextView
                 android:id="@+id/previewCompanyName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:minHeight="@dimen/reviews_bottom_sheet_peek_height_halved"
                 android:overScrollMode="ifContentScrolls"
                 android:singleLine="true"
                 android:textColor="#000000"
-                android:textSize="15sp"
+                android:textSize="18sp"
                 android:text="@string/btmsheet_company_name_default"
-                android:textIsSelectable="true" />
+                android:textIsSelectable="true"
+                android:layout_marginBottom="12dp"/>
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -43,7 +46,7 @@
                     android:textSize="14sp"
                     android:gravity="center"
                     android:text="@string/btmsheet_rating_value_default"
-                    android:textIsSelectable="true" />
+                    android:textIsSelectable="true"/>
 
                 <ImageView
                     android:id="@+id/btmSheetRatingStars"
@@ -52,7 +55,8 @@
                     app:layout_constraintStart_toStartOf="@id/btmSheetRatingValue"
                     app:layout_constraintEnd_toEndOf="@id/btmSheetRatingsCount"
                     android:contentDescription="@string/Rating_Stars_Description"
-                    android:scaleType="center"/>
+                    android:scaleType="center"
+                    android:visibility="invisible"/>
 
                 <TextView
                     android:id="@+id/btmSheetRatingsCount"
@@ -65,73 +69,159 @@
                     android:gravity="center"
                     android:text="@string/btmsheet_ratings_count_default"
                     android:textIsSelectable="true" />
+
             </android.support.constraint.ConstraintLayout>
+
         </LinearLayout>
+
+        <View style="@style/line_divider" />
+
+        <Button
+            android:id="@+id/btmSheetWriteReview"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:background="@color/white"
+            android:drawableTop="@drawable/ic_write_review"
+            android:drawableTint="#101010"
+            android:fontFamily="sans-serif"
+            android:gravity="bottom|center_horizontal"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            android:text="@string/write_first_review_button_text"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:typeface="normal" />
+
+        <View style="@style/line_divider" />
 
         <LinearLayout
             android:id="@+id/btmSheetReviewBody"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
+
             <TextView
                 android:id="@+id/btmSheetAddress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:textColor="@color/bottom_sheet_text"
-                android:textIsSelectable="true" />
+                android:textIsSelectable="true"
+                android:paddingBottom="16dp"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp" />
+
+            <View style="@style/line_divider" />
 
             <TextView
                 android:id="@+id/btmSheetCityName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/bottom_sheet_text"
-                android:textIsSelectable="true" />
+                android:textIsSelectable="true"
+                android:paddingBottom="16dp"
+                android:paddingTop="16dp"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp"/>
+
+            <View style="@style/line_divider" />
 
             <TextView
                 android:id="@+id/btmSheetIndustry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/bottom_sheet_text"
-                android:textIsSelectable="true" />
+                android:textIsSelectable="true"
+                android:paddingBottom="16dp"
+                android:paddingTop="16dp"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp" />
+
+            <View style="@style/line_divider" />
 
             <TextView
                 android:id="@+id/btmSheetProduct"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:textColor="@color/bottom_sheet_text"
-                android:textIsSelectable="true" />
+                android:textIsSelectable="true"
+                android:paddingBottom="16dp"
+                android:paddingTop="16dp"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp" />
 
-            <ImageView
-                android:id="@+id/btmSheetHistogram"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/histogram_description"
-                android:scaleType="center" />
+            <View style="@style/line_divider" />
 
             <LinearLayout
-                android:id="@+id/userReviewList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="vertical" />
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:id="@+id/btmSheetHistogram"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/histogram_description"
+                    android:layout_weight="3"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/ratingHistogram"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="2"
+                        android:textColor="@color/bottom_sheet_text" />
+
+                    <ImageView
+                        android:id="@+id/ratingImageHistogram"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:textColor="@color/bottom_sheet_text" />
+
+                    <TextView
+                        android:id="@+id/numReviewsHistogram"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:textColor="@color/bottom_sheet_text" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btmSheetWriteReview"
-            style="@style/Widget.AppCompat.Button"
-            android:layout_width="wrap_content"
+        <View style="@style/line_divider" />
+
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:drawableTop="@drawable/ic_write_review"
-            android:drawableTint="#101010"
-            android:fontFamily="sans-serif"
-            android:gravity="bottom|center_horizontal"
-            android:text="@string/write_first_review_button_text"
-            android:textAllCaps="false"
-            android:textColor="@android:color/black"
-            android:theme="?android:attr/buttonBarButtonStyle"
-            android:typeface="normal" />
+            android:textColor="@color/grey"
+            android:textAlignment="center"
+            android:text="Reviews"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp" />
+
+        <LinearLayout
+            android:id="@+id/userReviewList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
     </LinearLayout>
+
 </merge>

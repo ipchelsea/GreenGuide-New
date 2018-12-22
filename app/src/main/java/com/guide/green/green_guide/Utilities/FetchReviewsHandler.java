@@ -1,5 +1,8 @@
 package com.guide.green.green_guide.Utilities;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -7,6 +10,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -22,10 +27,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.baidu.mapapi.map.Overlay;
 import com.guide.green.green_guide.Dialogs.LoadingDialog;
+import com.guide.green.green_guide.FragmentContainer;
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest.OnRequestResultsListener;
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest.RequestProgress;
 import com.guide.green.green_guide.R;
 import com.guide.green.green_guide.Utilities.Review.AsyncGetReview;
+import com.guide.green.green_guide.ViewOneReview;
+import com.guide.green.green_guide.ViewOneReviewFragment;
 import com.guide.green.green_guide.WriteReviewActivity;
 
 import java.util.ArrayList;
@@ -153,10 +161,30 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
         LayoutInflater lf = LayoutInflater.from(mAct);
         ViewGroup child = (ViewGroup) lf.inflate(R.layout.review_single_comment,
                 mBtmSheetManager.reviews.body.reviews, false);
+
+        FrameLayout ratingLayout = child.findViewById(R.id.ratingLayout);
         TextView ratingValue = child.findViewById(R.id.ratingValue);
         ImageView ratingImage = child.findViewById(R.id.ratingImage);
         TextView reviewText = child.findViewById(R.id.reviewText);
         TextView reviewTime = child.findViewById(R.id.reviewTime);
+
+        ratingLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(mAct, "Clicked!", Toast.LENGTH_SHORT).show();
+                ViewOneReviewFragment frag = ViewOneReviewFragment.newInstance(review);
+                //FragmentContainer.startActivity(R.id.fragment_container, frag.getId());
+
+                /*FragmentTransaction transaction = mAct.getSupportFragmentManager().beginTransaction();
+                transaction.add(R.id.btmSheetReviewsContainer, frag);
+                transaction.commit();*/
+
+                //FragmentContainer.startReviewActivity(mAct, R.id.view_one_review, review);
+
+                Intent intent = new Intent(mAct, ViewOneReview.class);
+                mAct.startActivity(intent);
+            }
+        });
 
         ratingValue.setText(String.format("Rating: %s%d", rating > 0 ? "+" : "", rating));
 
@@ -222,10 +250,10 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
         int filledStarsColor, backgroundColor;
         if (Build.VERSION.SDK_INT >= 23) {
             filledStarsColor = mAct.getResources().getColor(R.color.bottom_sheet_gold, null);
-            backgroundColor = mAct.getResources().getColor(R.color.bottom_sheet_blue, null);
+            backgroundColor = mAct.getResources().getColor(R.color.white, null);
         } else {
             filledStarsColor = mAct.getResources().getColor(R.color.bottom_sheet_gold);
-            backgroundColor = mAct.getResources().getColor(R.color.bottom_sheet_blue);
+            backgroundColor = mAct.getResources().getColor(R.color.white);
         }
 
         // Create the rating stars & add the bitmap to a view
@@ -235,13 +263,13 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Drawing.drawStars(0, 0, w, h, histogramX.length, ratio,
                 filledStarsColor, Color.GRAY, new Canvas(bmp));
-        mBtmSheetManager.reviews.peekBar.ratingStars.setImageBitmap(bmp);
+        //mBtmSheetManager.reviews.peekBar.ratingStars.setImageBitmap(bmp);
 
         // Create a histogram & add the bitmap to a view
         float textSize = Drawing.convertSpToPx(mAct, 13);
-        w = mAct.getResources().getDisplayMetrics().widthPixels;
+        w = mAct.getResources().getDisplayMetrics().widthPixels - (int) Drawing.convertDpToPx(mAct, 48);
         bmp = Drawing.createBarGraph(histogramX, histogramY, histLeft, histRight, w, textSize,
-                filledStarsColor, Color.WHITE, backgroundColor, 7, 7, 7);
+                filledStarsColor, Color.GRAY, backgroundColor, 7, 7, 7);
         mBtmSheetManager.reviews.body.histogram.setImageBitmap(bmp);
 
         String sTemp;

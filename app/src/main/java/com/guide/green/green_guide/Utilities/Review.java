@@ -519,6 +519,7 @@ public class Review {
                         JSONObject subJObj = jObj.getJSONObject("review");
                         review.id = subJObj.getString("id");
                     }
+
                     getJsonValuesForObject(jObj, "review", review.location);
                     getJsonValuesForObject(jObj, "water", review.waterIssue);
                     getJsonValuesForObject(jObj, "solid", review.solidWaste);

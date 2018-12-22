@@ -9,6 +9,6 @@
     <color name="grey">#9e9e9e</color>
     <color name="bottom_sheet_blue">#4285f4</color>
     <color name="bottom_sheet_gold">#ffa500</color>
-    <color name="bottom_sheet_text">@color/white</color>
+    <color name="bottom_sheet_text">@color/black</color>
     <color name="bottom_buttons">@color/colorPrimary</color>
 </resources>

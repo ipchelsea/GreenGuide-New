@@ -12,6 +12,7 @@ import com.guide.green.green_guide.Fragments.LogInOutFragment;
 import com.guide.green.green_guide.Fragments.MyReviewsFragment;
 import com.guide.green.green_guide.Fragments.SignUpFragment;
 import com.guide.green.green_guide.Fragments.UserGuideFragment;
+import com.guide.green.green_guide.Utilities.Review;
 
 public class FragmentContainer extends AppCompatActivity {
     @Override
@@ -40,6 +41,7 @@ public class FragmentContainer extends AppCompatActivity {
             case R.id.user_guide: return new UserGuideFragment();
             case R.id.sign_up: return new SignUpFragment();
             case R.id.log_in_out: return new LogInOutFragment();
+            case R.id.view_one_review: return new ViewOneReviewFragment();
         }
         return null;
     }
@@ -56,6 +58,12 @@ public class FragmentContainer extends AppCompatActivity {
     }
 
     public static void startActivity(Activity act, int layoutId) {
+        Intent intent = new Intent(act, FragmentContainer.class);
+        intent.putExtra("itemId", layoutId);
+        act.startActivity(intent);
+    }
+
+    public static void startReviewActivity(Activity act, int layoutId, Review review) {
         Intent intent = new Intent(act, FragmentContainer.class);
         intent.putExtra("itemId", layoutId);
         act.startActivity(intent);

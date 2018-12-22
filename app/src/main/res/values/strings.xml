@@ -31,4 +31,8 @@
     <string name="btmsheet_ratings_count_default">(134)</string>
     <string name="poi_results_retry">Retry</string>
     <string name="list_item_other">Other</string>
+    <string name="title_activity_view_one_review">ViewOneReview</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

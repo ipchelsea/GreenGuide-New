@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ratingLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:paddingTop="32dp"
-    android:paddingBottom="32dp">
+    android:clickable="true">
+
+    <View style="@style/line_divider" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/review_comment_layout_background">
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp">
 
         <TextView
             android:id="@+id/ratingValue"
@@ -77,6 +82,7 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 android:visibility="gone"/>
+
         </android.support.constraint.ConstraintLayout>
 
         <Button
@@ -85,7 +91,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:text="View Raw Data"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="invisible"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -110,6 +117,9 @@
                 android:textStyle="italic"
                 android:textSize="13sp"
                 android:minHeight="0dp"/>
+
         </LinearLayout>
+
     </LinearLayout>
+
 </FrameLayout>
