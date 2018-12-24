@@ -6,6 +6,7 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,10 +20,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.model.LatLng;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog.OnCitySelectedListener;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
@@ -56,6 +61,9 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     // Logout & login state handler
     private MenuItem mLoginOut;
 
+    // Container for fragments
+    private LinearLayout previewFragmentContainer;
+
     // Image View
     private TextView mDrawerUsername;
     private ImageView mDrawerImage;
@@ -80,10 +88,28 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
         CredentialManager.addLoginStateChangedListener(this);
         CredentialManager.initialize(this);
 
+        previewFragmentContainer = findViewById(R.id.preview_fragment_container);
+
         mMapManager.setOnLocationClickListener(new BaiduMapManager.OnLocationClickListener() {
             @Override
             public void onLocationClick(BaiduSuggestion.Location location) {
                 mBtmSheetManager.getReviewFor(location);
+                previewFragmentContainer.insert
+
+            }
+        });
+
+        // This will cause the bottom sheet to dissapear when the user clicks on the map
+        mMapManager.baiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+
+            @Override
+            public boolean onMapPoiClick(MapPoi mapPoi) {
+                mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+                return false;
             }
         });
 
