@@ -29,4 +29,13 @@
         <item name="android:background">?android:attr/listDivider</item>
     </style>
 
+    <style name="GeneralLabelText" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/generalLabel</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="GeneralContentText" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
 </resources>

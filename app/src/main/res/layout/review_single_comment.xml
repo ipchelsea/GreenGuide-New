@@ -6,8 +6,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:clickable="true">
 
-    <View style="@style/line_divider" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,33 +16,45 @@
         android:paddingRight="24dp">
 
         <TextView
+            android:id="@+id/reviewPendingTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/offBlack"
+            android:textSize="16sp"
+            android:paddingBottom="8dp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/ratingDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/offBlack"
+            android:textSize="16sp"
+            android:paddingBottom="8dp"/>
+
+        <TextView
             android:id="@+id/ratingValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"/>
+            android:paddingBottom="8dp"/>
 
         <ImageView
             android:id="@+id/ratingImage"
             android:layout_width="192dp"
             android:layout_height="24dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginLeft="4dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Review: "/>
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/reviewText"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"/>
 
         <TextView
             android:id="@+id/reviewTime"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/reviewImages_root"
@@ -88,15 +98,6 @@
 
         </android.support.constraint.ConstraintLayout>
 
-        <Button
-            android:id="@+id/rawDataBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:text="View Raw Data"
-            android:textStyle="bold"
-            android:visibility="invisible"/>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,21 +109,33 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="Thumb Up"
                 android:src="@drawable/ic_thumb_up"
-                android:background="@android:color/transparent"
-                android:padding="8dp"/>
+                android:background="@android:color/transparent"/>
 
             <Button
-                android:id="@+id/inappropriateBtn"
-                style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+                android:id="@+id/edit_review_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Inappropriate"
-                android:textStyle="italic"
-                android:textSize="13sp"
-                android:minHeight="0dp"/>
+                android:text="Edit Text"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/edit_image_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit Images"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/delete_review_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete Review"
+                android:visibility="gone"/>
 
         </LinearLayout>
 
     </LinearLayout>
+
+    <View style="@style/line_divider" />
 
 </FrameLayout>

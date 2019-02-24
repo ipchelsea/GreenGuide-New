@@ -1,7 +1,11 @@
 package com.guide.green.green_guide;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.NestedScrollView;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
@@ -19,6 +23,7 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,18 +35,25 @@ import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.model.LatLng;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog;
 import com.guide.green.green_guide.Dialogs.CityPickerDialog.OnCitySelectedListener;
+import com.guide.green.green_guide.Dialogs.LoadingDialog;
 import com.guide.green.green_guide.Utilities.BaiduMapManager;
 import com.guide.green.green_guide.Utilities.BaiduSuggestion;
 import com.guide.green.green_guide.Utilities.BottomSheetManager;
 import com.guide.green.green_guide.Utilities.CredentialManager;
 import com.guide.green.green_guide.Utilities.DBReviewSearchManager;
+import com.guide.green.green_guide.Utilities.FetchReviews;
+import com.guide.green.green_guide.Utilities.Review;
 import com.guide.green.green_guide.Utilities.RomanizedLocation;
 import com.guide.green.green_guide.Utilities.SuggestionSearchManager;
+
+import java.util.ArrayList;
+
+import static com.guide.green.green_guide.HTTPRequest.AsyncRequest.getReviewsForPlace;
 
 
 public class MainActivity extends AppCompatActivity implements OnCitySelectedListener,
         NavigationView.OnNavigationItemSelectedListener, SuggestionSearchManager.DrawerController,
-        CredentialManager.OnLoginStateChanged {
+        CredentialManager.OnLoginStateChanged, LocationPreview.onLocationPreviewListener {
     // Main managers
     private BaiduMapManager mMapManager;
     private BottomSheetManager mBtmSheetManager;
@@ -62,11 +74,14 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     private MenuItem mLoginOut;
 
     // Container for fragments
-    private LinearLayout previewFragmentContainer;
+    private FrameLayout previewFragmentContainer;
+    private ArrayList<Review> currentReviews;
 
     // Image View
     private TextView mDrawerUsername;
     private ImageView mDrawerImage;
+
+    private BaiduSuggestion.Location currentLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,27 +103,62 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
         CredentialManager.addLoginStateChangedListener(this);
         CredentialManager.initialize(this);
 
+
+
+        final AppCompatActivity mAct = this;
+
         previewFragmentContainer = findViewById(R.id.preview_fragment_container);
+
+        // Start the process of showing our location preview
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+        LocationPreview newPreviewFragment = LocationPreview.newInstance();
+
+        // Replace the contents of the container with the new LocationPreview
+        ft.replace(R.id.preview_fragment_container, newPreviewFragment);
+
+        ft.commit();
+
+        FrameLayout fragContainer = findViewById(R.id.preview_fragment_container);
+
+        fragContainer.setVisibility(View.INVISIBLE);
 
         mMapManager.setOnLocationClickListener(new BaiduMapManager.OnLocationClickListener() {
             @Override
             public void onLocationClick(BaiduSuggestion.Location location) {
-                mBtmSheetManager.getReviewFor(location);
-                previewFragmentContainer.insert
+                currentLocation = location;
+                mMapManager.moveTo(location.point);
+                //mBtmSheetManager.getReviewFor(location);
+
+                FetchReviews fetchReviews = new FetchReviews(mAct, location);
+
+                /*fetchReviews.
+
+                // Start the process of showing our location preview
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+                LocationPreview newPreviewFragment = LocationPreview.newInstance();
+
+                // Replace the contents of the container with the new LocationPreview
+                ft.replace(R.id.preview_fragment_container, newPreviewFragment);
+
+                ft.commit();*/
 
             }
         });
 
-        // This will cause the bottom sheet to dissapear when the user clicks on the map
+        // This will cause the bottom sheet to disappear when the user clicks on the map
         mMapManager.baiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
                 mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+                hidePreview();
             }
 
             @Override
             public boolean onMapPoiClick(MapPoi mapPoi) {
                 mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+                hidePreview();
                 return false;
             }
         });
@@ -176,9 +226,17 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
 
         // Initialize Bottom Sheet Manager
         NestedScrollView btmSheet = findViewById(R.id.btmSheet);
+
         mBtmSheetManager = new BottomSheetManager(this, btmSheet, reviews, dbSearchMgr,
                 mMapManager);
         mBtmSheetManager.setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+
+        CoordinatorLayout btmSheetContainer = findViewById(R.id.bottom_sheet_container);
+
+        CoordinatorLayout.LayoutParams btmSheetLP = (CoordinatorLayout.LayoutParams) btmSheetContainer.getLayoutParams();
+        //btmSheetLP.height = findViewById(R.id.drawer_layout).getHeight() * 2 / 3;
+        btmSheetLP.topMargin = 100;
+        btmSheetContainer.setLayoutParams(btmSheetLP);
     }
 
     /**
@@ -187,6 +245,12 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
     private void initToolsAndWidgets() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        /*CoordinatorLayout bottomSheetContainer = findViewById(R.id.bottom_sheet_container);
+        int toolbarHeight = toolbar.getLayoutParams().height;
+        CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) bottomSheetContainer.getLayoutParams();
+        layoutParams.topMargin = toolbarHeight;
+        bottomSheetContainer.setLayoutParams(layoutParams);*/
 
         normalMapView = findViewById(R.id.normalfab);
         satelliteMapView = findViewById(R.id.satellitefab);
@@ -383,5 +447,61 @@ public class MainActivity extends AppCompatActivity implements OnCitySelectedLis
             mDrawerUsername.setText("");
             mLoginOut.setTitle(getResources().getString(R.string.log_in_text));
         }
+    }
+
+    public void setCurrentReviews() {
+
+    }
+
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        if (fragment instanceof LocationPreview) {
+            LocationPreview lp = (LocationPreview) fragment;
+            lp.setOnLocationPreviewListener(this);
+        }
+    }
+
+    public void onPreviewFragmentClicked() {
+        Log.d("MAIN", "Clicked");
+        Intent intent = new Intent(this, LocationInfoActivity.class);
+        intent.putExtra("location", currentLocation.name);
+        intent.putExtra("longitude", currentLocation.point.longitude);
+        intent.putExtra("latitude", currentLocation.point.latitude);
+        startActivity(intent);
+    }
+
+    public void onPreviewFragmentCreated() {
+
+        final AppCompatActivity mAct = this;
+
+        LinearLayout fragContainer = findViewById(R.id.FragmentLayout);
+
+        fragContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(mAct, LocationInfoActivity.class);
+                intent.putExtra("location", currentLocation.name);
+                intent.putExtra("longitude", currentLocation.point.longitude);
+                intent.putExtra("latitude", currentLocation.point.latitude);
+                mAct.startActivity(intent);
+            }
+        });
+    }
+
+    public void showPreviewFragmentForLocation(BaiduSuggestion.Location location) {
+        currentLocation = location;
+        mMapManager.moveTo(location.point);
+
+        FetchReviews fetchReviews = new FetchReviews(this, location);
+
+    }
+
+    public void setCurrentLocation(BaiduSuggestion.Location currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+    public void hidePreview() {
+        findViewById(R.id.preview_fragment_container).setVisibility(View.GONE);
+        currentLocation = null;
     }
 }

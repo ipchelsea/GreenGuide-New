@@ -32,7 +32,7 @@ import com.guide.green.green_guide.HTTPRequest.AbstractRequest.OnRequestResultsL
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest.RequestProgress;
 import com.guide.green.green_guide.LogInOutSignUpActivity;
 import com.guide.green.green_guide.R;
-import com.guide.green.green_guide.Utilities.Review.AsyncGetReview;
+import com.guide.green.green_guide.Utilities.AsyncGetReview;
 import com.guide.green.green_guide.ViewOneReview;
 import com.guide.green.green_guide.ViewOneReviewFragment;
 import com.guide.green.green_guide.WriteReviewActivity;
@@ -280,9 +280,9 @@ public class FetchReviewsHandler extends OnRequestResultsListener<ArrayList<Revi
         // Create a histogram & add the bitmap to a view
         float textSize = Drawing.convertSpToPx(mAct, 13);
         int w = mAct.getResources().getDisplayMetrics().widthPixels - (int) Drawing.convertDpToPx(mAct, 48);
-        Bitmap bmp = Drawing.createBarGraph(histogramX, histogramY, histLeft, histRight, w, textSize,
-                filledStarsColor, Color.GRAY, backgroundColor, 7, 7, 7);
-        mBtmSheetManager.reviews.body.histogram.setImageBitmap(bmp);
+        /*Bitmap bmp = Drawing.createBarGraph(histogramX, histogramY, histLeft, histRight, w, textSize,
+                filledStarsColor, Color.GRAY, backgroundColor, 7, 7, 7);*/
+        //mBtmSheetManager.reviews.body.histogram.setImageBitmap(bmp);
 
         String sTemp;
         sTemp = (average > 0 ? "+" : "") + average;

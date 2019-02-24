@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+import com.guide.green.green_guide.MainActivity;
 import com.guide.green.green_guide.R;
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public class SuggestionSearchManager extends AutoComplete implements View.OnKeyL
     private BottomSheetManager mBtmSheetManager;
     private BaiduMapManager mMapManager;
     private TextView mCitySelector;
-    private AppCompatActivity mAct;
+    private MainActivity mAct;
     private ViewGroup mDropDownContainer;
     private ViewGroup mMapViewContainer;
     private EditText mTextInput;
@@ -38,7 +39,7 @@ public class SuggestionSearchManager extends AutoComplete implements View.OnKeyL
         void showBackButton(boolean enabled);
     }
 
-    public SuggestionSearchManager(@NonNull AppCompatActivity act, @NonNull EditText textInput,
+    public SuggestionSearchManager(@NonNull MainActivity act, @NonNull EditText textInput,
                                    @NonNull RecyclerView dropdown, @NonNull TextView cityView,
                                    @NonNull BaiduMapManager mapManager,
                                    @NonNull BottomSheetManager btmSheetManager,
@@ -114,6 +115,7 @@ public class SuggestionSearchManager extends AutoComplete implements View.OnKeyL
     }
 
     private void onSuggestionClick() {
+        mAct.hidePreview();
         if (mBtmSheetManager.getBottomSheetState() != BottomSheetBehavior.STATE_HIDDEN) {
             mBtmSheetManager.saveAndHide();
             mWasShowingBottomSheet = true;

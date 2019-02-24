@@ -1,14 +1,25 @@
 package com.guide.green.green_guide;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
+import com.guide.green.green_guide.Utilities.Review;
+
+import java.util.ArrayList;
 
 public class LocationPreview extends Fragment {
+
+    private onLocationPreviewListener mCallback;
+
+    private ArrayList<Review> reviews;
 
     public LocationPreview() {
         // Required empty public constructor
@@ -36,16 +47,27 @@ public class LocationPreview extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_location_preview, container, false);
+        Log.d("Check", "Created");
+        View view = inflater.inflate(R.layout.fragment_location_preview, container, false);
+
+        LinearLayout lp = view.findViewById(R.id.FragmentLayout);
+
+        lp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mCallback.onPreviewFragmentClicked();
+            }
+        });
+
+        return view;
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public void setOnLocationPreviewListener(Activity activity) {
+        mCallback = (onLocationPreviewListener) activity;
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
+    public interface onLocationPreviewListener {
+        public void onPreviewFragmentClicked();
+        public void onPreviewFragmentCreated();
     }
 }

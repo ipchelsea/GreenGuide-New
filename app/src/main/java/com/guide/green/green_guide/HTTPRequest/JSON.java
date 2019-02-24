@@ -5,12 +5,14 @@ import com.guide.green.green_guide.HTTPRequest.AbstractRequest.OnRequestResultsL
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 
-public class JSON {
+
+public class JSON implements Serializable {
     /**
      * Asynchronously runs a POST request and calls the appropriate callbacks to return the result.
      */
-    public static class AsyncGetJsonArray extends AsyncRequest<JSONArray> {
+    public static class AsyncGetJsonArray extends AsyncRequest<JSONArray> implements Serializable {
         /**
          * Constructor which sets all of the member variables.
          *
@@ -59,7 +61,7 @@ public class JSON {
     /**
      * Asynchronously runs a POST request and calls the appropriate callbacks to return the result.
      */
-    public static class AsyncGetJsonObject extends AsyncRequest<JSONObject> {
+    public static class AsyncGetJsonObject extends AsyncRequest<JSONObject> implements Serializable {
         /**
          * Constructor which sets all of the member variables.
          *

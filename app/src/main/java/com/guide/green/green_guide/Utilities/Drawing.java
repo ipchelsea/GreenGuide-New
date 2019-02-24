@@ -3,9 +3,11 @@ package com.guide.green.green_guide.Utilities;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -151,26 +153,22 @@ public class Drawing {
      *
      * @param dataX a 1D list of x values. Should be the same length as {@code dataY}
      * @param dataY a 1D list of y values. Should be the same length as {@code dataX}
-     * @param dataStartIndex lowest index with a non-zero value in {@code dataY}
-     * @param dataLastIndex highest index with a non-zero value in {@code dataY}
-     * @param minWidth the desired width, in px, of the returned bitmap. (Might be larger)
      * @param textSizePx the size of the {@code dataX} text
      * @param barColor the background color of the returned bitmap
      * @param textColor the color of the text
      * @param backColor background color of the returned bmp
      * @param afterTextMargin The space, in px, between the {@code dataX} text & bar in the graph
-     * @param minBarHeight the desired height of the bars in px. (Might be larger)
      * @param barMargin the distance, in px, between the bars.
      * @return a bitmap with the bar graph drawn on it
      */
     public static Bitmap createBarGraph(@NonNull String[] dataX, @NonNull int[] dataY,
-                                        int dataStartIndex, int dataLastIndex, float minWidth,
+                                        float width,
                                         float textSizePx, @ColorInt int barColor,
                                         @ColorInt int textColor, @ColorInt int backColor,
-                                        int afterTextMargin, int minBarHeight, int barMargin)
-    {
+                                        @ColorInt int greyBarColor,
+                                        int afterTextMargin, int barMargin) {
         Paint paint = new Paint();
-        paint.setAntiAlias(false);
+        paint.setAntiAlias(true);
         paint.setColor(barColor);
         paint.setStyle(Paint.Style.FILL);
 
@@ -183,27 +181,34 @@ public class Drawing {
         float maxTextWidth = 0;
         int maxBarData = 0;
 
-        for (int i = dataStartIndex; i <= dataLastIndex; i++) {
-            if (dataY[i] > maxBarData) { maxBarData = dataY[i]; }
+        for (int i = 0; i < 7; i++) {
+            if (dataY[i] > maxBarData) {
+                maxBarData = dataY[i];
+            }
+
             float w = tp.measureText(dataX[i]);
-            if (w > maxTextWidth) { maxTextWidth = w; }
+
+            if (w > maxTextWidth) {
+                maxTextWidth = w;
+            }
         }
 
-        float barLeftMost = maxTextWidth + afterTextMargin;
-        float width = Math.max(minWidth, barLeftMost);
-        float barHeight = Math.max(textHeight, minBarHeight);
-        float maxBarWidth = width - barLeftMost;
-        float height = (barHeight + barMargin) * (dataLastIndex - dataStartIndex + 1) - barMargin;
+        float barStartPosition = maxTextWidth + afterTextMargin;
+        float barHeight = textHeight / 2;
+        float maxBarWidth = width - barStartPosition;
+        float height = (textHeight + barMargin) * (7) - barMargin;
 
         Bitmap bmp = Bitmap.createBitmap((int) width, (int) height, Bitmap.Config.ARGB_8888);
         Canvas cv = new Canvas(bmp);
         cv.drawColor(backColor);
 
-        float textOffsetTop = (barHeight - textHeight) / 2;
-        for (int i = dataStartIndex; i <= dataLastIndex; i++) {
+        for (int i = 0; i < 7; i++) {
             cv.save();
-            cv.translate(0, textOffsetTop + (i - dataStartIndex) * (barHeight + barMargin));
+            float textOffset = maxTextWidth - tp.measureText(dataX[i]);
+            cv.translate(textOffset, (i) * (textHeight + barMargin));
+
             StaticLayout sLayout;
+
             if (Build.VERSION.SDK_INT >= 28) {
                 sLayout = StaticLayout.Builder
                             .obtain(dataX[i], 0, dataX[i].length(), tp, (int) maxTextWidth).build();
@@ -211,13 +216,23 @@ public class Drawing {
                 sLayout = new StaticLayout(dataX[i], tp, (int) maxTextWidth,
                     StaticLayout.Alignment.ALIGN_NORMAL, 0, 0, false);
             }
+
             sLayout.draw(cv);
+
             cv.restore();
-            float bX = barLeftMost;
-            float bY = (i - dataStartIndex) * (barHeight + barMargin);
-            float bW = Math.max((maxBarWidth * dataY[i]) / maxBarData, 1);
+
+            float bX = barStartPosition;
+            float bY = (i) * (textHeight + barMargin) + (float) (textHeight * .275);
+            float bW = Math.max((maxBarWidth * dataY[i]) / maxBarData, 0);
             float bH = barHeight;
-            cv.drawRect(bX, bY, bX + bW, bY + bH, paint);
+
+            paint.setColor(greyBarColor);
+
+            cv.drawRoundRect(new RectF(bX, bY, bX + maxBarWidth, bY + bH), 8, 8, paint);
+
+            paint.setColor(barColor);
+
+            cv.drawRoundRect(new RectF(bX, bY, bX + bW, bY + bH), 8, 8, paint);
         }
 
         return bmp;

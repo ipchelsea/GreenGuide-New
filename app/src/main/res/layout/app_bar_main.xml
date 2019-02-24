@@ -101,5 +101,6 @@
             android:layout_height="match_parent"
             android:theme="@style/Autocomplete"
             android:visibility="gone"/>
+
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

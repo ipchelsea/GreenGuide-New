@@ -34,7 +34,6 @@
 
     <string name="title_activity_view_one_review">ViewOneReview</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="log_in_text">Log In</string>
@@ -43,5 +42,39 @@
     <string name="preference_file_credentials">preference_file_user_credentials</string>
     <string name="preference_credentials_token">token</string>
     <string name="preference_credentials_user_name">username</string>
+
+    <string name="general_info_address_label">Address:</string>
+    <string name="general_info_city_label">City:</string>
+    <string name="general_info_industry_label">Industry:</string>
+    <string name="general_info_product_label">Product:</string>
+
+    <string name="general_review_name_label">Name:</string>
+    <string name="general_review_rating_label">Rating:</string>
+    <string name="general_review_address_label">Address:</string>
+    <string name="general_review_city_label">City:</string>
+    <string name="general_review_industry_label">Industry:</string>
+    <string name="general_review_product_label">Product:</string>
+    <string name="general_review_date_label">Date:</string>
+    <string name="general_review_time_label">Time:</string>
+    <string name="general_review_weather_label">Weather:</string>
+
+    <string name="water_review_body_label">Body Type:</string>
+    <string name="water_review_color_label">Color:</string>
+    <string name="water_review_turbidity_label">Turbidity:</string>
+    <string name="water_review_odor_label">Odor:</string>
+    <string name="water_review_float_label">Float:</string>
+    <string name="water_review_ph_label">PH:</string>
+
+    <string name="air_review_visibility_label">Visibility:</string>
+    <string name="air_review_odor_label">Odor:</string>
+    <string name="air_review_smoke_label">Smoke:</string>
+    <string name="air_review_discomfort_label">Physical Discomfort:</string>
+    <string name="air_review_pm2_5_label">PM 2.5 (ug/m3):</string>
+    <string name="air_review_pm10_label">PM 10 (ug/m3):</string>
+
+    <string name="waste_review_type_label">Waste Type:</string>
+    <string name="waste_review_amount_label">Waste Amount:</string>
+    <string name="waste_review_odor_label">Odor:</string>
+    <string name="waste_review_info_label">More Info:</string>
 
 </resources>

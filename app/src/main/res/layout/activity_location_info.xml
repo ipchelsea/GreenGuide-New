@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ViewOneReview"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".LocationInfoActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -13,7 +13,7 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/location_info_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
@@ -22,7 +22,7 @@
         <View style="@style/line_divider" />
 
         <android.support.design.widget.TabLayout
-            android:id="@+id/one_review_tabs"
+            android:id="@+id/location_info_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabGravity="fill"
@@ -33,8 +33,8 @@
     <android.support.v4.view.ViewPager
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/one_review_pager"
-        tools:context="com.guide.green.green_guide.ViewOneReview"
+        android:id="@+id/location_info_pager"
+        tools:context="com.guide.green.green_guide.LocationInfoActivity"
         android:background="@color/white">
 
     </android.support.v4.view.ViewPager>

@@ -116,6 +116,7 @@ public class WriteReviewActivity extends AppCompatActivity {
                     String value = component.get(k);
                     if (value == null) { value = ""; }
                     formItems.add(new AbstractFormItem.TextFormItem(k.postName, value));
+                    Log.d("CHECK", "FORMITEM: " + k.postName + ", " + value);
                 }
             }
         }
@@ -139,8 +140,8 @@ public class WriteReviewActivity extends AppCompatActivity {
                         formItems, new AbstractRequest.OnRequestResultsListener<StringBuilder>() {
                             @Override
                             public void onSuccess(StringBuilder sb) {
-                                Log.i("*********", sb == null ? "NULL" : sb.toString());
-                                Toast.makeText(WriteReviewActivity.this, "Review Submitted", Toast.LENGTH_LONG).show();
+                                Log.d("*********", "yyy: " + (sb == null ? "NULL" : sb.toString()));
+                                Toast.makeText(WriteReviewActivity.this, "Review Submitted!", Toast.LENGTH_LONG).show();
                             }
                         }, httpHeader);
 
@@ -189,6 +190,12 @@ public class WriteReviewActivity extends AppCompatActivity {
                     mReview.location.set(key, bundle.getString(key.jsonName));
                 }
             }
+        }
+
+        if (bundle.keySet().contains("EditReview")) {
+            Review review = (Review) getIntent().getSerializableExtra("EditReview");
+
+            Toast.makeText(this, "Retrived review: " + review.id, Toast.LENGTH_LONG).show();
         }
 
         mWriteReviewGeneral.setLocationObject(mReview.location);
@@ -283,6 +290,26 @@ public class WriteReviewActivity extends AppCompatActivity {
         if (industry != null) {
             intent.putExtra(Review.Location.Key.INDUSTRY.jsonName, industry.substring("Industry: ".length()));
         }
+        act.startActivity(intent);
+    }
+
+    public static void open(Activity act, String name, String address, String city, double latitude,
+                            double longitude, String industry) {
+
+        Intent intent = new Intent(act, WriteReviewActivity.class);
+        intent.putExtra(Review.Location.Key.COMPANY.jsonName, name);
+        intent.putExtra(Review.Location.Key.ADDRESS.jsonName, address);
+        intent.putExtra(Review.Location.Key.CITY.jsonName, city);
+        intent.putExtra(Review.Location.Key.LAT.jsonName, Double.toString(latitude));
+        intent.putExtra(Review.Location.Key.LNG.jsonName, Double.toString(longitude));
+        if (industry != null) {
+            intent.putExtra(Review.Location.Key.INDUSTRY.jsonName, industry);
+        }
+        act.startActivity(intent);
+    }
+
+    public static void open(Activity act, Review review) {
+        Intent intent = new Intent(act, WriteReviewActivity.class);
         act.startActivity(intent);
     }
 }

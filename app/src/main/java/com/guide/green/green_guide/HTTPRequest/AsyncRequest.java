@@ -13,7 +13,7 @@ import com.guide.green.green_guide.HTTPRequest.JSON.AsyncGetJsonArray;
 import com.guide.green.green_guide.HTTPRequest.JSON.AsyncGetJsonObject;
 import com.guide.green.green_guide.HTTPRequest.POSTMultipartData.AsyncPostData;
 import com.guide.green.green_guide.Utilities.Review;
-import com.guide.green.green_guide.Utilities.Review.AsyncGetReview;
+import com.guide.green.green_guide.Utilities.AsyncGetReview;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -246,6 +246,14 @@ public abstract class AsyncRequest<Result> extends AsyncTask<String, RequestProg
      */
     public static AsyncGetReview getReviewsForPlace(double lng, double lat,
                     @NonNull OnRequestResultsListener<ArrayList<Review>> callback) {
+        AsyncGetReview asyncTask = new AsyncGetReview(callback);
+        asyncTask.execute(
+                "http://www.lovegreenguide.com/map_point_co_app.php?lng=" + lng + "&lat=" + lat);
+        return asyncTask;
+    }
+
+    public static AsyncGetReview getMyReviews(double lng, double lat,
+                                                    @NonNull OnRequestResultsListener<ArrayList<Review>> callback) {
         AsyncGetReview asyncTask = new AsyncGetReview(callback);
         asyncTask.execute(
                 "http://www.lovegreenguide.com/map_point_co_app.php?lng=" + lng + "&lat=" + lat);

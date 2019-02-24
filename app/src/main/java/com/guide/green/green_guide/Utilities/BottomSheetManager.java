@@ -14,6 +14,7 @@ import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.poi.PoiDetailSearchOption;
+import com.guide.green.green_guide.MainActivity;
 import com.guide.green.green_guide.R;
 
 
@@ -23,7 +24,7 @@ import com.guide.green.green_guide.R;
  * display search for and display POI results.
  */
 public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback {
-    private AppCompatActivity mAct;
+    private MainActivity mAct;
     public final Reviews reviews;
     private DBReviewSearchManager mDbSearcher;
     private BottomSheetBehavior mBtmSheet;
@@ -32,7 +33,7 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
     private FetchReviewsHandler mFetchReviewsHandler;
     private int mState;
 
-    public BottomSheetManager(@NonNull AppCompatActivity act, @NonNull NestedScrollView bottomSheet,
+    public BottomSheetManager(@NonNull MainActivity act, @NonNull NestedScrollView bottomSheet,
                               @NonNull Reviews reviews, @NonNull DBReviewSearchManager dbSearcher,
                               @NonNull BaiduMapManager mapManager) {
         mAct = act;
@@ -119,24 +120,33 @@ public class BottomSheetManager extends BottomSheetBehavior.BottomSheetCallback 
 
     public void getReviewFor(@NonNull BaiduSuggestion.Location suggestion) {
         removeMarkers();
-        showReviews();
+
+        mDbSearcher.container.setVisibility(View.GONE);
+        //showReviews();
 
         if (mFetchReviewsHandler != null && !mFetchReviewsHandler.isCompleted()) {
             mFetchReviewsHandler.cancel();
         }
 
+        mAct.setCurrentLocation(suggestion);
         mMapManager.moveTo(suggestion.point);
 
-        mFetchReviewsHandler = new FetchReviewsHandler(mAct, suggestion, this,
+        FetchReviews fetchReviews = new FetchReviews(mAct, suggestion);
+
+
+        setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+
+        /*mFetchReviewsHandler = new FetchReviewsHandler(mAct, suggestion, this,
                 mMapManager.addMarker(new MarkerOptions().position(suggestion.point),
                         R.drawable.icon_star_marker));
 
         if (suggestion.uid != null && suggestion.address == null || suggestion.address.equals("")) {
             mMapManager.poiSearch.searchPoiDetail(new PoiDetailSearchOption().poiUid(suggestion.uid));
-        }
+        }*/
     }
 
     public void searchGreenGuideReviewsFor(@NonNull String query) {
+
         removeMarkers();
         showPoiResults();
         mDbSearcher.searchFor(mMapManager, query);

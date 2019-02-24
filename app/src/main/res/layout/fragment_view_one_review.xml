@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ViewOneReviewFragment"
-    android:id="@+id/view_one_review">
+    android:id="@+id/view_one_review"
+    android:clickable="true">
 
     <TextView
         android:layout_width="match_parent"
