@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -211,7 +212,7 @@ public abstract class FormInput {
                 for (int i = 0; i < childCount; i++) {
                     RadioButton btn = (RadioButton) radioGroup.getChildAt(i);
                     if (btn.getText().toString().equals(preSetValue)) {
-                        btn.setSelected(true);
+                        btn.setChecked(true);
                         break;
                     }
                 }

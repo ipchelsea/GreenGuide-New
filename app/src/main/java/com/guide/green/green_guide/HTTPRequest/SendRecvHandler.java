@@ -1,6 +1,8 @@
 package com.guide.green.green_guide.HTTPRequest;
 
 
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -69,6 +71,7 @@ class SendRecvHandler {
      * @throws IOException thrown by {@code getInputStream}
      */
     void openInputStream() throws IOException {
+        Log.d("PPPPPP", Integer.toString(connection.getResponseCode()));
         mIn = new BufferedInputStream(connection.getInputStream());
     }
 

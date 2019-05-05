@@ -100,14 +100,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.guide.green.green_guide.MainActivity" />
         </activity>
-
-        <activity android:name=".LocationInfoActivity"
+        <activity
+            android:name=".LocationInfoActivity"
             android:label="Location Info"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.guide.green.green_guide.MainActivity" />
         </activity>
+        <activity android:name=".EditImagesActivity"></activity>
     </application>
 
 </manifest>

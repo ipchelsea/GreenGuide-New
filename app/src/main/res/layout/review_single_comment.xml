@@ -101,7 +101,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/helpfulBtn"
@@ -115,14 +115,14 @@
                 android:id="@+id/edit_review_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Edit Text"
+                android:text="Edit Review/Add Images"
                 android:visibility="gone"/>
 
             <Button
                 android:id="@+id/edit_image_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Edit Images"
+                android:text="Delete Images"
                 android:visibility="gone"/>
 
             <Button

@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.guide.green.green_guide.Dialogs.LoadingDialog;
+import com.guide.green.green_guide.EditImagesActivity;
 import com.guide.green.green_guide.HTTPRequest.AbstractFormItem;
 import com.guide.green.green_guide.HTTPRequest.AbstractRequest;
 import com.guide.green.green_guide.HTTPRequest.AsyncRequest;
@@ -122,7 +123,8 @@ public class MyReviewsFragment extends Fragment {
 
                             if (!jObj.isNull("review")) {
                                 JSONObject subJObj = jObj.getJSONObject("review");
-                                review.id = subJObj.getString("id");
+                                review.id = subJObj.getString("review_id");
+
                             }
 
                             getJsonValuesForObject(jObj, "review", review.location);
@@ -268,7 +270,20 @@ public class MyReviewsFragment extends Fragment {
             public void onClick(View view) {
                 //WriteReviewActivity.open(getActivity());
                 Intent intent = new Intent(getActivity(), WriteReviewActivity.class);
-                intent.putExtra("EditReview", review);
+                //intent.putExtra("EditReview", review);
+                intent.putExtra("Editing", true);
+                //intent.putExtra("EditLocation", review.location);
+                Log.d("CHECK", "LocationZ: " + review.location.get(Review.Location.Key.RATING));
+                CredentialManager.setMyReview(review);
+                getActivity().startActivity(intent);
+            }
+        });
+
+        editImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), EditImagesActivity.class);
+                CredentialManager.setMyReview(review);
                 getActivity().startActivity(intent);
             }
         });

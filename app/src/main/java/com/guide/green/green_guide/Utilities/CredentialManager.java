@@ -16,6 +16,7 @@ public class CredentialManager {
     private static boolean mIsLoggedIn = false;
     private static boolean mIsPemenantlyLoggedIn = false;
     private static HashSet<OnLoginStateChanged> mListeners = new HashSet<>();
+    private static Review mReview;
 
     /**
      * Callback interface for responding to a user being logged in or out.
@@ -126,5 +127,13 @@ public class CredentialManager {
             return new Pair<String, String>("PHPSESSID", getToken());
         }
         return null;
+    }
+
+    public static void setMyReview(Review review) {
+        mReview = review;
+    }
+
+    public static Review getMyReview() {
+        return mReview;
     }
 }

@@ -215,7 +215,7 @@ public class Review implements Serializable {
         /**
          * Key class containing keys that only work for the Location object.
          */
-        public static class Key extends Review.Key {
+        public static class Key extends Review.Key implements Serializable {
             public static final Key WEATHER = new Key(null, null);
             public static final Key OBSERVATION_DATE = new Key(null, "observation_date");
             public static final Key OBSERVATION_TIME = new Key(null, "observation_time");

@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +13,11 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.guide.green.green_guide.Dialogs.DatePickerDialog;
 import com.guide.green.green_guide.Dialogs.TimePickerDialog;
@@ -263,5 +266,9 @@ public class WriteReviewGeneralFragment extends WriteReviewActivity.WriteReviewP
             new FormInput.CheckBoxInput((CheckBox) mViewRoot.findViewById(viewId),
                     checkBoxes.get(viewId), mLocation);
         }
+    }
+
+    public void addPreviousImages() {
+
     }
 }
