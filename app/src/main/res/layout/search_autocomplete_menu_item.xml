@@ -32,7 +32,7 @@
             style="@android:style/Widget.Holo.Button.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="北京"
+            android:text="City"
             app:layout_constraintBottom_toBottomOf="@id/searchInput"
             app:layout_constraintTop_toTopOf="@id/searchInput"
             app:layout_constraintEnd_toEndOf="parent"/>

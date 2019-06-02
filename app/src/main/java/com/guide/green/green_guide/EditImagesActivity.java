@@ -41,7 +41,7 @@ public class EditImagesActivity extends AppCompatActivity {
         mReview = CredentialManager.getMyReview();
 
         ArrayList<AbstractFormItem> formItems = new ArrayList<>();
-        String reviewId = String.valueOf(Integer.parseInt(mReview.id) + 140);
+        String reviewId = String.valueOf(Integer.parseInt(mReview.id));
         formItems.add(new AbstractFormItem.TextFormItem("id", reviewId));
         formItems.add(new AbstractFormItem.TextFormItem("img_token", "02242019work"));
 
