@@ -175,7 +175,6 @@ public class WriteReviewActivity extends AppCompatActivity {
                                 public void onSuccess(StringBuilder sb) {
                                     Log.d("EDITCHECK", sb.toString());
                                     Toast.makeText(WriteReviewActivity.this, "Review Edit Submitted! " + sb.toString(), Toast.LENGTH_LONG).show();
-
                                 }
 
                                 @Override

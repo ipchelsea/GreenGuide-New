@@ -92,9 +92,13 @@ public class LocationInfoFetchReviews extends OnRequestResultsListener<ArrayList
 
         TextView addressView = mAct.findViewById(R.id.general_info_address);
 
-        initGeneralFragment(reviews.get(0));
+        if (reviews.size() > 0) {
 
-        initReviewsFragment(reviews);
+            initGeneralFragment(reviews.get(0));
+
+            initReviewsFragment(reviews);
+
+        }
     }
 
     @Override
